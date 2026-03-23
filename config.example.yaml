@@ -1,0 +1,98 @@
+# Guide Maker — Configuration
+# ============================
+# Copy this file to config.yaml and fill in your details.
+# Required fields are marked. Optional fields can be left empty.
+
+# === REQUIRED ===
+
+# Your Notion API key
+# Create an integration at https://www.notion.so/my-integrations
+# Then share your database with the integration
+notion_api_key: ""
+
+# The Notion database ID where guides are stored
+# Create a database with these properties:
+#   - Guide Title (title)
+#   - Type (select: Technical Tutorial, Strategic Framework, Comparison/Persuasion)
+#   - Week (date)
+#   - Keyword (rich_text)
+#   - Status (select: Draft, Review, Published)
+#
+# To find the database ID: open the database in Notion,
+# copy the URL, and extract the 32-character hex string.
+guide_database_id: ""
+
+# Your name (used in guide author byline)
+author_name: ""
+
+# Your LinkedIn profile URL (linked from author byline)
+linkedin_url: ""
+
+
+# === OPTIONAL: Content Board ===
+
+# If you want a separate database to track LinkedIn posts
+# Create a database with properties:
+#   - Title (title)
+#   - Account (select)
+#   - Post Date (date)
+#   - Day (select: Monday, Wednesday, Friday)
+#   - Type (select: guide, sales-resource)
+#   - Status (select: Draft, Review, Published)
+#   - Keyword (rich_text)
+#   - Guide Link (url)
+#   - Scheduled (checkbox)
+#   - Impressions (number)
+#   - Comments (number)
+#   - DMs Sent (number)
+#   - Notes (rich_text)
+content_board_database_id: ""
+
+
+# === OPTIONAL: Community CTA ===
+
+# If you have a community (Skool, Discord, Circle, etc.),
+# the guide hub page will include a callout linking to it.
+# Leave empty to skip the community callout.
+community_name: ""          # e.g., "AI Sales Community"
+community_url: ""           # e.g., "https://www.skool.com/my-community"
+community_description: ""   # e.g., "Join 500+ business owners learning AI"
+
+
+# === OPTIONAL: Multi-Account LinkedIn ===
+
+# By default, the skill generates copy for a single account (you).
+# Add entries here if you post from multiple LinkedIn profiles.
+#
+# voice options: "founder" (default), "team", "company"
+# cta_type options: "community" (sends to community_url), "direct" (sends Notion guide link)
+accounts:
+  - name: ""
+    voice: "founder"
+    cta_type: "direct"
+
+
+# === OPTIONAL: Banner Generation ===
+
+# KieAI API key for AI-generated guide banners
+# Sign up at https://kie.ai and create an API key
+# If left empty, the skill uses simple Pillow banners (free, no API needed)
+kieai_api_key: ""
+
+
+# === OPTIONAL: Brand Colors ===
+
+# Used for simple Pillow banners. Hex color codes.
+brand_colors:
+  dark: "#1A1A1C"
+  light: "#F7F7F7"
+  accent_1: "#A6CB17"
+  accent_2: "#8033F4"
+
+
+# === OPTIONAL: YouTube Transcript Extraction ===
+
+# Path to yt-dlp binary (for extracting video transcripts)
+# Default assumes yt-dlp is in your PATH
+# Install: pip install yt-dlp  or  brew install yt-dlp
+ytdlp_path: "yt-dlp"

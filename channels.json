@@ -1,0 +1,33 @@
+{
+  "scan_defaults": {
+    "days_back": 7,
+    "max_videos_per_channel": 10
+  },
+  "channels": [
+    {
+      "name": "Matt Wolfe",
+      "url": "https://www.youtube.com/@maboroshi-tech",
+      "focus": "AI tools and news"
+    },
+    {
+      "name": "AI Jason",
+      "url": "https://www.youtube.com/@AIJasonZ",
+      "focus": "AI automation tutorials"
+    },
+    {
+      "name": "All About AI",
+      "url": "https://www.youtube.com/@AllAboutAI",
+      "focus": "AI coding and development"
+    },
+    {
+      "name": "WorldofAI",
+      "url": "https://www.youtube.com/@intheworldofai",
+      "focus": "AI tools and tutorials"
+    },
+    {
+      "name": "Income Stream Surfers",
+      "url": "https://www.youtube.com/@IncomeStreamSurfers",
+      "focus": "AI for business and income"
+    }
+  ]
+}
