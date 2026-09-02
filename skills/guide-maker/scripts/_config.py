@@ -142,13 +142,17 @@ DEFAULTS = {
     },
     "dm_tool": {
         "provider": "manual",
+        "timezone": "",                    # falls back to leadshark.timezone
         "leadshark": {
+            "base_url": "https://apex.leadshark.io",
             "auto_connect": True,
             "comment_replies": True,
             "non_first_degree_reply": "",
             "attachment_max_bytes": 4194304,
             "create_as": "Paused",
             "timezone": "UTC",
+            "post_as": "",
+            "organization_id": "",
         },
     },
     "brand": {
@@ -170,6 +174,11 @@ DEFAULTS = {
         "strip_c2pa": True,
         "format_rotation_days": 7,
         "negative_prompt_extra": "",
+        "usage_log": "",                   # empty = <graphics-maker>/format-usage-log.jsonl
+        "upload_endpoint": "",             # empty = anonymous catbox API
+        "logo_corner": "top-left",
+        "logo_width_pct": 0.12,
+        "logo_on_dark": "",
     },
     "providers": {
         "kieai": {"api_key": ""},

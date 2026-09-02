@@ -1,98 +1,239 @@
-# Guide Maker — Configuration
-# ============================
-# Copy this file to config.yaml and fill in your details.
-# Required fields are marked. Optional fields can be left empty.
-
-# === REQUIRED ===
-
-# Your Notion API key
-# Create an integration at https://www.notion.so/my-integrations
-# Then share your database with the integration
-notion_api_key: ""
-
-# The Notion database ID where guides are stored
-# Create a database with these properties:
-#   - Guide Title (title)
-#   - Type (select: Technical Tutorial, Strategic Framework, Comparison/Persuasion)
-#   - Week (date)
-#   - Keyword (rich_text)
-#   - Status (select: Draft, Review, Published)
+# guide-maker configuration (schema_version 2)
+# ============================================
+# Copy this file to config.yaml in the same folder and fill in the blanks.
+# Every key has a default; you can delete anything you do not want to change.
+# Secrets can live here, in an env var, or in a key file (env wins, then file,
+# then this file). Never commit config.yaml; .gitignore already covers it.
 #
-# To find the database ID: open the database in Notion,
-# copy the URL, and extract the 32-character hex string.
-guide_database_id: ""
-
-# Your name (used in guide author byline)
-author_name: ""
-
-# Your LinkedIn profile URL (linked from author byline)
-linkedin_url: ""
-
-
-# === OPTIONAL: Content Board ===
-
-# If you want a separate database to track LinkedIn posts
-# Create a database with properties:
-#   - Title (title)
-#   - Account (select)
-#   - Post Date (date)
-#   - Day (select: Monday, Wednesday, Friday)
-#   - Type (select: guide, sales-resource)
-#   - Status (select: Draft, Review, Published)
-#   - Keyword (rich_text)
-#   - Guide Link (url)
-#   - Scheduled (checkbox)
-#   - Impressions (number)
-#   - Comments (number)
-#   - DMs Sent (number)
-#   - Notes (rich_text)
-content_board_database_id: ""
-
-
-# === OPTIONAL: Community CTA ===
-
-# If you have a community (Skool, Discord, Circle, etc.),
-# the guide hub page will include a callout linking to it.
-# Leave empty to skip the community callout.
-community_name: ""          # e.g., "AI Sales Community"
-community_url: ""           # e.g., "https://www.skool.com/my-community"
-community_description: ""   # e.g., "Join 500+ business owners learning AI"
-
-
-# === OPTIONAL: Multi-Account LinkedIn ===
-
-# By default, the skill generates copy for a single account (you).
-# Add entries here if you post from multiple LinkedIn profiles.
+# The six keys most people change: copy.cta_mode, copy.words, workflow.gates,
+# community.*, secondary_channel.*, excluded_topics.
 #
-# voice options: "founder" (default), "team", "company"
-# cta_type options: "community" (sends to community_url), "direct" (sends Notion guide link)
+# Check the result with:  python3 scripts/doctor.py
+
+schema_version: 2
+
+# ---------------------------------------------------------------------------
+# Notion
+# ---------------------------------------------------------------------------
+notion:
+  # Integration token. Prefer env NOTION_API_KEY or ~/.config/notion/api_key.
+  api_key: ""
+  # Guide Database id (32 hex chars from the database URL). Required properties:
+  #   Guide Title (title), Keyword (rich_text), Type (select), Week (date), Status (select)
+  guide_database_id: ""
+  # Content Board id. Optional; empty skips Phase 3d (the card). Required properties:
+  #   Title (title), Post Date (date), Type (select: guide), Status (select: Draft, ...),
+  #   Keyword (rich_text), Guide Link (url), Graphic (files)
+  #   Optional: Account (select), Day (select), Notes (rich_text), Scheduled (checkbox)
+  content_board_database_id: ""
+  # Your public Notion domain, e.g. "yourname.notion.site". Gates the public-URL
+  # check for DMs. Pages only resolve there after you publish them to the web by hand.
+  public_domain: ""
+  # Options the Guide DB Type select must contain. doctor.py checks it.
+  guide_types: ["Technical Tutorial", "Strategic Framework", "Comparison/Persuasion", "Use-case Stack"]
+
+# ---------------------------------------------------------------------------
+# You
+# ---------------------------------------------------------------------------
+author:
+  name: ""                      # hub byline ("By Name")
+  linkedin_url: ""              # byline link
+  voice: founder                # founder | team | company; default voice for copy
+  dm_signoff: ""                # bare first name at the end of DMs; empty = author.name
+
+# Community (Skool, Discord, Circle, Slack). Empty url = no callout, no community DMs.
+community:
+  platform: none                # skool | discord | circle | slack | none
+  name: ""                      # link text in the hub callout and DMs
+  url: ""                       # the invite or about page
+  callout_line: ""              # hub callout text, e.g. "Join 100+ people automating their inbox"
+
+# Secondary channel (YouTube, newsletter, podcast). Empty url = no credit line, no secondary DM.
+secondary_channel:
+  type: none                    # youtube | newsletter | podcast | none
+  handle: ""                    # "@yourchannel", shown as the link text
+  url: ""
+  credit_line: ""               # label under the byline, e.g. "YouTube"
+
+# LinkedIn accounts to write copy for. One entry = single account (the default).
+# dm_destination: auto (pick from what is configured) | community | direct | secondary
 accounts:
   - name: ""
-    voice: "founder"
-    cta_type: "direct"
+    voice: founder
+    dm_destination: auto
 
+# ---------------------------------------------------------------------------
+# Workflow
+# ---------------------------------------------------------------------------
+workflow:
+  gates: two                    # two = approve outline AND content; one = approve outline only
+  work_dir: /tmp/guide-maker    # every intermediate file lives here, never in the project
+  language: en                  # language of the shipped guide, copy and DMs
+  post_days: [Monday, Wednesday, Friday]
+  one_card_per: guide           # guide | account (Content Board cards)
+  cover_required: true          # the hub cover is a release gate, not a polish step
 
-# === OPTIONAL: Banner Generation ===
+# ---------------------------------------------------------------------------
+# Topic research (sibling skill topic-finder)
+# ---------------------------------------------------------------------------
+topic_finder:
+  path: ""                      # empty = <skills root>/topic-finder
+  sources: [youtube, reddit, x] # which scanners scan_all.py runs
+  lookback_days: {youtube: 7, reddit: 7, x: 8}
+  youtube_tracks: [tool, business]   # channel categories scored separately, never merged
+  scan_health:                  # the agent refuses to rank when these are not met
+    min_channels_with_videos: 5
+    min_x_posts: 1
+    min_reddit_posts: 1
+    fail_on_missing_config: true
+  x_bookmark_rate: {substance: 0.8, noise: 0.1}   # percent; rank X on bookmarks, never views
 
-# KieAI API key for AI-generated guide banners
-# Sign up at https://kie.ai and create an API key
-# If left empty, the skill uses simple Pillow banners (free, no API needed)
-kieai_api_key: ""
+# Topics that never become guides. Plain strings match case-insensitively;
+# wrap a regex in slashes. Put competitor products and off-brand subjects here.
+excluded_topics: []
+#  - "some competitor"
+#  - "/^(?:get rich|make \\$\\d+)/"
 
+# ---------------------------------------------------------------------------
+# Research gates (references/research/topic-research.md)
+# ---------------------------------------------------------------------------
+research:
+  depth_gate:
+    min_authoritative_sources: 3
+    require_official_docs: true
+    min_video_minutes: 20       # OR min_written_pages
+    min_written_pages: 10
+    min_subpages: 4
+    max_subpages: 7
+  hard_reject:                  # shapes rejected no matter how trending
+    - "news or drama with no tutorial payoff"
+    - "single-feature announcement with no docs"
+    - "every source says the same two or three things"
+    - "pure opinion or reaction"
+  auto_accept_patterns: []      # topic shapes you already know work for your audience
+  check_already_covered: {guide_db_titles: true, content_board_keywords: true}
+  gap_analysis: required        # required | optional
 
-# === OPTIONAL: Brand Colors ===
+# What the reader sees under Sources (references/research/sources-policy.md)
+sources:
+  cite_official_docs: true
+  cite_institutional_talks: true    # university lectures, vendor courses, named-role engineers
+  cite_creator_videos: false        # a creator's tutorial is research, not a citation
+  cross_guide_references: false     # never name another guide or keyword in a body
 
-# Used for simple Pillow banners. Hex color codes.
-brand_colors:
-  dark: "#1A1A1C"
-  light: "#F7F7F7"
-  accent_1: "#A6CB17"
-  accent_2: "#8033F4"
+# ---------------------------------------------------------------------------
+# LinkedIn copy (references/linkedin/linkedin-prompt.md)
+# ---------------------------------------------------------------------------
+copy:
+  # graphic = the keyword lives only in the post graphic's CTA band (default).
+  # copy = the old "Comment X" line in the text. Warned every run; see
+  # references/strategy/cta-evidence.md for the 95 vs 11,432 impressions.
+  cta_mode: graphic
+  structure: prose              # prose (8-beat essay) | arrow_list (legacy listicle shape)
+  variations: 3
+  hooks: [contrarian, problem_pain, quantity_build]   # one per variation, in order
+  words: {min: 180, max: 250, target: 215, reject_below: 140, reject_above: 300}
+  closers:                      # the last line, each followed by the pointing-down emoji
+    - "Free Access"
+    - "Get free access"
+    - "Get access for free"
+    - "I'm giving away the complete guide for free"
+    - "I'm giving away the complete guide. For free."
+    - "The guide and the full setup are free"
+    - "Give me a shout if you want the full setup"
+  closer_rotation_weeks: 3      # same closer N weeks running fails lint_copy.py rotation
+  banned_in_copy:               # engagement instructions; any of these fails the linter
+    - 'comment "'
+    - "comment '"
+    - "like this post"
+    - "connect with me"
+    - "repost this"
+    - "and i'll send it"
+    - "dm me"
+  banned_words_file: references/writing/humanizer.md   # the delimited list the linter reads
+  extra_banned_words: []        # your own additions, any form of the word counts
 
+# ---------------------------------------------------------------------------
+# DMs (references/dm/dm-guide.md)
+# ---------------------------------------------------------------------------
+dm:
+  versions: auto                # auto = every version the config allows; or a list:
+                                # [direct, combined, community_only, secondary]
+  merge_tag: "{{firstName}}"    # what your DM tool substitutes; {name} and [Name] ship as text
+  max_lines: 7                  # non-blank lines; people do not read long DMs from strangers
+  hard_wrap: false              # one paragraph = one line, always
+  guide_link_must_be_public: true   # fail on app.notion.com / notion.so links
+  vary_opener_weekly: true
 
-# === OPTIONAL: YouTube Transcript Extraction ===
+# The tool that watches comments and sends the DM.
+dm_tool:
+  provider: manual              # manual (paste-ready bundle + checklist) | leadshark
+  timezone: ""                  # checklist local time; empty = dm_tool.leadshark.timezone
+  leadshark:                    # reference adapter in skills/dm-automation
+    base_url: "https://apex.leadshark.io"
+    auto_connect: true
+    comment_replies: true
+    non_first_degree_reply: ""  # reply text for commenters who are not 1st-degree
+    attachment_max_bytes: 4194304   # 4 MiB ceiling on the post image
+    create_as: Paused           # automations are created paused; you flip them on
+    timezone: UTC
+    post_as: ""                 # optional: company page to post as
+    organization_id: ""         # optional: organization id for company-page posting
 
-# Path to yt-dlp binary (for extracting video transcripts)
-# Default assumes yt-dlp is in your PATH
-# Install: pip install yt-dlp  or  brew install yt-dlp
-ytdlp_path: "yt-dlp"
+# ---------------------------------------------------------------------------
+# Brand, cover, post graphic
+# ---------------------------------------------------------------------------
+brand:
+  colors: {dark: "#1A1A1C", light: "#F7F7F7", accent_1: "#A6CB17", accent_2: "#8033F4"}
+  fonts: {bold: "", regular: ""}    # absolute paths; empty = bundled Inter in assets/fonts
+  typography_prompt: "modern geometric sans-serif, bold weight"   # for AI prompts
+  logo:
+    path: ""                    # PNG with transparency
+    on_post_graphic: false      # composite the logo in a corner of the post graphic
+    on_cover: false
+
+# Notion hub cover. Never carries the keyword.
+cover:
+  mode: simple                  # simple (Pillow, free) | ai (KieAI, $0.03) | upload
+  style: dark                   # dark | gradient | accent (simple mode)
+  size: [1500, 600]
+
+# LinkedIn post graphic (sibling skill graphics-maker). Always carries the keyword.
+graphics:
+  provider: none                # none (Pillow card only) | kieai | openai
+  scene_model: ""               # provider model for the scene pass; empty = provider default
+  text_model: ""                # provider model for the text pass; empty = provider default
+  aspect_ratio: "4:5"
+  resolution: 2K
+  cta_bar:
+    renderer: pillow            # pillow (exact glyphs, free) | model (provider renders the band)
+    string: primary             # primary = COMMENT "[KEYWORD]" TO GET IT FOR FREE
+                                # compact = Comment "[KEYWORD]" for the guide
+    height_pct: 0.11            # band height as a fraction of the image height
+    bg: ""                      # band colors; empty = auto contrast against the art
+    fg: ""
+  strip_c2pa: true              # remove Content Credentials so LinkedIn does not badge the image
+  format_rotation_days: 7       # do not reuse a format card within this window
+  negative_prompt_extra: ""     # third-party branding to name in every negative prompt
+  usage_log: ""                 # format usage log; empty = <graphics-maker>/format-usage-log.jsonl
+  upload_endpoint: ""           # public host for reference images when a provider needs URLs;
+                                # empty = anonymous catbox API
+  logo_corner: top-left         # where brand.logo.path goes when on_post_graphic is true
+  logo_width_pct: 0.12          # logo width as a fraction of the image width
+  logo_on_dark: ""              # optional light logo variant for dark formats
+
+# ---------------------------------------------------------------------------
+# Provider keys (env var > key file > here)
+#   KIEAI_API_KEY      ~/.config/kieai/api_key
+#   OPENAI_API_KEY     ~/.config/openai/api_key
+#   APIFY_TOKEN        ~/.config/apify/api_key
+#   LEADSHARK_API_KEY  ~/.config/leadshark/api_key
+# ---------------------------------------------------------------------------
+providers:
+  kieai: {api_key: ""}
+  openai: {api_key: ""}
+  apify: {api_key: ""}
+  leadshark: {api_key: ""}
+
+tools:
+  ytdlp_path: ""                # empty = the yt-dlp on PATH

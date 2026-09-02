@@ -10,6 +10,7 @@ Usage:
     python3 md_to_notion.py publish-subpage <md_file> <parent_page_id>
     python3 md_to_notion.py create-content-entry [options]
     python3 md_to_notion.py blocks <md_file>
+    python3 md_to_notion.py public-url --page-id ID [--check]
 
 Options for publish-guide:
     --keyword TEXT       Keyword for the guide (e.g., SKILLS)
@@ -36,6 +37,9 @@ Options for create-content-entry (one card per guide):
 
 The `blocks` subcommand converts a markdown file and prints the Notion block
 JSON. Use it to check fences, directives and tables without touching Notion.
+
+`public-url` prints https://<notion.public_domain>/<slug>-<id> for a page and,
+with --check, exits 1 until the page has been published to the web by hand.
 """
 
 import re
@@ -841,6 +845,27 @@ def cmd_create_content_entry(args):
     return page_id, url
 
 
+def cmd_public_url(args):
+    """Print the public notion.site URL of a page; --check GETs it."""
+    domain = args.domain or cfg_get(config(), "notion.public_domain", "")
+    if not domain:
+        print("Error: notion.public_domain is empty and no --domain given. The public URL "
+              "is https://<your-domain>.notion.site/<slug>-<id>.", file=sys.stderr)
+        sys.exit(2)
+    page = _notion.retrieve_page(args.page_id)
+    url = _notion.public_url(page, domain)
+    print(url)
+    if args.check:
+        ok, status = _notion.check_url(url)
+        if ok:
+            print(f"OK   {status}: the public page answers", file=sys.stderr)
+            sys.exit(0)
+        print(f"FAIL {status}: the public page does not resolve. Publish it to the web from "
+              "the Notion UI (Share, Publish) and run this again. Until then every DM that "
+              "carries this link is a dead end.", file=sys.stderr)
+        sys.exit(1)
+
+
 def cmd_blocks(args):
     """Convert a markdown file and print the Notion block JSON."""
     with open(args.md_file, "r", encoding="utf-8") as fh:
@@ -875,6 +900,12 @@ def main():
     bl.add_argument("md_file", help="Path to markdown file")
     bl.add_argument("--keep-h1", action="store_true", help="Keep the first H1 as a heading")
 
+    # public-url
+    pu = subparsers.add_parser("public-url", help="Print (and check) a page's public notion.site URL")
+    pu.add_argument("--page-id", required=True, help="Notion page ID")
+    pu.add_argument("--domain", default=None, help="Override notion.public_domain")
+    pu.add_argument("--check", action="store_true", help="GET the URL; exit 1 if it does not resolve")
+
     # create-content-entry
     ce = subparsers.add_parser("create-content-entry", help="Create a Content Board card")
     ce.add_argument("--title", required=True, help="Card title")
@@ -897,7 +928,7 @@ def main():
                     help="Override content_board_database_id from config")
     ce.add_argument("--dry-run", action="store_true", help="Print payload, do not publish")
 
-    add_config_arg(parser, [pg, ps, bl, ce])
+    add_config_arg(parser, [pg, ps, bl, pu, ce])
     args = parser.parse_args()
     config_path = getattr(args, "config", None)
 
@@ -912,6 +943,8 @@ def main():
         cmd_publish_subpage(args)
     elif args.command == "blocks":
         cmd_blocks(args)
+    elif args.command == "public-url":
+        cmd_public_url(args)
     elif args.command == "create-content-entry":
         cmd_create_content_entry(args)
     else:
