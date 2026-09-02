@@ -146,7 +146,7 @@ Task(
 - **nav_note**: Navigation callout text
 - **subpage_files**: List of /tmp/ markdown file paths (one per step)
 - **linkedin_copy**: 3 variations for each configured account
-- **dm_templates**: Community DM (if community_url configured) + Direct link DM
+- **dm_templates**: every version `dm.versions` allows (direct; combined and community_only with a community; secondary with a secondary channel), one file each under `WORK_DIR/dm/`
 - **banner_recommendation**: Tools mentioned, suggested style, keyword for banner text
 
 ---
@@ -159,7 +159,7 @@ Present the content in a scannable format:
 2. **Hub page preview**: Description callout, What You'll Build, Who This Is For
 3. **Subpage summaries**: One line per subpage with title and key topics
 4. **LinkedIn copy**: Show hooks (first lines) for each variation per account. Offer to expand any variation the user wants to read in full.
-5. **DM templates**: Show both versions
+5. **DM templates**: Show every generated version
 6. **Banner**: Describe the recommendation
 
 The user approves, requests changes, or rejects. If changes are needed, either make them directly (small edits) or re-spawn the agent (structural changes).
@@ -230,11 +230,10 @@ Toggle format:
 - Toggle title = hook type ("Contrarian Hook", "Problem/Pain Hook", "Quantity/Build Hook")
 - Toggle content = code block (plain text) for easy copy/paste
 
-DM template format:
+DM template format (`md_to_notion.py create-content-entry --dm "Label|@file"`, repeatable):
 - Divider
 - H2: "DM Templates"
-- Toggle (H3): "Community DM" (only if community_url is configured)
-- Toggle (H3): "Direct Guide Link DM"
+- One H3 toggle per generated version: "Direct", "Combined", "Community only", "Secondary channel"
 
 ---
 
@@ -274,10 +273,9 @@ Before presenting content to the user, verify:
 - CTA is one value line ending on the pointing-down emoji; the keyword is absent from the text (it lives in the post graphic, see `references/strategy/cta-evidence.md`)
 
 **DM templates:**
-- Personalized with guide topic
-- Correct links (community URL or direct guide link)
-- Human tone, not automated-sounding
-- Concise (3-5 short paragraphs max)
+- `lint_copy.py dm` exits 0 (merge tag, no hard-wrap, public URL, no formula opener or collaborative sign-off)
+- One destination per version, personalized with the guide topic
+- Human tone, bare first-name sign-off
 
 ---
 

@@ -18,8 +18,7 @@ Create one entry per account (accounts from config.yaml). Each entry contains:
 ### DM Templates (below copy)
 - Divider
 - H2: "DM Templates"
-- H3 Toggle: "Community DM" (personalized, mentions community, includes community link). Only include if a community URL is configured.
-- H3 Toggle: "Direct Guide Link DM" (delivers Notion guide link directly, uses {name} placeholder)
+- One H3 toggle per generated DM version (see `references/dm/dm-guide.md`): "Direct" always; "Combined" and "Community only" when `community.url` is set; "Secondary channel" when `secondary_channel.url` is set. Each uses the `dm.merge_tag` placeholder (`{{firstName}}`), never `{name}`.
 
 ### Properties to Set
 

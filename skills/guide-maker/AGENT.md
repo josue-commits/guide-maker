@@ -141,7 +141,7 @@ After the user approves the outline, write ALL content:
 1. **Hub page** (main landing page for the guide)
 2. **Subpages** (one per step/section, 4-7 pages)
 3. **LinkedIn copy** (3 variations per account from config.yaml)
-4. **DM templates** (community version if community_url configured, plus direct link version)
+4. **DM templates** (every version `config.dm.versions` allows; see `references/dm/dm-guide.md`)
 
 ---
 
@@ -287,19 +287,17 @@ You are a WRITER, not a summarizer. When creating posts from a guide or transcri
 
 ## DM TEMPLATES
 
-Create DM templates based on config.yaml settings:
+Read `references/dm/dm-guide.md`. Generate the versions the config allows (`dm.versions: auto` means: `direct` always, `combined` and `community_only` when `community.url` is set, `secondary` when `secondary_channel.url` is set). Each version is a shape in `templates/dm-*.md`; you rewrite the specific lines per guide and return the filled text, one file per version under `WORK_DIR/dm/`.
 
-### Community DM (only if `community_url` is configured)
-Personalized, warm, mentions the community by name. Includes the community URL. Mentions the guide is available inside the community.
+**Absolute rules (all versions):**
+- Merge tag is exactly `config.dm.merge_tag` (`{{firstName}}` by default). Never `[Name]`, `{name}` or `{first_name}`.
+- Never hard-wrap. One paragraph is one continuous line; blank lines separate paragraphs; only a bare URL gets its own line.
+- The guide link is the **public** URL (`notion.public_domain`), never `app.notion.com` or `notion.so`. Leave it as `{guide_url}` if the main agent has not given you the public one.
+- Kill the formula opener ("Thanks for commenting on my post"), the community pitch block, and the "Let me know if you have any questions" sign-off. Vary the opener every week. Sign off with the bare first name (`author.dm_signoff` or `author.name`).
+- One destination per DM. The combined version carries the community link as an aside; the secondary version carries the channel ask. Never both.
+- `dm.max_lines` non-blank lines max (7). Zero em dashes. Match the language of the post.
 
-### Direct Guide Link DM (always generated)
-Straightforward, delivers the Notion guide link directly. Professional but friendly. Uses `{name}` placeholder for personalization.
-
-Both templates should:
-- Reference the specific guide topic
-- Feel human, not automated
-- Be concise (3-5 short paragraphs max)
-- Include the correct link
+Run `python3 {SKILL_DIR}/scripts/lint_copy.py dm WORK_DIR/dm/*.txt` and fix every failure before returning.
 
 ---
 
@@ -376,11 +374,11 @@ Before you return ANY content to the main agent:
 - For personal posts: any bullets or arrows? Remove them.
 
 **For DM templates:**
-- Community DM only present if community_url is configured?
-- Direct link DM present?
-- Personalized with guide topic?
-- Correct links?
-- Human tone?
+- Every version the config allows is present (direct always; combined and community_only with a community; secondary with a secondary channel)?
+- Merge tag is exactly `dm.merge_tag`? No `[Name]` / `{name}`?
+- No hard-wrapped paragraphs? Public guide URL only?
+- No formula opener, no pitch block, no "let me know if you have questions"? Bare first-name sign-off?
+- One destination per DM?
 
 ---
 
