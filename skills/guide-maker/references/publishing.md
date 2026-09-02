@@ -27,40 +27,52 @@ python3 scripts/publish_guide_hub.py \
 
 4. Share the Notion URL with the user
 
-## Banner Generation
+## Cover (banner) generation
 
-After publishing the hub page, generate a banner and set it as the page cover.
+After publishing the hub page, generate a cover and set it as the page cover. `banner_generator.py` has three subcommands:
 
-**Model:** nano-banana-2 (via KieAI Jobs API, optional)
-**Full reference:** `references/banner-guide.md` (prompt templates, logo workflow, style rules)
-
-**Read `references/banner-guide.md` before generating any banner.**
-
-**Process:**
-1. Read the agent's banner recommendation from Phase 2 output (tools, keyword, style)
-2. **Check for style reference:** If this is a sequel or same-series guide, find the previous banner and use it as a `--ref-image` to match the visual style
-3. **Research logos (MANDATORY):** For every tool/brand on the banner, web search for the real logo PNG. Without `--ref-image`, the AI invents fake logos.
-4. Craft the prompt using templates from `references/banner-guide.md`
-5. Generate and upload:
+| Subcommand | What it does | Needs |
+|---|---|---|
+| `simple` | Pillow render with brand colors from config, bundled Inter font | nothing |
+| `ai` | KieAI generation from a prompt and reference images, cropped to 1500x600 | `kieai_api_key` |
+| `upload` | Upload an existing PNG as a page cover | nothing |
 
 ```bash
+# Free cover
+python3 scripts/banner_generator.py simple \
+  --title "Short Guide Title" \
+  --subtitle "Optional subtitle" \
+  --style dark \
+  --output /tmp/guides/cover.png \
+  --upload-to HUB_PAGE_ID
+
+# AI cover (read references/banner-guide.md first)
 python3 scripts/banner_generator.py ai \
   --prompt "Your prompt here" \
   --ref-image "STYLE_REF_URL" \
   --ref-image "LOGO_URL_1" \
   --ref-image "LOGO_URL_2" \
-  --output /tmp/banner.png \
+  --output /tmp/guides/cover.png \
   --upload-to HUB_PAGE_ID
+
+# Upload only
+python3 scripts/banner_generator.py upload --file /tmp/guides/cover.png --page-id HUB_PAGE_ID
 ```
+
+`--style` accepts `dark`, `gradient` or `accent`. `--upload-to` generates and sets the cover in one step. If AI generation fails, the script falls back to a `simple` cover automatically. The output directory is created if it does not exist.
+
+**Process for `ai`:**
+1. Read the agent's banner recommendation from Phase 2 output (tools, style)
+2. **Check for style reference:** If this is a sequel or same-series guide, find the previous cover and pass it as a `--ref-image`
+3. **Research logos (MANDATORY):** For every tool on the cover, web search for the real logo PNG. Without `--ref-image`, the model invents fake logos.
+4. Craft the prompt using the templates in `references/banner-guide.md`
 
 **Reference image rules:**
 - PNG only (SVGs cause `invalid_image_format` errors)
 - Direct URL to the image file (not a landing page)
 - Publicly accessible (the API fetches server-side)
 - Up to 5 reference images per generation
-- Style references (previous banners) count toward the 5 image limit
-
-If AI generation fails, the script falls back to a simple Pillow banner automatically.
+- Style references (previous covers) count toward the 5 image limit
 
 ## Screenshots
 

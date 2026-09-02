@@ -149,31 +149,43 @@ The user approves, requests changes, or rejects. If changes are needed, either m
 
 After approval:
 
-1. **Create the Guide Database entry**:
-   - Title, Type, Week (current week's Monday), Keyword, Status = "Published"
-
-2. **Publish the hub page** as a child of the Guide Database entry:
+1. **Publish the hub page and subpages** in one call. The script creates the Guide Database entry (title, type, week, keyword, status), publishes every `--step` markdown file as a child page, then writes the hub body with links to each step. It reads the database ID, author byline and community callout from `config.yaml`.
    ```bash
    python3 scripts/publish_guide_hub.py \
-     --config config.yaml \
-     --hub /tmp/guide-hub.md \
-     --subpages /tmp/guide-step-*.md \
-     --parent-id [guide_database_entry_id]
+     --title "Guide Title" \
+     --description "One-sentence guide description" \
+     --keyword "KEYWORD" \
+     --type "Technical Tutorial" \
+     --week "YYYY-MM-DD" \
+     --icon "🛠️" \
+     --build-item "Outcome the reader gets" \
+     --audience-item "Who this is for" \
+     --nav-note "Start at Step 1 unless you already have X." \
+     --step "⚡|Short Title|Description paragraph|/tmp/guides/01-step.md" \
+     --step "🧩|Short Title|Description paragraph|/tmp/guides/02-step.md" \
+     --source "Official docs|Tool documentation|https://example.com/docs"
    ```
+   Add `--dry-run` to print the plan without touching Notion. The output includes the hub page ID you need next.
 
-3. **Generate and upload banner** (if KieAI key is configured):
+2. **Generate and upload the cover.** Three subcommands: `simple` (Pillow, free), `ai` (KieAI, needs a key), `upload` (an existing PNG).
    ```bash
-   python3 scripts/banner_generator.py \
-     --config config.yaml \
-     --page-id [hub_page_id] \
-     --keyword [KEYWORD] \
-     --tools [tool1,tool2]
+   # Free, always works
+   python3 scripts/banner_generator.py simple \
+     --title "Short Guide Title" --subtitle "Optional line" \
+     --style dark --output /tmp/guides/cover.png --upload-to HUB_PAGE_ID
+
+   # AI cover with real logo references (see references/banner-guide.md)
+   python3 scripts/banner_generator.py ai \
+     --prompt "White background banner ..." \
+     --ref-image "https://.../logo.png" \
+     --output /tmp/guides/cover.png --upload-to HUB_PAGE_ID
+
+   # Upload a cover you already have
+   python3 scripts/banner_generator.py upload --file /tmp/guides/cover.png --page-id HUB_PAGE_ID
    ```
-   If no KieAI key, generate a simple Pillow banner using brand colors from config.
+   `--upload-to` sets the image as the page cover. If `ai` fails it falls back to `simple` automatically.
 
-4. **Verify**: Open the published guide URL and confirm all blocks rendered correctly.
-
-5. Share the Notion URL with the user.
+3. **Verify**: open the published guide URL and confirm every block rendered, then share the URL with the user.
 
 ---
 
