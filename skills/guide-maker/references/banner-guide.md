@@ -1,8 +1,21 @@
-# Banner Generation Guide
+# Cover Generation Guide
 
-How to generate Notion cover banners for guides and resources using KieAI (optional).
+How to generate the Notion hub page cover for a guide. This is **one of two image assets** and they are not interchangeable:
 
-**The single most important rule: every logo and visual element on the banner must come from a real reference image passed via `--ref-image`.** KieAI generates better results when it has real images to work from. Without references, it invents logos that look close but wrong. With references, it reproduces them accurately.
+| Asset | Where it goes | Carries the keyword? | Script |
+|-------|---------------|----------------------|--------|
+| **Cover** (this file) | Notion hub page cover, 1500x600 | **Never** | `scripts/banner_generator.py` |
+| **Post graphic** | The LinkedIn post, uploaded to the Content Board `Graphic` property | **Always**, in a full-width CTA band | sibling skill `graphics-maker` |
+
+The cover is a title card for the page. The post graphic is the only place the keyword exists. Putting the keyword on the cover does nothing for the DM tool and muddies the one signal the reader is supposed to act on. `banner_generator.py` refuses a `--title` equal to the keyword unless you pass `--allow-keyword`.
+
+Three ways to make a cover:
+
+- `simple`: Pillow render with brand colors and the bundled Inter font. Free, always works, the default (`cover.mode: simple`).
+- `ai`: KieAI generation from a prompt plus reference images. $0.03 per run, needs a key. The rest of this file is about doing this well.
+- `upload`: a PNG you already have.
+
+**The single most important rule for `ai`: every logo and visual element on the cover must come from a real reference image passed via `--ref-image`.** Without references the model invents logos that look close but wrong. With references it reproduces them.
 
 ---
 
@@ -76,7 +89,7 @@ Every banner follows the same visual language:
 
 **Single-tool guide** (e.g., "Claude Code Skills", "Claude Code Remote Control"):
 - The tool's logo on the left
-- The guide keyword on the right in styled text
+- The guide's short title on the right in styled text (never the keyword)
 
 **Multi-tool guide** (e.g., "Top 5 Vibe Coding Platforms"):
 - All tool logos in a row
@@ -123,8 +136,21 @@ White background banner. Large centered text reading '[SHORT TITLE]' in a modern
 
 **Single-tool banner (for dedicated tool guides):**
 ```
-White background banner. The provided [TOOL] logo on the left side, clearly visible and accurately reproduced from the reference image. On the right side, the text '[KEYWORD]' in a stylized bold font. Clean layout with plenty of white space.
+White background banner. The provided [TOOL] logo on the left side, clearly visible and accurately reproduced from the reference image. On the right side, the text '[SHORT TITLE]' in a stylized bold font. Clean layout with plenty of white space.
 ```
+
+> ⚠️ **The cover never carries the keyword.** This template used to say `'[KEYWORD]'` and that is wrong. The keyword lives in exactly one place, the LinkedIn post graphic's CTA band, built by the `graphics-maker` sibling. Use the guide's short title here. A keyword on the Notion cover does nothing for the DM tool and muddies the one signal the reader is supposed to act on.
+
+**Multi-logo rows: name each logo explicitly and forbid repeats.** With three or more references the model will silently drop one logo and duplicate another, and sometimes convert the row to monochrome. The prompt shape that fixes it:
+
+```
+...a row of exactly 3 different small tool logos in their original brand colors, evenly
+spaced, each one accurately reproduced from a different reference image: first the
+[COLOR] [TOOL A] icon, second the [COLOR] [TOOL B] icon, third the [COLOR] [TOOL C] icon.
+Do not repeat any logo. Do not convert the logos to black and white, keep their real colors.
+```
+
+Name the logo, name its colour, name its position. Then say "do not repeat" and "keep their real colors" out loud. **Always look at the output before uploading it.** Nothing in the tool's output signals a dropped logo.
 
 **Style-matched banner (when using a previous banner as reference):**
 ```
@@ -171,7 +197,7 @@ The `--upload-to` flag generates the image and uploads it as the Notion page cov
 - **Output:** Cropped and resized to 1500x600px (Notion cover optimal size)
 - **Reference images:** Up to 5 PNG URLs via `image_input` parameter
 - **Generation time:** ~30-35 seconds
-- **API key location:** `~/.config/kieai/api_key`
+- **API key:** `KIEAI_API_KEY`, then `~/.config/kieai/api_key`, then `providers.kieai.api_key` in the config
 
 ---
 
@@ -206,6 +232,6 @@ If any answer is "no", fix it before generating.
 | Guide Type | Banner Approach | Logos Needed | Style Reference |
 |-----------|----------------|--------------|-----------------|
 | Multi-tool guide or sales resource | Default: modern font + faded logos row | 3-5 logos | Previous banner if same series |
-| Single-tool technical tutorial | Single-tool: logo prominent + keyword text | 1 logo | Previous banner if sequel |
+| Single-tool technical tutorial | Single-tool: logo prominent + short title text | 1 logo | Previous banner if sequel |
 | Strategic framework (no specific tools) | Topic-only: modern font, no logos | None | None |
 | User explicitly requests style | Follow user direction | Varies | Whatever user provides |

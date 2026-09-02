@@ -26,6 +26,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 import json
 import time
@@ -186,6 +187,32 @@ def hex_to_rgb(hex_color):
     """Convert hex color string to RGB tuple."""
     h = hex_color.lstrip("#")
     return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+
+# --- Keyword guard ---
+
+KEYWORD_SHAPE = re.compile(r"^[A-Z]{3,12}$")
+
+
+def refuse_keyword_title(title, keyword=None, allow=False):
+    """Exit 2 when the cover title is the lead-magnet keyword.
+
+    The cover never carries the keyword; the post graphic's CTA band does.
+    The check fires when --title equals --keyword (or GUIDE_MAKER_KEYWORD),
+    and, with no keyword given, when the whole title looks like one
+    (a single ALL-CAPS token). --allow-keyword overrides.
+    """
+    if allow:
+        return
+    keyword = (keyword or os.environ.get("GUIDE_MAKER_KEYWORD", "") or "").strip()
+    text = (title or "").strip()
+    looks_like_keyword = KEYWORD_SHAPE.match(text) is not None
+    if (keyword and text.upper() == keyword.upper()) or (not keyword and looks_like_keyword):
+        print(f"Error: cover title {text!r} is the lead-magnet keyword. The cover never "
+              "carries the keyword; it belongs in the post graphic's CTA band "
+              "(graphics-maker). Use the guide's short title, or pass "
+              "--allow-keyword if this really is the title.", file=sys.stderr)
+        sys.exit(2)
 
 
 # --- Simple Banner Generator ---
@@ -570,6 +597,11 @@ def main():
                         help="Output file path")
     simple.add_argument("--upload-to", default=None,
                         help="Notion page ID to upload to after generating")
+    simple.add_argument("--keyword", default=None,
+                        help="The guide's keyword; the title must not equal it "
+                             "(also read from GUIDE_MAKER_KEYWORD)")
+    simple.add_argument("--allow-keyword", action="store_true",
+                        help="Allow a title that equals the keyword")
 
     # AI banner
     ai = subparsers.add_parser("ai", help="Generate an AI banner via KieAI")
@@ -597,6 +629,7 @@ def main():
     _CFG_PATH = getattr(args, "config", None)
 
     if args.command == "simple":
+        refuse_keyword_title(args.title, args.keyword, args.allow_keyword)
         path = generate_simple_banner(
             title=args.title,
             subtitle=args.subtitle,
