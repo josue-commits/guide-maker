@@ -436,7 +436,7 @@ def validate(cfg):
         ok(f"schema_version {cfg_get(cfg, 'schema_version')}")
 
     if not cfg_get(cfg, "notion.guide_database_id"):
-        fail("notion.guide_database_id is empty (publishing needs it)")
+        warn("notion.guide_database_id empty: publishing (Phase 3a) is unavailable until it is set")
     else:
         ok("notion.guide_database_id set")
     if not cfg_get(cfg, "notion.content_board_database_id"):
