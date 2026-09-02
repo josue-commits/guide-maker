@@ -1,306 +1,194 @@
 ---
 name: guide-maker
-description: "Turn YouTube videos into polished Notion guides with LinkedIn lead magnet copy. Use when the user provides a YouTube URL, transcript, or asks to create a guide/lead magnet. Also triggers on 'find me a topic', 'what's trending', 'make a guide from this', 'create a lead magnet', or 'turn this into a guide'."
+description: "Turn a YouTube video, a transcript or a researched topic into a multi-page Notion guide plus the LinkedIn lead-magnet bundle around it: three copy variations, a cover, a post graphic that carries the keyword, DM templates and a Content Board card. Use when the user provides a YouTube URL or transcript, says 'make a guide from this', 'turn this into a lead magnet', 'create a Notion guide', 'write the copy for the guide', 'publish the guide', or asks 'find me a topic' / 'what's trending' / 'what should I write about'. Also use for partial steps: only the copy, only the DMs, only the publish."
 ---
 
 # Guide Maker
 
-## Setup
+You are the orchestrator. The writer agent (`AGENT.md`) does the heavy lifting in the background; you run the scripts, hold the gates, and talk to the user. Talk to the user in their language; everything the skill ships (guide, copy, DMs) is written in `workflow.language`.
 
-Before first use, check if `config.yaml` exists in this skill's directory.
+## 0. Before anything
 
-If it doesn't exist:
-1. Tell the user: "This is your first time using Guide Maker. Let's set it up."
-2. Copy `config.example.yaml` to `config.yaml`
-3. Walk the user through filling in the required fields:
-   - **Notion API key** — Link them to https://www.notion.so/my-integrations. They need to create an integration, copy the secret, and share their target database with it.
-   - **Guide Database ID** — Explain how to create the database (properties: Guide Title as title, Type as select, Week as date, Keyword as rich_text, Status as select). Show them how to find the database ID from the Notion URL.
-   - **Author name** — Their name for the guide byline.
-   - **LinkedIn URL** — Their LinkedIn profile URL for the byline link.
-4. Ask about optional fields:
-   - Community URL (for a callout at the top of guides)
-   - KieAI API key (for AI-generated banners, $0.03 each)
-   - Multi-account posting (additional LinkedIn accounts)
-   - Content Board database (for tracking LinkedIn post performance)
-5. Test the Notion connection by reading the database via the Notion API. If it fails, help them troubleshoot (usually a sharing permission issue).
+1. Resolve `SKILL_DIR`, the absolute path of this folder, and `SKILLS_ROOT`, its parent. Every command below uses absolute paths; the working directory is the project, not the skill.
+2. Run the doctor. Never proceed on a red line.
+   ```bash
+   python3 {SKILL_DIR}/scripts/doctor.py
+   ```
+   No config yet? It says so. Copy `config.example.yaml` to `config.yaml`, walk the user through `docs/setup.md` at the repo root, run the doctor again. `--offline` skips the network checks, `--print-paths` shows what it resolved, `--migrate-config` prints a v2 file from a v1 one.
+3. Load the config (`python3 {SKILL_DIR}/scripts/_config.py` prints the validation). `WORK_DIR` is `workflow.work_dir`. Guides are never written into the project directory.
 
-Once config.yaml exists, load it at the start of every run. Use the values throughout the pipeline.
+## 1. Pipeline
 
-Resolve `SKILL_DIR` (the absolute path of this skill folder) once and pass it into every spawn prompt and every script call. The working directory is the project root, not the skill, so relative `scripts/...` paths fail.
+| Step | What | Who | Reference |
+|------|------|-----|-----------|
+| 0 | Topic research (three sources, correlated) | writer agent via `topic-finder` | `references/research/topic-research.md` |
+| 0.5 | Calibration read: CTA evidence, top performers, voice | writer agent | `references/strategy/cta-evidence.md` |
+| 1 | Intake, research, outline, keyword | writer agent | `references/research/*`, `references/guides/guide-types.md` |
+| **G1** | User approves the outline | user | always |
+| 2 | Write guide, copy, DMs; lint | writer agent | `references/writing/*`, `references/linkedin/*`, `references/dm/dm-guide.md` |
+| lint | `lint_copy.py copy` and `dm` exit 0 | you | `scripts/lint_copy.py` |
+| **G2** | User approves the content | user | only if `workflow.gates: two` |
+| 3a | Publish hub + subpages | you | `references/publishing.md` |
+| 3b | Cover on the hub page, never with the keyword, required | you | `references/banner-guide.md` |
+| 3c | Post graphic with the CTA band | you via `graphics-maker` | sibling `SKILL.md`, `references/strategy/cta-evidence.md` |
+| 3d | Content Board card + Graphic property | you | `references/content-board.md` |
+| 3e | DM bundle or schedule | you via `dm-automation` | `references/dm/dm-guide.md` |
+| Q | Quality gates | you | section 8 |
 
----
+If something breaks, read `references/troubleshooting.md`.
 
-## Pipeline Overview
+## 2. Gate model
 
-| Step | What | Reference |
-|------|------|-----------|
-| 0 | Topic research (optional) | sibling skill `topic-finder` (`scripts/scan_all.py`, `health.json`) |
-| 1 | Get source material | `references/writing/guide-spec.md` (source extraction section) |
-| 2 | Classify guide type | `references/guides/guide-types.md` |
-| 3 | Research and verify | (inline below) |
-| 4 | Write the guide | `references/writing/guide-spec.md`, `references/writing/humanizer.md` |
-| 5 | Structure as hub + subpages | `references/guides/hub-page-layout.md` |
-| 6 | Publish to Notion + banner | `scripts/publish_guide_hub.py`, `scripts/banner_generator.py` |
-| 7 | Quality check | (inline below) |
-| 8 | Create Content Board entries | (optional, requires `content_board_database_id` in config) |
+- **G1 is unconditional.** No content is written before the user approves the outline, title and keyword.
+- **G2 is config.** `workflow.gates: two` (default) shows the user the copy and the guide before anything reaches Notion. `one` ships the bundle with sensible defaults after G1 and asks one consolidated question only when something is genuinely ambiguous.
+- **Release gates that are not user gates.** You hold these yourself and do not ask: the cover exists on the hub page; the CTA band on the post graphic is read character by character and matches the Content Board keyword; every lint exits 0; the keyword is unique (`keyword_check.py`); no `[Verify: ...]` placeholder survives.
+- **Steps the skill never does.** Publishing the Notion page to the web (the user does it in the Notion UI; DM links are dead until then). Posting to LinkedIn. Sending a DM by hand.
 
-If something breaks, check `references/troubleshooting.md`.
+## 3. Spawning the writer agent
 
----
+Use this prompt shape for every phase. The no-nested-agents line is not optional: a sub-agent that spawns a sub-agent dies and the work is lost silently.
 
-## Phase 0: Topic Research (Optional)
+```
+Task(
+  subagent_type="general-purpose",
+  run_in_background=true,
+  prompt="""Read {SKILL_DIR}/AGENT.md in full before doing anything.
+PHASE: <0 | 1 | 2>
+SKILL_DIR: {SKILL_DIR}
+CONFIG: {SKILL_DIR}/config.yaml   (already validated by doctor.py)
+WORK_DIR: {WORK_DIR}
+TOPIC_FINDER_DIR: {SKILLS_ROOT}/topic-finder   (Phase 0 only)
+INPUTS: <URL | transcript path | approved outline + keyword | topic pick>
+EXCLUDE: <already-published titles and keywords, from the Guide DB and Content Board>
+RECENT CLOSERS: <last three weeks from the closer log, Phase 2 only>
+RULES: Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself.
+Absolute paths only. Write files under WORK_DIR, never into the project.
+Run the linters named in AGENT.md until they exit 0.
+RETURN the Phase <N> block exactly as AGENT.md specifies."""
+)
+```
 
-Topic research lives in the sibling skill **topic-finder** (YouTube via yt-dlp, Reddit and X via Apify, then a correlation pass). guide-maker does not scan anything itself. Resolve the sibling first:
+## 4. Phase 0: topic research
 
+1. `python3 -c "import sys; sys.path.insert(0,'{SKILL_DIR}/scripts'); from _config import sibling; print(sibling('topic-finder'))"`. If it raises, show the user the install hint and stop Phase 0. Never fall back to web search.
+2. Pull the exclusion list: Guide DB titles and Content Board keywords (`keyword_check.py --list` when online).
+3. Spawn Phase 0. The agent runs `scan_all.py --sources youtube,reddit,x --out-dir {WORK_DIR}/scan`, reads `health.json`, and prints the **scan-health block first**. A dead source is a stop, not a fallback.
+4. Present the briefing: scan health, then 3 ranked topics (two YouTube tracks scored apart, X ranked on bookmarks), each with every resource found across sources. The user picks one; hand its URLs to Phase 1.
+
+## 5. Phase 1: intake, research, outline
+
+1. Spawn Phase 1 with the URL, transcript or topic. The agent extracts the transcript (yt-dlp), fetches official docs, verifies every claim, checks already-covered, applies the depth gate, writes the gap analysis, classifies the guide type (four types), outlines 4-7 subpages and derives a one-word keyword from the guide name.
+2. Run `python3 {SKILL_DIR}/scripts/keyword_check.py KEYWORD --config {SKILL_DIR}/config.yaml`. Shape first (offline), then collisions against the Content Board, the Guide DB and the DM tool. A collision means a new keyword before G1.
+3. Present the Phase 1 block: type, title, keyword, outline with per-step descriptions, sources tagged `official | institutional | creator-research-only`, gap analysis, `[Verify: ...]` items.
+4. **G1.** The user approves or edits the outline, title or keyword.
+
+## 6. Phase 2: write everything
+
+1. Spawn Phase 2 with the approved outline, keyword, config and the recent closer log.
+2. The agent writes `{WORK_DIR}/hub.md`, `{WORK_DIR}/NN-step.md` per subpage, three copy variations per account (`{WORK_DIR}/copy/<account>-<hook>.txt`), every DM version the config allows (`{WORK_DIR}/dm/<version>.txt`), a cover recommendation and a post-graphic brief. It runs the linters itself; you run them again:
+   ```bash
+   python3 {SKILL_DIR}/scripts/lint_copy.py copy {WORK_DIR}/copy/*.txt --keyword KEYWORD --config {SKILL_DIR}/config.yaml
+   python3 {SKILL_DIR}/scripts/lint_copy.py dm {WORK_DIR}/dm/*.txt --config {SKILL_DIR}/config.yaml
+   ```
+   Exit 1 goes back to the agent with the findings. Exit 2 (warnings) you read and decide.
+3. **G2** if `workflow.gates: two`: hooks of each variation, subpage summaries, DM versions, cover and graphic briefs. Expand anything the user asks for. Small edits you make; structural changes go back to the agent.
+
+## 7. Phase 3: publish and package
+
+Every command takes `--config {SKILL_DIR}/config.yaml` and `--dry-run` where it writes. Run the dry run first the first time you use a command in a session.
+
+**3a. Hub + subpages**
 ```bash
-python3 -c "import sys; sys.path.insert(0, '{SKILL_DIR}/scripts'); from _config import sibling; print(sibling('topic-finder'))"
+python3 {SKILL_DIR}/scripts/publish_guide_hub.py --config {SKILL_DIR}/config.yaml \
+  --title "Guide Title" --description "One sentence." --keyword KEYWORD \
+  --type "Technical Tutorial" --week YYYY-MM-DD --icon "🛠️" \
+  --build-item "..." --audience-item "..." --nav-note "..." \
+  --step "⚡|Short title|Description|{WORK_DIR}/01-step.md" \
+  --source "official|Title|https://..." --source "institutional|Title|https://..."
 ```
+Creator-channel sources are refused by default. The output has `HUB_PAGE_ID`.
 
-If that prints a `FileNotFoundError`, tell the user the install hint it contains (clone `josue-commits/topic-finder` next to guide-maker, or set `GUIDE_MAKER_SKILLS_DIR`) and **stop Phase 0**. Never fall back to web search: a briefing built on a silent fallback looks authoritative and misses the direct hits the scan exists to find.
-
-When the sibling is present, spawn the writer agent:
-
+**3b. Cover (required, never the keyword)**
+```bash
+python3 {SKILL_DIR}/scripts/banner_generator.py --config {SKILL_DIR}/config.yaml simple \
+  --title "Short Title" --keyword KEYWORD --output {WORK_DIR}/cover.png --upload-to HUB_PAGE_ID
 ```
-Task(
-  subagent_type="general-purpose",
-  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR}. Run Phase 0: Topic Research. Run {TOPIC_FINDER_DIR}/scripts/scan_all.py --sources youtube,reddit,x --out-dir {WORK_DIR}/scan, read {WORK_DIR}/scan/health.json, print the scan-health block first, then cluster, score and return the ranked briefing. Exclude these already-published titles and keywords: [list]. Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Return the Phase 0 block.",
-  run_in_background=true
-)
+`ai` and `upload` are the other subcommands (`references/banner-guide.md`). The guide is not "ready" until this exists.
+
+**3c. Post graphic with the CTA band** (sibling `graphics-maker`; skip only if it is not installed, and say so)
+```bash
+G={SKILLS_ROOT}/graphics-maker/scripts
+python3 $G/graphics_generate.py card --title "Short Title" --keyword KEYWORD --out {WORK_DIR}/graphic.png        # Pillow, free, default
+python3 $G/graphics_generate.py scene --brief {WORK_DIR}/graphic-brief.md --out {WORK_DIR}/scene/ --estimate    # provider, two variants, no text
+python3 $G/graphics_generate.py finalize {WORK_DIR}/scene/pick.png --keyword KEYWORD --out {WORK_DIR}/graphic.png   # CTA band + C2PA strip
+python3 $G/cta_bar.py {WORK_DIR}/graphic.png --keyword KEYWORD --check
 ```
+`text`, `single` and `tweak` exist for provider-rendered text. Whatever path you took, open the final PNG and read the keyword character by character. Misspelled, missing or illegible means it does not ship.
 
-`health.json` is the contract between the two skills:
-
-```json
-{"config_present": {"youtube": true, "reddit": true, "x": false},
- "youtube": {"channels_configured": 12, "channels_with_videos": 10, "videos": 39, "errors": []},
- "reddit": {"subs": 8, "posts": 84},
- "x": {"accounts": 0, "posts": 0, "cost_usd": 0.0},
- "correlation": {"topics_2plus": 6, "topics_all": 2},
- "web_search_used": false}
+**3d. Content Board card** (skipped when `notion.content_board_database_id` is empty)
+```bash
+python3 {SKILL_DIR}/scripts/md_to_notion.py create-content-entry --config {SKILL_DIR}/config.yaml \
+  --title "KEYWORD | Mon 09/07" --keyword KEYWORD --post-date YYYY-MM-DD --day Monday \
+  --guide-link "https://www.notion.so/..." --status Draft --type guide \
+  --variation "Contrarian Hook|@{WORK_DIR}/copy/main-contrarian.txt" \
+  --variation "Problem/Pain Hook|@{WORK_DIR}/copy/main-problem_pain.txt" \
+  --variation "Quantity/Build Hook|@{WORK_DIR}/copy/main-quantity_build.txt" \
+  --dm "Direct|@{WORK_DIR}/dm/direct.txt" --dm "Combined|@{WORK_DIR}/dm/combined.txt" \
+  --graphic {WORK_DIR}/graphic.png
 ```
+One card per guide (`workflow.one_card_per: guide`); `account` makes one per account. The graphic goes on the `Graphic` files property, never as a body image.
 
-The agent applies the thresholds in `config.topic_finder.scan_health` to that file and refuses to rank if a configured source came back empty or `web_search_used` is true. Present the briefing to the user. Once they pick a topic, hand the selected URLs to Phase 1.
-
----
-
-## Phase 1: Source Intake + Research + Outline
-
-When the user provides a YouTube URL, transcript, or topic:
-
-1. Load `config.yaml` for author info and account settings.
-2. Spawn the writer agent:
-
+**3e. DM bundle** (sibling `dm-automation`; without it, the DM toggles on the card are the deliverable)
+```bash
+D={SKILLS_ROOT}/dm-automation/scripts
+python3 $D/dm_cli.py render --guide-url "$(python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --page-id HUB_PAGE_ID)" --guide-title "Title" --out {WORK_DIR}/dm/
+python3 $D/dm_cli.py schedule --keyword KEYWORD --dm {WORK_DIR}/dm/combined.txt --image {WORK_DIR}/graphic.png --dry-run
 ```
-Task(
-  subagent_type="general-purpose",
-  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR} (absolute path of this skill). Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Run Phase 1: Research + Outline. Source material: [URL/transcript/topic]. Return the outline, guide type classification, proposed keyword, and notes about source quality.",
-  run_in_background=true
-)
+`dm_tool.provider: manual` writes a checklist; `leadshark` creates the automation paused. Before any DM goes live:
+```bash
+python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --page-id HUB_PAGE_ID --check
 ```
+Exit 1 means the user has not published the page to the web yet. Tell them; do not schedule.
 
-3. When the agent returns, present the outline to the user for review:
-   - Guide type classification
-   - Proposed title
-   - Proposed keyword
-   - Step-by-step outline with descriptions
-   - Source material notes
-4. Get approval before proceeding to Phase 2. The user may request changes to the outline, title, keyword, or structure.
+Log the closers used: append `{"date": "YYYY-MM-DD", "closer": "..."}` per variation to `{WORK_DIR}/../closer-log.jsonl` and run `lint_copy.py rotation --log` before the next week's copy.
 
-### Phase 1 Output Format
-- **guide_type**: "Technical Tutorial", "Strategic Framework", or "Comparison/Persuasion"
-- **title**: Proposed guide title
-- **keyword**: Proposed keyword (short, memorable, ALL CAPS)
-- **outline**: List of steps, each with emoji, title, and 2-3 sentence description
-- **sources**: List of source URLs (YouTube, docs, etc.)
-- **notes**: Concerns about source material quality or coverage gaps
+## 8. Quality gates (before "done")
 
----
+- Guide: every section teaches something actionable; code blocks copy-paste ready; every URL verified; no hallucinated features; H2 with emoji, H3 plain; no banned vocabulary; no cross-guide references; no directive lines on the page (`scan_published_leaks.py` after the publish).
+- Copy: `lint_copy.py copy` exit 0; three genuinely different hooks; prose by default; keyword absent from the text; one closer ending on the pointing-down emoji, three different closers.
+- DMs: `lint_copy.py dm` exit 0; one destination per version; public guide URL.
+- Assets: cover on the hub page; post graphic with a legible, correctly spelled keyword; graphic on the card's `Graphic` property.
+- Keyword: unique (`keyword_check.py`), identical on the card, the graphic and in the DM tool.
 
-## Phase 2: Write Everything
+## 9. Key rules
 
-After the user approves the outline:
+1. The keyword lives only in the post graphic. Never in the copy. `references/strategy/cta-evidence.md` has the numbers.
+2. Two image assets per guide, not interchangeable: cover (no keyword) and post graphic (always the keyword).
+3. Humanizer always on. `lint_copy.py` is the floor, not the ceiling.
+4. Never an unverified URL. Never a claim without a primary source.
+5. Creator videos are research, institutional talks are citable, no cross-guide references.
+6. Read the example guide matching the type before writing; match its depth.
+7. G1 always; G2 per config; release gates are yours.
+8. One guide is one keyword, derived from the guide name, unique across the account.
+9. Every spawn prompt carries the no-nested-agents line and absolute paths.
+10. Guides are written under `WORK_DIR`, never into the project. They live in Notion.
+11. The user publishes to the web by hand and posts by hand. The skill stops at the bundle.
+12. Config over constants. If you are typing a name, URL, color or count, it belongs in `config.yaml`.
 
-1. Load `config.yaml` for account list, community settings, and author info.
-2. Spawn the writer agent:
-
-```
-Task(
-  subagent_type="general-purpose",
-  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR} (absolute path of this skill). Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Run Phase 2: Write Everything. Config: [pass relevant config values]. Approved outline: [paste outline]. Keyword: [KEYWORD]. Write the full guide (hub + subpages), LinkedIn copy for each account, and DM templates. Return all content.",
-  run_in_background=true
-)
-```
-
-3. When the agent returns, present all content to the user for review:
-   - Hub page content
-   - Each subpage (summarize, offer to show full text)
-   - LinkedIn copy variations (for each account)
-   - DM templates
-   - Banner recommendation
-4. Get approval. The user may request edits to any piece.
-
-### Phase 2 Output Format
-- **hub_description**: One-sentence guide description for the hub callout
-- **build_items**: "What You'll Build" bullet points
-- **audience_items**: "Who This Is For" bullet points
-- **nav_note**: Navigation callout text
-- **subpage_files**: List of /tmp/ markdown file paths (one per step)
-- **linkedin_copy**: 3 variations for each configured account
-- **dm_templates**: every version `dm.versions` allows (direct; combined and community_only with a community; secondary with a secondary channel), one file each under `WORK_DIR/dm/`
-- **banner_recommendation**: Tools mentioned, suggested style, keyword for banner text
-
----
-
-## Phase 3: Review with User
-
-Present the content in a scannable format:
-
-1. **Guide overview**: Title, type, keyword, number of subpages
-2. **Hub page preview**: Description callout, What You'll Build, Who This Is For
-3. **Subpage summaries**: One line per subpage with title and key topics
-4. **LinkedIn copy**: Show hooks (first lines) for each variation per account. Offer to expand any variation the user wants to read in full.
-5. **DM templates**: Show every generated version
-6. **Banner**: Describe the recommendation
-
-The user approves, requests changes, or rejects. If changes are needed, either make them directly (small edits) or re-spawn the agent (structural changes).
-
----
-
-## Phase 4: Publish to Notion
-
-After approval:
-
-1. **Publish the hub page and subpages** in one call. The script creates the Guide Database entry (title, type, week, keyword, status), publishes every `--step` markdown file as a child page, then writes the hub body with links to each step. It reads the database ID, author byline and community callout from `config.yaml`.
-   ```bash
-   python3 scripts/publish_guide_hub.py \
-     --title "Guide Title" \
-     --description "One-sentence guide description" \
-     --keyword "KEYWORD" \
-     --type "Technical Tutorial" \
-     --week "YYYY-MM-DD" \
-     --icon "🛠️" \
-     --build-item "Outcome the reader gets" \
-     --audience-item "Who this is for" \
-     --nav-note "Start at Step 1 unless you already have X." \
-     --step "⚡|Short Title|Description paragraph|/tmp/guides/01-step.md" \
-     --step "🧩|Short Title|Description paragraph|/tmp/guides/02-step.md" \
-     --source "Official docs|Tool documentation|https://example.com/docs"
-   ```
-   Add `--dry-run` to print the plan without touching Notion. The output includes the hub page ID you need next.
-
-2. **Generate and upload the cover.** Three subcommands: `simple` (Pillow, free), `ai` (KieAI, needs a key), `upload` (an existing PNG).
-   ```bash
-   # Free, always works
-   python3 scripts/banner_generator.py simple \
-     --title "Short Guide Title" --subtitle "Optional line" \
-     --style dark --output /tmp/guides/cover.png --upload-to HUB_PAGE_ID
-
-   # AI cover with real logo references (see references/banner-guide.md)
-   python3 scripts/banner_generator.py ai \
-     --prompt "White background banner ..." \
-     --ref-image "https://.../logo.png" \
-     --output /tmp/guides/cover.png --upload-to HUB_PAGE_ID
-
-   # Upload a cover you already have
-   python3 scripts/banner_generator.py upload --file /tmp/guides/cover.png --page-id HUB_PAGE_ID
-   ```
-   `--upload-to` sets the image as the page cover. If `ai` fails it falls back to `simple` automatically.
-
-3. **Verify**: open the published guide URL and confirm every block rendered, then share the URL with the user.
-
----
-
-## Phase 5: Create Content Board Entries (Optional)
-
-Only run this phase if `content_board_database_id` is set in config.yaml.
-
-For each configured account:
-1. Create a Content Board entry with:
-   - Title (guide title)
-   - Account name
-   - Post Date
-   - Type: "guide"
-   - Status: "Draft"
-   - Keyword
-   - Guide Link (URL to the published guide)
-2. Add LinkedIn copy as toggle blocks (3 variations per account)
-3. Add DM templates below a divider
-
-Toggle format:
-- Toggle title = hook type ("Contrarian Hook", "Problem/Pain Hook", "Quantity/Build Hook")
-- Toggle content = code block (plain text) for easy copy/paste
-
-DM template format (`md_to_notion.py create-content-entry --dm "Label|@file"`, repeatable):
-- Divider
-- H2: "DM Templates"
-- One H3 toggle per generated version: "Direct", "Combined", "Community only", "Secondary channel"
-
----
-
-## Step 3: Research and Verify (Inline Reference)
-
-Before writing a single word of guide content:
-- Web search every tool, software, and platform mentioned
-- Verify all URLs. Never include a URL you haven't confirmed works.
-- Check current pricing, version numbers, feature availability
-- Find official documentation links for tools discussed
-- If you cannot verify a URL, mark it as "[Verify: tool-name documentation]"
-
----
-
-## Quality Check
-
-Before presenting content to the user, verify:
-
-**Guide content:**
-- Every section has real substance, no filler
-- All code blocks are syntactically correct and copy-paste ready
-- All URLs verified via web search
-- No hallucinated tools, features, or capabilities
-- H1 only for title, H2 has emoji prefix, H3 for subsections
-- No banned AI vocabulary or phrases (humanizer filter)
-- Title compelling enough to make someone comment on LinkedIn
-
-**LinkedIn copy:**
-- Each variation is 180-250 words (reject under 140 or over 300)
-- Zero emojis in body (only the pointing-down emoji on the last line)
-- Zero em dashes
-- Zero markdown formatting
-- Zero hashtags
-- Prose by default; arrow bullets only for a genuine framework
-- 3 variations are genuinely different hooks (contrarian, problem/pain, quantity/build) on the prose 8-beat skeleton
-- No banned vocabulary or phrases
-- CTA is one value line ending on the pointing-down emoji; the keyword is absent from the text (it lives in the post graphic, see `references/strategy/cta-evidence.md`)
-
-**DM templates:**
-- `lint_copy.py dm` exits 0 (merge tag, no hard-wrap, public URL, no formula opener or collaborative sign-off)
-- One destination per version, personalized with the guide topic
-- Human tone, bare first-name sign-off
-
----
-
-## Key Rules
-
-1. **Humanizer is always on.** Every sentence runs through the banned vocabulary and pattern filter. No exceptions. Read `references/writing/humanizer.md` for the full list.
-2. **Never include unverified URLs.** If you can't confirm a link works, flag it for the user.
-3. **Read the example guides** matching your detected type before writing. Match their depth, formatting density, and tone. Examples are in `references/guides/examples/`.
-4. **Present classification and outline before writing.** Don't write the full guide without the user's approval on the direction.
-5. **One guide per week, then move on.** Timely content beats recycled content.
-6. **Unique keyword per guide.** Enables tracking across LinkedIn accounts.
-7. **Never create guide files in the project directory.** Use `/tmp/` for all intermediate files. Guides live in Notion only.
-8. **Account handling is config-driven.** Read accounts from `config.yaml`. Could be 1 account or 10. Generate copy for each.
-9. **Community CTA is conditional.** Only include the community callout on hub pages if `community_url` is set in config.yaml.
-10. **Guide sources stay clean.** Never include YouTube video URLs as sources in the published guide. Only link to official documentation, blog posts, and other non-video external resources. YouTube videos are research inputs, not reader citations.
-
----
-
-## Tools
+## 10. Tools
 
 | Tool | Purpose |
 |------|---------|
-| `yt-dlp` (path from config.yaml) | Extract YouTube transcripts |
-| `WebSearch` / `WebFetch` | Research topics, verify URLs, check pricing |
-| `scripts/md_to_notion.py` | Convert markdown to Notion blocks and publish subpages |
-| `scripts/publish_guide_hub.py` | Create hub page with subpage links and structure |
-| `scripts/banner_generator.py` | Generate banners (KieAI or Pillow) and upload to Notion |
-| `topic-finder` (sibling skill) | Scan YouTube, Reddit and X for topics; writes `health.json` |
+| `{SKILL_DIR}/scripts/doctor.py` | 12-line health check; `--offline`, `--json`, `--print-paths`, `--migrate-config` |
+| `{SKILL_DIR}/scripts/_config.py` | Config loader shared by every skill; prints validation when run |
+| `{SKILL_DIR}/scripts/publish_guide_hub.py` | Hub + subpages to the Guide DB |
+| `{SKILL_DIR}/scripts/md_to_notion.py` | `blocks`, `publish-subpage`, `create-content-entry`, `public-url` |
+| `{SKILL_DIR}/scripts/banner_generator.py` | Cover: `simple`, `ai`, `upload` |
+| `{SKILL_DIR}/scripts/lint_copy.py` | `copy`, `dm`, `rotation` |
+| `{SKILL_DIR}/scripts/keyword_check.py` | Shape and collision check |
+| `{SKILL_DIR}/scripts/scan_published_leaks.py` | Sweep published pages for directives and placeholders |
+| `{SKILLS_ROOT}/topic-finder/scripts/scan_all.py` | Three-source scan, `health.json` |
+| `{SKILLS_ROOT}/graphics-maker/scripts/graphics_generate.py`, `cta_bar.py` | Post graphic with the CTA band |
+| `{SKILLS_ROOT}/dm-automation/scripts/dm_cli.py` | Render DMs, schedule with the DM tool |
+| `yt-dlp` (`tools.ytdlp_path` or PATH) | Transcripts |
+| WebSearch / WebFetch | Verification |
