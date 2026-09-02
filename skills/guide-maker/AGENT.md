@@ -117,22 +117,19 @@ Be honest. Don't inflate scores. If nothing is trending, say so. Bias toward top
 
 ### PHASE 1: Research + Outline
 
-1. **Extract source material**: If given a YouTube URL, use `yt-dlp` (check config.yaml for the path, defaults to `yt-dlp` in PATH) to extract the transcript. If given a transcript or topic, work directly from that.
-2. **Research the topic**: Understand the subject deeply. Identify what makes it valuable, what problems it solves, who needs it.
-3. **Classify guide type**: Determine which type fits best. Read `references/guides/guide-types.md` for full descriptions:
-   - **Technical Tutorial** — Step-by-step how-to
-   - **Strategic Framework** — Conceptual system with actionable components
-   - **Comparison/Persuasion** — Tool comparisons or persuasive arguments
-   - **Use-case Stack** — Several small reusable pieces bundled around one professional role
-4. **Read example guides**: Find example guides matching your detected type in `references/guides/examples/`. Match their depth, formatting density, and tone.
-5. **Create outline**: Structure the guide into 4-7 logical steps/sections. Each section needs:
-   - Emoji + title
-   - 2-3 sentence description of what it covers
-   - Key points and subtopics
-6. **Propose keyword**: A short, memorable keyword (e.g., CLAUDE, REMOTE, SALESTIPS). ALL CAPS, one word preferred.
-7. **Return**: The outline, guide type classification, proposed title, proposed keyword, source list, and any notes about source material quality.
+Read `references/research/topic-research.md` and `references/research/sources-policy.md` first.
 
----
+1. **Extract source material**: For a YouTube URL, use yt-dlp (`tools.ytdlp_path`, else the one on PATH) to pull the transcript: `yt-dlp --write-auto-sub --sub-lang en --skip-download --sub-format srt -o "{WORK_DIR}/yt/%(title)s" "URL"`, then clean the SRT. For a pasted transcript or a topic, work from that.
+2. **Fetch official documentation**: the vendor docs, the repo README, the changelog. Never trust a single source.
+3. **Mine community threads** when the topic-finder scan files are available (`{WORK_DIR}/scan/`): what the docs do not explain, what people debated, what broke, the language the audience uses.
+4. **Verify every claim**: cross-reference creators against official docs or the repo. A claim without a primary source does not go in; mark it `[Verify: ...]` in the outline.
+5. **Already covered**: compare against the titles and keywords the main agent passed. If it shipped, stop and say so.
+6. **Depth gate** (`research.depth_gate`): official docs present, 3+ authoritative sources, 20+ minutes of video or 10+ pages of text, more than one implementation path, enough material for `min_subpages` to `max_subpages` subpages. Fail it and the topic is rejected, no matter how trending.
+7. **Gap analysis** (`research.gap_analysis: required`): what existing guides cover well, what they miss, what this guide will explain that none of them do. Write it into "Who This Is For" and "What You'll Build". It stays in your return block; it never goes into the published body.
+8. **Classify guide type**: Technical Tutorial, Strategic Framework, Comparison/Persuasion, or Use-case Stack. Read the matching example in `references/guides/examples/`.
+9. **Create outline**: `min_subpages` to `max_subpages` sections. Each needs an emoji + title, a 2-3 sentence description, key points, and a note on what NEW information it adds (tie back to the gap analysis).
+10. **Propose keyword**: one word, ALL CAPS, derived from the guide name (ENGINE from "Lead Engine", FLOWS from "13 workflows"), never arbitrary. Run `python3 {SKILL_DIR}/scripts/keyword_check.py KEYWORD --offline` for the shape; the main agent runs the collision check.
+11. **Return** the Phase 1 block: guide type, title, keyword, outline, sources tagged `official | institutional | creator-research-only`, gap analysis summary, source-quality notes, and any `[Verify: ...]` items.
 
 ### PHASE 2: Write Everything
 
@@ -175,7 +172,8 @@ Read `config.yaml` for `community_url`, `community_name`, `community_description
 - NO footer (author byline at top is enough)
 - Community callout goes ABOVE the guide description callout (when present)
 - Each subpage gets an icon matching its step emoji
-- NEVER include YouTube video URLs as sources. Only link to official documentation, blog posts, and other non-video external resources. YouTube videos are research inputs, not citations for the reader.
+- **Creator videos are never sources. Institutional lectures are.** Official docs, changelogs, repos, blog posts and first-party or institutional talks go under Sources (`institutional` type). A creator's tutorial is a research input, never a citation. Full policy: `references/research/sources-policy.md`.
+- **No cross-guide references in the published body.** Do not name another guide or its keyword anywhere on the page. Readers arrive cold from one post. The gap analysis stays in your return block.
 
 ### Subpage Writing
 - Emoji H2 headers for sections
@@ -357,7 +355,7 @@ Before you return ANY content to the main agent:
 - Are there real examples, commands, or configurations?
 - Does the hub page follow the exact block order?
 - Did you use emoji H2 headers?
-- Did you include any YouTube URLs as sources? Remove them. Only official docs and blog posts.
+- Any creator-channel video under Sources? Remove it (institutional lectures stay). Any reference to another guide or keyword in the body? Remove it.
 - Did you use any banned AI vocabulary? Remove it.
 - Did you use an em dash anywhere? Replace with period or comma.
 

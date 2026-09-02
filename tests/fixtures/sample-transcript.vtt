@@ -1,0 +1,41 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.000 --> 00:00:04.200
+okay so today I want to show you how I stopped
+reading my inbox by hand
+
+00:00:04.200 --> 00:00:09.800
+the whole thing is one rule file with three queues
+reply today read this week and archive
+
+00:00:09.800 --> 00:00:15.100
+the part people get wrong is they let it send
+on day one do not do that keep send false
+
+00:00:15.100 --> 00:00:21.400
+I read about fifty drafts before I trusted it
+and two of them were wrong in a way I would
+not have caught from the summary
+
+00:00:21.400 --> 00:00:27.900
+so step one install the client point it at your
+provider and run doctor to check the token
+
+00:00:27.900 --> 00:00:34.300
+step two write the rule file the match list is
+just strings from client subject urgent and so on
+
+00:00:34.300 --> 00:00:40.000
+step three run it as a daemon and read the digest
+at six it tells you what got archived so nothing
+disappears silently
+
+00:00:40.000 --> 00:00:45.500
+on my inbox that was forty one emails on day one
+six needed a reply the rest were noise
+
+00:00:45.500 --> 00:00:49.000
+that is the whole setup I will put the rule file
+and the docs links below

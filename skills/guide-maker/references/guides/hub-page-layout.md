@@ -78,14 +78,18 @@ Divider (between steps, not after the last one)
 ### 13. Divider (before sources)
 
 ### 14. Sources
-H2 with emoji: "🎬 Sources"
-
-Paragraph: Brief attribution line.
+H2 with emoji: "📚 Sources"
 
 Then for each source:
 ```
 Paragraph: "→ " + "[Source type]: [Title]" (linked to URL)
 ```
+
+**Creator videos are never sources. Institutional lectures are.** Full policy in `references/research/sources-policy.md`. The reader sees official docs, changelogs, repos, blog posts, and first-party or institutional talks. `publish_guide_hub.py` refuses `--source "youtube|..."` unless `sources.cite_creator_videos` is true, and accepts `institutional` as a type.
+
+When the guide rests on an institutional lecture, say so in the body (institution and role, not the speaker's name) and link it here as the optional deep-dive.
+
+**No cross-guide references anywhere on the page.** Readers arrive cold from one post. Gap analysis stays in the agent's return block.
 
 ### 15. Final Divider
 

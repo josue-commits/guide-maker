@@ -24,21 +24,24 @@ Usage:
         --audience-item "Another audience" \
         --nav-note "Each step builds on the previous one." \
         --step "⚡|Short Title|Description paragraph|path/to/step.md" \
-        --source "YouTube|Video Title|https://youtube.com/watch?v=..."
+        --source "official|Tool documentation|https://example.com/docs" \\
+        --source "institutional|University lecture on the topic|https://example.edu/talk"
 
 Options:
     --title TEXT          Guide title (required)
     --description TEXT    One-sentence guide description (required)
     --keyword TEXT        Lead magnet keyword, e.g., SKILLS (required)
     --type TEXT           Guide type: Technical Tutorial, Strategic Framework,
-                         or Comparison/Persuasion (default: Technical Tutorial)
+                         Comparison/Persuasion or Use-case Stack (default: Technical Tutorial)
     --week DATE           Week date YYYY-MM-DD (required)
     --icon EMOJI          Page icon emoji (default: 📖)
     --build-item TEXT     Repeatable: items for "What You'll Build" section
     --audience-item TEXT  Repeatable: items for "Who This Is For" section
     --nav-note TEXT       Navigation callout text for "The Guide" section
     --step TEXT           Repeatable: "emoji|title|description|md_file"
-    --source TEXT         Repeatable: "type|title|url"
+    --source TEXT         Repeatable: "type|title|url". Types: official, institutional,
+                         blog, pdf, repo, changelog, paper, course. Creator channels
+                         (youtube, video) are refused unless sources.cite_creator_videos.
     --dry-run             Print plan without publishing
 """
 
@@ -329,7 +332,7 @@ def build_hub_blocks(description, build_items, audience_items, nav_note,
         blocks.append({
             "type": "heading_2",
             "heading_2": {
-                "rich_text": parse_inline("🎬 Sources"),
+                "rich_text": parse_inline("📚 Sources"),
                 "is_toggleable": False,
             }
         })
@@ -363,14 +366,42 @@ def parse_step(step_str):
     return tuple(p.strip() for p in parts)
 
 
+CREATOR_SOURCE_TYPES = {"youtube", "video", "tiktok", "instagram", "creator", "podcast-episode", "stream"}
+KNOWN_SOURCE_TYPES = {"official", "docs", "documentation", "institutional", "lecture", "course",
+                      "talk", "blog", "article", "pdf", "repo", "github", "changelog", "paper",
+                      "site", "release-notes"}
+SOURCE_LABELS = {"official": "Official docs", "docs": "Docs", "documentation": "Docs",
+                 "institutional": "Lecture", "lecture": "Lecture", "course": "Course",
+                 "talk": "Talk", "blog": "Blog", "article": "Article", "pdf": "PDF",
+                 "repo": "Repo", "github": "GitHub", "changelog": "Changelog", "paper": "Paper",
+                 "site": "Site", "release-notes": "Release notes"}
+
+
 def parse_source(source_str):
-    """Parse a source string: 'type|title|url'."""
+    """Parse a source string: 'type|title|url' and apply the sources policy.
+
+    Creator-channel types (youtube, video, ...) are refused unless
+    sources.cite_creator_videos is true. Institutional talks are citable.
+    See references/research/sources-policy.md.
+    """
     parts = source_str.split("|", 2)
     if len(parts) != 3:
         print(f"Error: Source must have 3 parts separated by '|': {source_str}",
               file=sys.stderr)
         sys.exit(1)
-    return tuple(p.strip() for p in parts)
+    stype, title, url = (p.strip() for p in parts)
+    key = stype.lower()
+    if key in CREATOR_SOURCE_TYPES and not cfg_get(config(), "sources.cite_creator_videos"):
+        print(f"Error: source type {stype!r} is a creator channel and sources.cite_creator_videos "
+              f"is false. Creator videos are research inputs, not citations. Verify the fact "
+              f"against an official page and cite that, or use 'institutional' for a university "
+              f"or vendor lecture. ({title})", file=sys.stderr)
+        sys.exit(1)
+    if key not in KNOWN_SOURCE_TYPES and key not in CREATOR_SOURCE_TYPES:
+        print(f"Warning: unknown source type {stype!r}; known types: "
+              f"{', '.join(sorted(KNOWN_SOURCE_TYPES))}", file=sys.stderr)
+    label = SOURCE_LABELS.get(key, stype)
+    return (label, title, url)
 
 
 def main():
@@ -421,7 +452,7 @@ def main():
 
     if args.dry_run:
         print("=" * 60)
-        print("DRY RUN — Guide Hub Publishing Plan")
+        print("DRY RUN: Guide Hub Publishing Plan")
         print("=" * 60)
         print(f"\nTitle: {args.title}")
         print(f"Description: {args.description}")
@@ -443,6 +474,20 @@ def main():
         print(f"\nSources: {len(sources)}")
         for stype, stitle, surl in sources:
             print(f"  - {stype}: {stitle}")
+        # Block plan with placeholder subpage URLs, so the hub layout can be
+        # checked (callout present or absent, byline, credit line) offline.
+        fake_subpages = [{"id": f"step-{i + 1}", "url": f"https://www.notion.so/step-{i + 1}"}
+                         for i in range(len(steps))]
+        hub_blocks = build_hub_blocks(
+            description=args.description, build_items=args.build_item,
+            audience_items=args.audience_item, nav_note=args.nav_note,
+            steps=steps, subpage_data=fake_subpages, sources=sources)
+        print(f"\nHub block plan ({len(hub_blocks)} blocks):")
+        for block in hub_blocks:
+            kind = block["type"]
+            inner = block.get(kind, {}) or {}
+            text = "".join(rt.get("text", {}).get("content", "") for rt in inner.get("rich_text", []))
+            print(f"  {kind:<20} {text[:70]}")
         print("\nNo changes made (dry run).")
         return
 
