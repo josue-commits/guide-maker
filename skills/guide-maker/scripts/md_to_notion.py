@@ -50,10 +50,12 @@ HTML_COMMENT_LINE = re.compile(r'^<!--.*-->$')
 
 # --- Configuration ---
 
-from _config import get_notion_token, get_content_board_db
+import os as _os
+sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from _config import get_content_board_db
+import _notion
+from _notion import NOTION_VERSION, NOTION_BASE  # re-exported for callers
 
-NOTION_VERSION = "2022-06-28"
-NOTION_BASE = "https://api.notion.com/v1"
 MAX_BLOCKS_PER_REQUEST = 100
 MAX_RICH_TEXT_LENGTH = 2000
 
@@ -96,25 +98,11 @@ def _normalize_code_lang(lang):
     return NOTION_CODE_LANG_ALIASES.get(key, "plain text")
 
 
-# --- HTTP helpers (stdlib only, no requests dependency) ---
+# --- HTTP helpers (stdlib only, shared in _notion.py) ---
 
 def notion_request(method, path, body=None):
-    """Make an authenticated request to the Notion API."""
-    url = f"{NOTION_BASE}{path}"
-    headers = {
-        "Authorization": f"Bearer {get_notion_token()}",
-        "Notion-Version": NOTION_VERSION,
-        "Content-Type": "application/json",
-    }
-    data = json.dumps(body).encode("utf-8") if body else None
-    req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8")
-        print(f"Notion API error {e.code}: {error_body}", file=sys.stderr)
-        raise
+    """Authenticated Notion request with retry. Kept as a thin alias."""
+    return _notion.request(method, path, body)
 
 
 # --- Rich text parsing ---

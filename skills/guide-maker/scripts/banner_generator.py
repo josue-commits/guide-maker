@@ -49,10 +49,8 @@ PURPLE = "#8033F4"
 
 # Notion + KieAI config loaded from config.yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _config import get_notion_token, get_kieai_key, get_brand_colors, load_config
-
-NOTION_BASE = "https://api.notion.com/v1"
-NOTION_VERSION_UPLOAD = "2025-09-03"
+from _config import get_kieai_key, get_brand_colors, load_config
+import _notion
 
 # KieAI config
 KIEAI_API_BASE = "https://api.kie.ai/api/v1"
@@ -493,54 +491,14 @@ def _download_and_crop(url, output_path):
 
 # --- Notion Upload ---
 
-def _notion_upload_request(method, path, body=None, headers_extra=None,
-                           raw_data=None, content_type=None):
-    """
-    Make a Notion API request with the file upload API version.
-    Separate from md_to_notion's notion_request to avoid changing its version.
-    """
-    url = f"{NOTION_BASE}{path}"
-    headers = {
-        "Authorization": f"Bearer {get_notion_token()}",
-        "Notion-Version": NOTION_VERSION_UPLOAD,
-    }
-
-    if content_type:
-        headers["Content-Type"] = content_type
-
-    if headers_extra:
-        headers.update(headers_extra)
-
-    if body and not raw_data:
-        headers["Content-Type"] = "application/json"
-        data = json.dumps(body).encode("utf-8")
-    elif raw_data:
-        data = raw_data
-    else:
-        data = None
-
-    req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8")
-        print(f"Notion API error {e.code}: {error_body}", file=sys.stderr)
-        raise
-
-
 def upload_banner_to_notion(file_path, page_id):
-    """
-    Upload a banner image and set it as a Notion page cover.
+    """Upload a banner image and set it as a Notion page cover.
 
-    Uses the Notion file upload API (requires Notion-Version: 2025-09-03).
+    Uses the shared file_upload helper in _notion.py (Notion-Version
+    2025-09-03 for the upload endpoints, see that module for why two API
+    versions coexist).
 
-    Args:
-        file_path: Path to the banner PNG file
-        page_id: Notion page ID to set the cover on
-
-    Returns:
-        True on success, False on failure
+    Returns True on success, False on failure.
     """
     if not os.path.exists(file_path):
         print(f"Error: File not found: {file_path}", file=sys.stderr)
@@ -548,61 +506,18 @@ def upload_banner_to_notion(file_path, page_id):
 
     filename = os.path.basename(file_path)
     file_size = os.path.getsize(file_path)
-
     print(f"Uploading banner to Notion page {page_id}...")
     print(f"  File: {filename} ({file_size:,} bytes)")
-
     try:
-        # Step 1: Create file upload object
-        print("  [1/3] Creating file upload...")
-        upload_result = _notion_upload_request("POST", "/file_uploads", {
-            "mode": "single_part",
-            "filename": filename,
-            "content_type": "image/png",
-        })
-        upload_id = upload_result["id"]
+        print("  [1/2] Uploading file...")
+        upload_id = _notion.upload_file(file_path, content_type="image/png")
         print(f"  Upload ID: {upload_id}")
-
-        # Step 2: Send the file (multipart/form-data)
-        print("  [2/3] Sending file...")
-        boundary = "----NotionBannerUpload"
-        with open(file_path, "rb") as f:
-            file_data = f.read()
-
-        # Build multipart body
-        body_parts = []
-        body_parts.append(f"--{boundary}".encode())
-        body_parts.append(
-            f'Content-Disposition: form-data; name="file"; filename="{filename}"'.encode()
-        )
-        body_parts.append(b"Content-Type: image/png")
-        body_parts.append(b"")
-        body_parts.append(file_data)
-        body_parts.append(f"--{boundary}--".encode())
-        multipart_body = b"\r\n".join(body_parts)
-
-        _notion_upload_request(
-            "POST",
-            f"/file_uploads/{upload_id}/send",
-            raw_data=multipart_body,
-            content_type=f"multipart/form-data; boundary={boundary}",
-        )
-        print("  File sent.")
-
-        # Step 3: Set as page cover
-        print("  [3/3] Setting as page cover...")
-        _notion_upload_request("PATCH", f"/pages/{page_id}", {
-            "cover": {
-                "type": "file_upload",
-                "file_upload": {"id": upload_id},
-            }
-        })
-
+        print("  [2/2] Setting as page cover...")
+        _notion.set_page_cover(page_id, upload_id)
         print(f"  Banner set as cover on page {page_id}")
         return True
-
-    except Exception as e:
-        print(f"Error uploading banner: {e}", file=sys.stderr)
+    except Exception as exc:
+        print(f"Error uploading banner: {exc}", file=sys.stderr)
         return False
 
 
