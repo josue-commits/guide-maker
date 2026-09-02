@@ -16,11 +16,15 @@
 - **Bad logo placement:** Be specific about layout in the prompt ("left side", "right side", "centered below text").
 
 ## Screenshots
-- **Full-page screenshots look zoomed out:** Never use `page.screenshot()` for the whole page. Use `element.screenshot()` on the specific element.
-- **Element not found:** Use `page.$$('img')` to list all images first, then pick the right index. Check `naturalWidth > 200` to filter out icons.
+- **Full-page screenshots look zoomed out:** Never capture the whole page. Capture the specific element.
+- **Element not found:** List all images on the page first (any browser automation tool can enumerate `img` elements), then pick the right one. Filter out icons by natural width (anything under 200px is decoration).
 - **Image is blurry or too small:** Try a larger viewport (`{ width: 1920, height: 1080 }`) or screenshot the parent container instead.
-- **dev-browser server won't start:** Run `./skills/dev-browser/server.sh &` and wait for `Ready`. If Playwright isn't installed, run `npx playwright install chromium` first.
 
 ## Content Board entries
 - **Curl fails with parentheses:** zsh interprets parentheses. Use /tmp/ JSON files for complex payloads instead of inline curl.
 - **Toggle blocks not rendering:** Ensure toggle headings use `is_toggleable: true` and children are nested inside the heading block.
+
+## Config
+- **`Config not found`:** Copy `config.example.yaml` to `config.yaml` in the skill directory, or point `GUIDE_MAKER_CONFIG` at a file anywhere. `config.json` with the same keys works when PyYAML is not installed.
+- **`unrecognized arguments`:** Run the script with `--help`. Every script documents its real flags; the docs in `references/` and `SKILL.md` match them.
+- **Fonts look wrong on the cover:** The bundled Inter font in `assets/fonts/` is used unless `brand.fonts.*` points somewhere else. If you see a bitmap font, the assets folder is missing.

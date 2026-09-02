@@ -26,6 +26,8 @@ If it doesn't exist:
 
 Once config.yaml exists, load it at the start of every run. Use the values throughout the pipeline.
 
+Resolve `SKILL_DIR` (the absolute path of this skill folder) once and pass it into every spawn prompt and every script call. The working directory is the project root, not the skill, so relative `scripts/...` paths fail.
+
 ---
 
 ## Pipeline Overview
@@ -53,7 +55,7 @@ When the user asks "find me a topic", "what's trending", or "what should I write
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="Read AGENT.md in this skill's directory for your full instructions. Run Phase 0: Topic Research. Scan YouTube channels for the last 7 days and produce a ranked topic briefing. Previously published guides to exclude: [list any known published guides]. Return the briefing.",
+  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR} (absolute path of this skill). Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Run Phase 0: Topic Research. Scan YouTube channels for the last 7 days and produce a ranked topic briefing. Previously published guides to exclude: [list any known published guides]. Return the briefing.",
   run_in_background=true
 )
 ```
@@ -72,7 +74,7 @@ When the user provides a YouTube URL, transcript, or topic:
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="Read AGENT.md in this skill's directory for your full instructions. Run Phase 1: Research + Outline. Source material: [URL/transcript/topic]. Return the outline, guide type classification, proposed keyword, and notes about source quality.",
+  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR} (absolute path of this skill). Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Run Phase 1: Research + Outline. Source material: [URL/transcript/topic]. Return the outline, guide type classification, proposed keyword, and notes about source quality.",
   run_in_background=true
 )
 ```
@@ -105,7 +107,7 @@ After the user approves the outline:
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="Read AGENT.md in this skill's directory for your full instructions. Run Phase 2: Write Everything. Config: [pass relevant config values]. Approved outline: [paste outline]. Keyword: [KEYWORD]. Write the full guide (hub + subpages), LinkedIn copy for each account, and DM templates. Return all content.",
+  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR} (absolute path of this skill). Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Run Phase 2: Write Everything. Config: [pass relevant config values]. Approved outline: [paste outline]. Keyword: [KEYWORD]. Write the full guide (hub + subpages), LinkedIn copy for each account, and DM templates. Return all content.",
   run_in_background=true
 )
 ```
