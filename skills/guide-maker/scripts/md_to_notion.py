@@ -109,7 +109,7 @@ NOTION_CODE_LANGS = {
 NOTION_CODE_LANG_ALIASES = {
     "js": "javascript", "jsx": "javascript", "mjs": "javascript",
     "ts": "typescript", "tsx": "typescript", "py": "python", "py3": "python",
-    "sh": "bash", "zsh": "bash", "shell-session": "shell", "console": "shell",
+    "sh": "shell", "zsh": "shell", "shell-session": "shell", "console": "shell",
     "text": "plain text", "txt": "plain text", "plaintext": "plain text",
     "": "plain text", "yml": "yaml", "dockerfile": "docker", "md": "markdown",
     "node": "javascript", "jsonc": "json", "json5": "json", "env": "bash",

@@ -346,8 +346,8 @@ def load_config(path=None):
     raw = _read_file(found)
     if is_v1(raw):
         if not _deprecation_printed:
-            print(f"[guide-maker] {found} uses the v1 flat config format; loading "
-                  "through the compatibility shim. Run scripts/doctor.py "
+            print(f"[guide-maker] {found} uses the deprecated v1 flat config format; "
+                  "loading through the compatibility shim. Run scripts/doctor.py "
                   "--migrate-config to print the v2 file.", file=sys.stderr)
             _deprecation_printed = True
         raw = migrate_v1(raw)
