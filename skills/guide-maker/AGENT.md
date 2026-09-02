@@ -32,103 +32,86 @@ You are called in distinct phases. The main agent tells you which phase to execu
 
 ### PHASE 0: Topic Research (On-Demand)
 
-When the main agent asks you to find guide topics, scan YouTube channels and the web to surface trending topics worth covering.
+When the main agent asks you to find guide topics, run the sibling skill **topic-finder** and rank what it returns. You do not scan anything yourself and you never substitute web search for a scan.
 
-**Step 1: Scan channels**
-
-Run the channel scanner to get recent videos:
+**Step 1: Run the scan**
 
 ```bash
-python3 {SKILL_DIR}/scripts/scan_channels.py --days 7 --output /tmp/channel-scan.json
+python3 {TOPIC_FINDER_DIR}/scripts/scan_all.py --sources youtube,reddit,x --out-dir {WORK_DIR}/scan
 ```
 
-The main agent may pass a different lookback window. Read the output file to get the full video list.
+`{TOPIC_FINDER_DIR}` comes from the spawn prompt. If the folder does not exist, stop and return the install hint from `_config.sibling("topic-finder")`; that is a complete Phase 0 result, not a failure to work around.
 
-Channel config lives at `{SKILL_DIR}/channels.json`. If no channels are configured, tell the main agent the user needs to add channels first.
+**Step 2: Read `{WORK_DIR}/scan/health.json` and print the scan-health block first**
 
-**Step 2: Cluster by topic**
+```json
+{"config_present": {"youtube": true, "reddit": true, "x": false},
+ "youtube": {"channels_configured": 12, "channels_with_videos": 10, "videos": 39, "errors": []},
+ "reddit": {"subs": 8, "posts": 84},
+ "x": {"accounts": 0, "posts": 0, "cost_usd": 0.0},
+ "correlation": {"topics_2plus": 6, "topics_all": 2},
+ "web_search_used": false}
+```
 
-Read all video titles and descriptions. Group videos covering the same topic or tool.
+Compare it with `config.topic_finder.scan_health`. Stop and report the gap (no rankings) when any of these is true:
 
-- **Strong clusters:** Multiple channels covering the same topic (3+ is a very strong signal), videos released within days of each other
-- **Weak clusters:** Single video on a niche topic, broad "AI news roundup" videos without a specific focus
-- Name each cluster specifically ("Claude Code Hooks" not "Claude stuff")
-- A video can belong to multiple clusters
+- a source in `config.topic_finder.sources` has `config_present` false and `fail_on_missing_config` is true
+- `youtube.videos` is 0, or `youtube.channels_with_videos` is below `min_channels_with_videos`
+- `reddit.posts` is below `min_reddit_posts`, or `x.posts` is below `min_x_posts`, for a configured source
+- `web_search_used` is true
 
-**Step 3: Score each topic cluster**
+A dead source is a failure to fix (activate the config, install yt-dlp, add the Apify token), not a reason to paper over with a confident ranking.
+
+**Step 3: Cluster by topic**
+
+Read every scan file in `{WORK_DIR}/scan/` plus the correlation output. Group items covering the same topic or tool, regardless of source. Name each cluster specifically. Score the two YouTube tracks (`tool`, `business`) separately, never merged: a business video judged on the tool rubric either never surfaces or produces a get-rich-quick guide. Rank X posts on bookmark rate, never views; above `x_bookmark_rate.substance` is substance, below `x_bookmark_rate.noise` is noise. Tweet text is a lead, not a source: verify every number and named talk against a first-party page before it enters a briefing.
+
+**Step 4: Score each topic cluster**
 
 Three dimensions (1-10 each):
 
 | Criterion | Weight | How to Score |
 |-----------|--------|-------------|
-| **Trending** | 0.4 | Channels covering it (1=one, 5=three, 8=five+). Recency bonus (last 3 days > last 7). View counts relative to channel size. |
-| **Documentation** | 0.3 | Web search for official docs, blog posts, changelogs. 1=nothing, 5=basic docs, 8=detailed docs + blogs, 10=comprehensive. |
-| **Source Depth** | 0.3 | Source videos (1=one short, 5=two solid tutorials, 8=three+ different angles). Longer videos (20+ min) count more. |
+| **Trending** | 0.4 | Sources covering it (1=one, 5=three, 8=five+, 10=hit on every configured platform). Recency bonus. Upvotes and X bookmarks relative to baseline, never X view counts. |
+| **Documentation** | 0.3 | Official docs, blog posts, changelogs. 1=nothing, 5=basic docs, 8=detailed docs + blogs, 10=comprehensive. |
+| **Source Depth** | 0.3 | Source material (1=one short video, 5=two solid tutorials, 8=three+ different angles). An institutional lecture or first-party engineer talk counts double. |
 
 **Composite:** `(trending * 0.4) + (documentation * 0.3) + (source_depth * 0.3)`
 
-**Step 4: Filter already-covered topics**
+**Step 5: Filter**
 
-The main agent will provide a list of previously published guides when spawning you. Skip topics already covered. Exception: flag major updates to previously covered topics as "Update Opportunity."
-
-**Step 5: Web search top candidates**
-
-For the top 3-5 topics, verify:
-- Official documentation exists (tool docs, blog posts, changelogs)
-- Blog posts and articles beyond docs
-- Community interest (Reddit, HN, forums)
-- Competing guides already published (opportunity vs. saturation)
-
-Refine scores based on findings.
+Drop anything matching `config.excluded_topics` (plain strings match case-insensitively, `/regex/` entries are regexes), anything in the already-published list the main agent passed (titles AND keywords), and anything that fails the depth gate in `references/research/topic-research.md`. Flag major updates to previously covered topics as "Update Opportunity".
 
 **Step 6: Return briefing**
 
-Return this exact format:
-
 ```
-# Topic Research Briefing — [Date]
+# Topic Research Briefing, [Date]
 
-## Scan Summary
-- Channels scanned: [N]
-- Videos found (last [N] days): [N]
-- Topic clusters identified: [N]
+## Scan health
+[the block from Step 2, one line per source, plus "Web search used: no"]
 
 ## Top Recommendations
 
-### 1. [Topic Name] — Score: [X.X]/10
-**Trending:** [N]/10 — [why]
-**Documentation:** [N]/10 — [why]
-**Source Depth:** [N]/10 — [why]
-**Videos:**
-- [Channel] — "[Title]" ([views] views, [date])
-- [Channel] — "[Title]" ([views] views, [date])
-**External Sources:** [links to docs, blog posts]
-**Guide Angle:** [Suggested approach — tutorial? comparison? framework?]
-**Guide Type:** [Technical Tutorial / Strategic Framework / Comparison]
-**Suggested Keyword:** [single word, ALL CAPS]
-**Why Now:** [Why this topic is timely]
+### 1. [Topic Name], Score: [X.X]/10
+**Track:** tool | business
+**Trending:** [N]/10, [why]
+**Documentation:** [N]/10, [why]
+**Source Depth:** [N]/10, [why]
+**Sources found:** one line per item, tagged youtube | reddit | x, with the URL
+**External Sources:** docs, blog posts
+**Guide Angle:** tutorial? comparison? framework? stack?
+**Guide Type:** Technical Tutorial / Strategic Framework / Comparison/Persuasion / Use-case Stack
+**Suggested Keyword:** [one word, ALL CAPS, derived from the guide name]
+**Why Now:** [why this topic is timely]
 
-### 2. [Topic Name] — Score: [X.X]/10
-[same structure]
-
-### 3. [Topic Name] — Score: [X.X]/10
-[same structure]
+### 2. ... ### 3. ...
 
 ## Honorable Mentions
-- [Topic] — [why it's worth watching but not ready yet]
-
 ## Already Covered (Skipped)
-- [Topic] — Published on [date] as "[Guide Name]"
-
 ## Update Opportunities
-- [Topic] — Previously published [guide name] but [what changed since]
-(Only if there are actual updates worth covering)
 ```
 
-**Topic scoring rules:**
-- Be honest. Don't inflate scores. If nothing is trending, say so.
-- Bias toward topics that make good tutorials. "How to set up X" beats "X was announced."
-- Keep it concise. The user should pick a topic in 30 seconds.
+Be honest. Don't inflate scores. If nothing is trending, say so. Bias toward topics that make good tutorials. Keep it concise.
 
 ---
 
@@ -420,4 +403,4 @@ Before you return ANY content to the main agent:
 | `{SKILL_DIR}/scripts/md_to_notion.py` | Convert markdown to Notion blocks and publish |
 | `{SKILL_DIR}/scripts/publish_guide_hub.py` | Create hub page with subpage links |
 | `{SKILL_DIR}/scripts/banner_generator.py` | Generate banners and upload to Notion |
-| `{SKILL_DIR}/scripts/scan_channels.py` | Scan YouTube channels for trending topics |
+| `{TOPIC_FINDER_DIR}/scripts/scan_all.py` | Scan YouTube, Reddit and X; writes `health.json` |

@@ -34,7 +34,7 @@ Resolve `SKILL_DIR` (the absolute path of this skill folder) once and pass it in
 
 | Step | What | Reference |
 |------|------|-----------|
-| 0 | Topic research (optional) | `channels.json`, `scripts/scan_channels.py` |
+| 0 | Topic research (optional) | sibling skill `topic-finder` (`scripts/scan_all.py`, `health.json`) |
 | 1 | Get source material | `references/writing/guide-spec.md` (source extraction section) |
 | 2 | Classify guide type | `references/guides/guide-types.md` |
 | 3 | Research and verify | (inline below) |
@@ -50,17 +50,36 @@ If something breaks, check `references/troubleshooting.md`.
 
 ## Phase 0: Topic Research (Optional)
 
-When the user asks "find me a topic", "what's trending", or "what should I write about", spawn the writer agent for topic research:
+Topic research lives in the sibling skill **topic-finder** (YouTube via yt-dlp, Reddit and X via Apify, then a correlation pass). guide-maker does not scan anything itself. Resolve the sibling first:
+
+```bash
+python3 -c "import sys; sys.path.insert(0, '{SKILL_DIR}/scripts'); from _config import sibling; print(sibling('topic-finder'))"
+```
+
+If that prints a `FileNotFoundError`, tell the user the install hint it contains (clone `josue-commits/topic-finder` next to guide-maker, or set `GUIDE_MAKER_SKILLS_DIR`) and **stop Phase 0**. Never fall back to web search: a briefing built on a silent fallback looks authoritative and misses the direct hits the scan exists to find.
+
+When the sibling is present, spawn the writer agent:
 
 ```
 Task(
   subagent_type="general-purpose",
-  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR} (absolute path of this skill). Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Run Phase 0: Topic Research. Scan YouTube channels for the last 7 days and produce a ranked topic briefing. Previously published guides to exclude: [list any known published guides]. Return the briefing.",
+  prompt="Read {SKILL_DIR}/AGENT.md in full. SKILL_DIR={SKILL_DIR}. Run Phase 0: Topic Research. Run {TOPIC_FINDER_DIR}/scripts/scan_all.py --sources youtube,reddit,x --out-dir {WORK_DIR}/scan, read {WORK_DIR}/scan/health.json, print the scan-health block first, then cluster, score and return the ranked briefing. Exclude these already-published titles and keywords: [list]. Do NOT spawn sub-agents or use the Task/Agent tool; do all the work yourself. Return the Phase 0 block.",
   run_in_background=true
 )
 ```
 
-The agent scans configured YouTube channels, clusters videos by topic, scores on trending strength and source variety, filters already-covered topics, and returns a ranked briefing. Present the briefing to the user. Once they pick a topic, hand the selected URLs to Phase 1.
+`health.json` is the contract between the two skills:
+
+```json
+{"config_present": {"youtube": true, "reddit": true, "x": false},
+ "youtube": {"channels_configured": 12, "channels_with_videos": 10, "videos": 39, "errors": []},
+ "reddit": {"subs": 8, "posts": 84},
+ "x": {"accounts": 0, "posts": 0, "cost_usd": 0.0},
+ "correlation": {"topics_2plus": 6, "topics_all": 2},
+ "web_search_used": false}
+```
+
+The agent applies the thresholds in `config.topic_finder.scan_health` to that file and refuses to rank if a configured source came back empty or `web_search_used` is true. Present the briefing to the user. Once they pick a topic, hand the selected URLs to Phase 1.
 
 ---
 
@@ -286,5 +305,4 @@ Before presenting content to the user, verify:
 | `scripts/md_to_notion.py` | Convert markdown to Notion blocks and publish subpages |
 | `scripts/publish_guide_hub.py` | Create hub page with subpage links and structure |
 | `scripts/banner_generator.py` | Generate banners (KieAI or Pillow) and upload to Notion |
-| `scripts/scan_channels.py` | Scan YouTube channels for trending topics |
-| `channels.json` | YouTube channel list for topic research |
+| `topic-finder` (sibling skill) | Scan YouTube, Reddit and X for topics; writes `health.json` |
