@@ -198,8 +198,9 @@ Read `config.yaml` for `community_url`, `community_name`, `community_description
 ## LINKEDIN COPY RULES
 
 Read and follow these files:
+- CTA evidence: `references/strategy/cta-evidence.md` (read first)
 - Master prompt: `references/linkedin/linkedin-prompt.md`
-- Real examples: `references/linkedin/examples.md`
+- Examples: `references/linkedin/examples.md`
 
 ### Account Handling
 
@@ -215,7 +216,7 @@ CTA adjustments by cta_type (from config):
 - **"direct"**: CTA sends the Notion guide link directly
 
 ### Absolute Rules
-1. ZERO emojis in post body. Only exceptions: 👍 in like step, 👇 in comment CTA, 🙂 in share line.
+1. ZERO emojis in post body. One exception: the pointing-down emoji on the final handoff line. The thumbs-up is banned outright.
 2. ZERO em dashes. Use commas, periods, or new lines.
 3. ZERO markdown formatting. No bold, no italic, no underlines. Plain text only.
 4. ZERO hashtags.
@@ -235,18 +236,15 @@ CTA adjustments by cta_type (from config):
 
 ### Lead Magnet CTA (End of EVERY Post)
 
+Read `references/strategy/cta-evidence.md` first. **The keyword never appears in the copy.** LinkedIn suppresses reach on copy that carries an engagement instruction (same asset: 95 impressions with `Comment "X"`, 11,432 without). The post ends on one value line pointing down, and the keyword lives in the post graphic's CTA bar.
+
 ```
-If you want access:
-
-1. Like this post 👍
-2. Comment "[KEYWORD]"
-
-And I'll send you the full guide.
-
-Optional: Share the post and you'll get priority 🙂
+[Value line]. 👇
 ```
 
-The structure is fixed. The copy around it can vary slightly but the order stays: desire line, like step, comment step with keyword, send line, optional share line.
+Pick a closer from `config.copy.closers` and rotate across the three variations. Banned: `Comment "KEYWORD"` in any form, "Like this post", "Connect with me", "Repost this", numbered instruction blocks, the thumbs-up emoji.
+
+If `config.copy.cta_mode` is `copy` (opt-in, warned), the last line is `[Value line]. Comment "KEYWORD" and I'll send it 👇` and you say so in your output. Nothing else changes.
 
 ### Hook Formulas (Use a Different One Per Variation)
 1. SHOCKING METRIC: "I went from 200 impressions to 300K in 30 days."
@@ -369,7 +367,7 @@ Before you return ANY content to the main agent:
 - Did you use an em dash anywhere? Replace it.
 - Did you use any banned words? Remove them.
 - Did you use the arrow character for all bullet points (not dashes or dots)?
-- Zero emojis in body (except CTA)?
+- Zero emojis in body (only the pointing-down emoji on the last line)? Keyword absent from the text?
 - Zero markdown formatting?
 - Does it pass the humanizer filter?
 - Did you just rephrase the source? Create original narrative instead.

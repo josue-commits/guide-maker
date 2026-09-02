@@ -264,14 +264,14 @@ Before presenting content to the user, verify:
 
 **LinkedIn copy:**
 - Each variation is 250-350 words
-- Zero emojis in body (except CTA)
+- Zero emojis in body (only the pointing-down emoji on the last line)
 - Zero em dashes
 - Zero markdown formatting
 - Zero hashtags
 - Uses arrow character for all bullet points
 - 3 variations are genuinely different angles (Story, Problem/Pain, Data/Framework)
 - No banned vocabulary or phrases
-- CTA follows the exact structure (like, comment keyword, send line, optional share)
+- CTA is one value line ending on the pointing-down emoji; the keyword is absent from the text (it lives in the post graphic, see `references/strategy/cta-evidence.md`)
 
 **DM templates:**
 - Personalized with guide topic
