@@ -220,19 +220,21 @@ CTA adjustments by cta_type (from config):
 2. ZERO em dashes. Use commas, periods, or new lines.
 3. ZERO markdown formatting. No bold, no italic, no underlines. Plain text only.
 4. ZERO hashtags.
-5. Use the arrow character for ALL bullet points. Never dashes or dots for lists.
-6. 250-350 words per post. Under 200 or over 400 gets rejected.
+5. Use the arrow character for ALL bullet points, and only for a genuine framework. Prose is the default.
+6. 180-250 words per post, target 215 (`copy.words`). Under 140 or over 300 gets rejected.
 7. Each line earns its place. Never repeat the same point twice.
 8. End naturally with a question or genuine reflection. Never with a cliche lesson or summary.
 9. Be SPECIFIC. Real numbers, real steps, real costs, real scenarios. Never vague.
 10. Tell stories with EVENTS. Walk the reader through things that happened. No abstract reflections.
 
-### 3 Variations (Mandatory Differentiation)
-- **Variation 1 (STORY):** Pick ONE specific moment or event. Tell it with events, dialogue, timeline. Build tension. Reveal result at the end.
-- **Variation 2 (PROBLEM/PAIN):** Start with the frustration, the old way, what's broken. Show contrast with "The old way / The new way" structure.
-- **Variation 3 (DATA/FRAMEWORK):** Lead with results or a named framework ("The [X] Method"). Break down the system with arrow-character bullets. Include specific metrics.
+### 3 Variations (Different HOOKS, same 8-beat skeleton)
 
-**Exception for personal posts:** All 3 variations use flowing sentences (NO bullets, NO arrows, NO lists). Differentiate through: variation 1 = one pivotal moment told deeply, variation 2 = the struggle/dark times angle, variation 3 = the transformation arc with specific milestones.
+Default structure is the prose 8-beat essay in `references/linkedin/linkedin-prompt.md` (`copy.structure: prose`). All three variations use it and differ by hook angle, one per entry in `config.copy.hooks`:
+- **contrarian**: challenge an assumption ("Your CRM is a system of guilt.")
+- **problem_pain**: the frustration and the old way, then the pivot ("You have 40 summaries you never opened.")
+- **quantity_build**: a concrete artifact and a number ("I gave an agent 14 reports and went to lunch.")
+
+Label each variation with its hook type. Rotate the closer: three different closers across the three variations, chosen from `config.copy.closers`, avoiding the ones in the recent closer log the main agent passes you.
 
 ### Lead Magnet CTA (End of EVERY Post)
 
@@ -261,7 +263,7 @@ NEVER start with: "I built a [thing] that [does thing]. Here's how." or "Let me 
 ### Delivery Format
 
 For each account, deliver all 3 variations as toggle blocks:
-- Toggle title = angle name ("Story Angle", "Problem/Pain Angle", "Data/Framework Angle")
+- Toggle title = hook type ("Contrarian Hook", "Problem/Pain Hook", "Quantity/Build Hook")
 - Toggle content = code block (plain text) for easy copy/paste
 
 ### Style Preferences
@@ -362,11 +364,11 @@ Before you return ANY content to the main agent:
 - Did you use an em dash anywhere? Replace with period or comma.
 
 **For LinkedIn copy:**
-- Is each variation 250-350 words?
+- Is each variation 180-250 words (reject under 140 or over 300)?
 - Are the 3 variations genuinely different angles (not rephrased versions of each other)?
 - Did you use an em dash anywhere? Replace it.
 - Did you use any banned words? Remove them.
-- Did you use the arrow character for all bullet points (not dashes or dots)?
+- Any bullets at all? Only for a genuine framework, and then with the arrow character.
 - Zero emojis in body (only the pointing-down emoji on the last line)? Keyword absent from the text?
 - Zero markdown formatting?
 - Does it pass the humanizer filter?

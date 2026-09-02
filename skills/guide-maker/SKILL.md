@@ -227,7 +227,7 @@ For each configured account:
 3. Add DM templates below a divider
 
 Toggle format:
-- Toggle title = angle name ("Story Angle", "Problem/Pain Angle", "Data/Framework Angle")
+- Toggle title = hook type ("Contrarian Hook", "Problem/Pain Hook", "Quantity/Build Hook")
 - Toggle content = code block (plain text) for easy copy/paste
 
 DM template format:
@@ -263,13 +263,13 @@ Before presenting content to the user, verify:
 - Title compelling enough to make someone comment on LinkedIn
 
 **LinkedIn copy:**
-- Each variation is 250-350 words
+- Each variation is 180-250 words (reject under 140 or over 300)
 - Zero emojis in body (only the pointing-down emoji on the last line)
 - Zero em dashes
 - Zero markdown formatting
 - Zero hashtags
-- Uses arrow character for all bullet points
-- 3 variations are genuinely different angles (Story, Problem/Pain, Data/Framework)
+- Prose by default; arrow bullets only for a genuine framework
+- 3 variations are genuinely different hooks (contrarian, problem/pain, quantity/build) on the prose 8-beat skeleton
 - No banned vocabulary or phrases
 - CTA is one value line ending on the pointing-down emoji; the keyword is absent from the text (it lives in the post graphic, see `references/strategy/cta-evidence.md`)
 

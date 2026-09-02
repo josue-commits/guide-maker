@@ -9,7 +9,7 @@ After publishing the guide, generating the banner, and embedding screenshots, cr
 Create one entry per account (accounts from config.yaml). Each entry contains:
 
 ### LinkedIn Copy (3 toggle blocks)
-- Toggle title = angle name: "Story Angle", "Problem/Pain Angle", "Data/Framework Angle"
+- Toggle title = hook type: "Contrarian Hook", "Problem/Pain Hook", "Quantity/Build Hook"
 - Toggle content = code block (plain text) for easy copy/paste
 - CTA pre-baked per account:
   - Primary account (owner): community link (if configured in config.yaml)

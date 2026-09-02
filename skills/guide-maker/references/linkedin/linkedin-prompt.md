@@ -35,18 +35,35 @@ NEVER start with: "I built a [thing] that [does thing]. Here's how." or "Let me 
 
 ---
 
-## COPY STRUCTURE
+## COPY STRUCTURE (default: prose, `copy.structure: prose`)
 
-Each of the 3 variations must use a genuinely different HOOK. The body stays the same shape (context block, arrow list, bridge, CTA). Differentiate through the opening, not the format.
+A short prose essay that teaches an insight and does not sell the guide until the last line. The guide is invisible until the final CTA. Do not say "I made a guide about X" up top. The three synthetic posts in `examples.md` show the shape.
 
-### Post Body Structure (all 3 variations)
-1. **Hook** (1-2 lines): specific claim, MUST name the tool in line 1
-2. **Context block** (2-4 lines): WHY this matters
-3. **Arrow list** (5-8 bullets with →): what the READER gets from the guide. Each bullet names a specific deliverable. Not what you built for yourself.
-4. **Bridge line** (1 line): reframes value for the reader
-5. **Soft handoff**: one value line ending in the pointing-down emoji. No keyword, no instructions. See the CTA section below.
+**The 8 beats (target 215 words, range 180-250):**
+1. **Problem-flaw hook**, 1 line. Name the tool or the reader's situation plus a blunt weakness ("[Tool] has a slop problem." / "Your CRM is a system of guilt."). A real flaw, not a feature.
+2. **Make the pain concrete**, 1 short paragraph. Specific everyday examples, short sentences, land a twist.
+3. **Insight reframe.** A transition that gives instead of sells, varied each time ("Here's the thing nobody says out loud." / "Here's what nobody admits."). Then teach the non-obvious truth.
+4. **Philosophy / authority beat.** Relatable wisdom, often a three-beat rhythm ("It reads the thread. It decides if the stage moved. It logs the reason.").
+5. **Introduce the tool or mechanism MID-POST**, never in the hook body. Explain it plainly: the gate, the loop, the one prompt.
+6. **Hard proof line.** Real numbers from real use. One line, not a metrics dump.
+7. **Personality kicker**, plus a reassurance if relevant ("Nothing about the meetings got better. The notes just started doing something.").
+8. **Soft CTA**, one closer ending on the pointing-down emoji (next section).
 
-Arrow bullets describe what the READER learns from the guide, NOT what you built for yourself. "How to set up X step by step", not "My agent does X for me." Personal examples can appear for credibility (1-2 lines max in the context block) but the body sells the guide to the reader.
+**Prose, not lists.** Use a → arrow list ONLY when the content is a genuine framework (e.g. "the four levels"). A stack of "what the guide covers" bullets is the legacy format's tell and reads as an ad.
+
+### Hook taxonomy (`copy.hooks`, one per variation)
+
+All three variations share the 8-beat skeleton and differ by hook angle:
+
+- **contrarian**: "Most people X wrong" / "X's biggest weakness is Y" / "Your CRM is a system of guilt." Challenge an assumption. The safest default.
+- **problem_pain**: "You have 40 summaries you never opened" / "X is burning through Y" / before-after. Show the old way's pain, then pivot. The "The old way: / The new way:" pair fits here.
+- **quantity_build**: "I gave an agent 14 reports and went to lunch" / "I compiled 40+ X" / shocking number + free offer. Lead with a concrete artifact.
+
+Multipliers you may have seen attached to these ("contrarian = 1.83x") come from one account's pre-change data and are unverified. Treat the taxonomy as three angles to differentiate, not as a ranking.
+
+### Legacy structure (`copy.structure: arrow_list`)
+
+Kept for pure listicle guides ("14 automations"). Hook (names the tool), context block (2-4 lines), 5-8 → bullets describing what the READER gets (never what you built for yourself), bridge line, soft CTA. Same CTA rule, same word range. If your draft is hook + bullet stack + instruction block, you picked the wrong format and the wrong CTA.
 
 ---
 
@@ -90,7 +107,7 @@ Use exactly that shape, still one line, still ending on the pointing-down emoji.
 3. ZERO markdown formatting. No bold, no italic, no headings. Plain text only.
 4. ZERO hashtags.
 5. Use → for ALL bullet points. Never dashes or dots.
-6. 250-350 words per variation. Reject under 200 or over 400.
+6. 180-250 words per variation, target 215; reject under 140 or over 300 (`copy.words`). This is an editorial preference, not a performance finding: strong posts exist at 170 and at 330 words. Shorter is the house default because every longer range drifted to its ceiling.
 7. Every line must earn its place. If a paragraph does not add new information, cut it.
 8. End naturally. Never with a cliche lesson or a summary.
 9. Be SPECIFIC. Real numbers, real steps, real costs, real scenarios.

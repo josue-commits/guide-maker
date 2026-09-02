@@ -1,144 +1,91 @@
-# Voice Calibration Examples
+# Copy Examples (synthetic)
 
-These example posts demonstrate the LinkedIn copy framework in action. Study the structure, rhythm, and tone. Each follows the rules: zero emojis in body, zero em dashes, zero markdown, zero hashtags, → for bullets, 250-350 words. All end with the lead magnet CTA format.
+**Replace these with 5-10 of your own posts.** These three are synthetic, written to show the house structure on generic topics. They are voice and shape references, not proof of performance. Once you have posts that worked, put them in `top-performers.md` and the writer agent will match those first.
 
----
-
-## Example 1: Story Angle (DIALOGUE OPENER hook, ~280 words)
-
-"Can you follow up with the 47 leads from last week?" my ops manager asked.
-
-I looked at my inbox. Then at my calendar. Then back at the inbox.
-
-"I'll get to it," I said. Knowing I wouldn't.
-
-That was a Tuesday. By Friday, 31 of those leads had gone cold. Two signed with a competitor. The other 14? No idea. They just vanished into the void of "I'll follow up tomorrow."
-
-So I spent the weekend building something.
-
-An AI agent that monitors new leads, waits 4 minutes after they submit a form, then sends a personalized follow-up based on what they told us.
-
-Not a template. Not a "Hi {first_name}" mail merge.
-
-It pulls their company size, industry, and the specific service they asked about. Then it writes a response that sounds like I actually read their submission. Because the agent did.
-
-Monday morning. 22 new leads came in overnight.
-
-By the time I opened my laptop, all 22 had received follow-ups. 6 had already replied. 2 booked calls.
-
-I spent zero minutes on follow-ups that week. Zero.
-
-The week before, I'd spent about 4 hours and still missed half of them.
-
-Here's what changed in the numbers:
-
-→ Response time: 24-48 hours down to 4 minutes
-→ Follow-up completion rate: ~50% up to 100%
-→ Booked calls from inbound: 3/week up to 9/week
-→ My time spent: 4 hours down to 0
-
-The leads didn't get better. The speed did.
-
-If you want access:
-
-1. Like this post 👍
-2. Comment "[KEYWORD]"
-
-And I'll send you the full guide.
-
-Optional: Share the post and you'll get priority 🙂
+Each one: prose 8-beat structure, tool named in line 1, 180-250 words, zero emojis in the body, zero em dashes, zero markdown, zero hashtags, no keyword anywhere in the text, one closer ending on the pointing-down emoji. All three pass `scripts/lint_copy.py copy`.
 
 ---
 
-## Example 2: Problem/Pain Angle (BRUTAL REALITY hook, ~290 words)
+## Example 1: Contrarian hook (a CRM automation, 231 words)
 
-80% of leads go cold because you're too slow. Not because your offer is bad.
+```
+Your CRM is not a system of record. It is a system of guilt.
 
-The average small business takes 47 hours to respond to an inbound lead. By then, the prospect has already talked to 2-3 competitors. They've probably already made a decision.
+Every rep knows the drill. Call ends, you promise yourself you will log it, three calls later the notes are gone and the deal stage is whatever it was last Tuesday. The pipeline review on Friday is a fiction everybody agrees to read out loud.
 
-You lost before you even showed up.
+Here's the thing nobody says out loud: the CRM was never going to get updated by the people it was built to measure. The incentive runs the wrong way.
 
-The old way:
-→ Lead comes in at 9pm
-→ You see it the next morning
-→ You add it to your "follow up" list
-→ Three days later you send a generic email
-→ No reply. Lead is dead.
+So I stopped asking. I wired a small agent between the inbox, the calendar and the CRM. Every reply, every booked call, every no-show now moves the deal stage on its own and writes a two-line note about what happened.
 
-The new way:
-→ Lead comes in at 9pm
-→ AI agent responds in under 5 minutes
-→ Personalized message based on their actual submission
-→ Books a call if they're qualified
-→ You wake up to a meeting on your calendar
+It reads the thread. It decides if the stage moved. It logs the reason. I never touch a field.
 
-Same lead. Same offer. Completely different outcome.
+Four weeks in: 312 activities logged without a human, 0 deals sitting in a stage they had already left, and the Friday review took eleven minutes instead of forty.
 
-I watched this happen with a roofing company last month. They were getting 40+ leads a week from their Google Ads. Closing maybe 4. Not because their work was bad. They just couldn't keep up with the volume.
+The reps did not become more disciplined. The work just stopped depending on them.
 
-We set up an AI text agent that responded to every lead within 3 minutes. Asked qualifying questions. Filtered out tire-kickers. Booked estimates for the real ones.
+I wrote up the whole setup: the three triggers, the stage rules, the prompt that decides when a deal is stuck, and the one guardrail that keeps it from closing deals that are not closed.
 
-First week: 11 booked estimates instead of 4.
-
-Same ad spend. Same leads. Just faster.
-
-The gap between "interested" and "moved on" is about 5 minutes. That's not a metaphor. It's what the data shows.
-
-Speed is the easiest competitive advantage most businesses ignore. Because it feels like it should be harder than this.
-
-If you want access:
-
-1. Like this post 👍
-2. Comment "[KEYWORD]"
-
-And I'll send you the full guide.
-
-Optional: Share the post and you'll get priority 🙂
+I'm giving away the complete guide for free 👇
+```
 
 ---
 
-## Example 3: Data/Framework Angle (TIME COMPRESSION hook, ~275 words)
+## Example 2: Problem/pain hook (a meeting-notes workflow, 226 words)
 
-I set up an AI workflow in 45 minutes that now saves me 15 hours every week.
+```
+You have 40 meeting summaries in a folder you have never opened.
 
-Not an exaggeration. I tracked it.
+Every notetaker records the call. Every notetaker writes the summary. Then the summary sits in a tab, the action items sit under it, and by Thursday nobody remembers who owed what to whom.
 
-I call it The Intake Stack. Three AI agents working together to handle everything that happens between "new lead" and "booked call."
+The old way: record, summarize, forget.
 
-Here's the breakdown:
+The new way: record, summarize, route.
 
-→ Agent 1: The Qualifier
-Reads every form submission. Checks company size, budget range, timeline. Scores them 1-10. Anything under 6 gets a polite "not right now" email. Anything 6+ moves forward.
+Here's what nobody admits. The value of a meeting note is not the note. It is the follow-up that happens because of it. A summary that creates zero tasks is a transcript with better formatting.
 
-→ Agent 2: The Researcher
-Takes qualified leads and spends 90 seconds pulling context. Recent news, LinkedIn activity, tech stack from their website. Feeds it to Agent 3.
+So I built a small routing step that runs after every call. It reads the summary, pulls out anything with a name and a verb, creates the task in the tool the team already checks, and drafts the follow-up email in the same thread the meeting came from.
 
-→ Agent 3: The Booker
-Sends a personalized follow-up within 5 minutes. Includes a calendar link. Handles objections. Follows up twice if no response.
+Read. Extract. Route. Draft.
 
-The numbers after 30 days:
+Two weeks of data: 27 calls, 61 action items created automatically, 58 of them closed by the owner without a reminder. Before this we were closing about a third.
 
-→ 340 leads processed
-→ 186 qualified (55% qualification rate)
-→ 94 booked calls (51% of qualified)
-→ Average response time: 3.2 minutes
-→ My time spent: ~2 hours total (monitoring, not doing)
+Nothing about the meetings got better. The notes just started doing something.
 
-Before The Intake Stack:
-→ I processed maybe 15 leads per day manually
-→ Response time averaged 6-8 hours
-→ Booked call rate was around 22%
-→ I spent 3+ hours daily on intake alone
+The guide has the routing prompt, the task template, the email draft rules, and the one filter that stops it from turning small talk into tickets.
 
-The setup wasn't complicated. One form tool, one AI platform, one calendar integration. The hardest part was writing the qualification criteria. Everything else was configuration.
+Get free access 👇
+```
 
-15 hours back every week. That's two full workdays a month I got back by spending one afternoon building this.
+---
 
-If you want access:
+## Example 3: Quantity/build hook (a spreadsheet agent, 227 words)
 
-1. Like this post 👍
-2. Comment "[KEYWORD]"
+```
+I gave a spreadsheet agent 14 reports to build and went to lunch.
 
-And I'll send you the full guide.
+Every ops team has the same Monday. Export the CSVs, paste them into the master sheet, fix the three columns that shifted, rebuild the pivot, screenshot it for the channel. Two hours if nothing breaks. Nothing breaking is rare.
 
-Optional: Share the post and you'll get priority 🙂
+Here's the part that surprised me. The agent was not good at spreadsheets. It was good at the boring layer around them: reading the export, noticing the shifted column, asking one question when a header changed, and refusing to guess.
+
+That refusal is the whole trick. A script that guesses corrupts the sheet quietly. An agent that stops and asks corrupts nothing.
+
+The build took one afternoon. One prompt file that describes each report. One folder the exports land in. One rule: if a column is missing, stop and say which one.
+
+Fourteen reports. Forty minutes of runtime. Zero fixes by hand.
+
+Since then it has caught two vendor exports that silently dropped a currency column, which the old process would have pasted straight into the board deck.
+
+The guide walks through the prompt file, the folder convention, the stop rule, and how to add a fifteenth report without touching the first fourteen.
+
+The guide and the full setup are free 👇
+```
+
+---
+
+## What to notice
+
+- The tool or the reader is in line 1. The guide is invisible until the last two lines.
+- Beats 3 and 4 give something away (the reframe, the mechanism) before anything is offered.
+- One proof line with real numbers. Not a list of five metrics.
+- The arrow list is absent. Prose carries it. Use arrows only for a genuine framework.
+- Three different closers across the three posts.
