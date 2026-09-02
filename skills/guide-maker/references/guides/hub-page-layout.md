@@ -6,15 +6,17 @@ The main/hub page for every guide follows this exact block structure. This is th
 
 ## Block Order (Top to Bottom)
 
-### 1. Community Callout (FIRST)
-Highest priority CTA. Always the first content block. Only include this block if a community URL is configured in config.yaml.
+### 1. Community Callout (FIRST, only when `community.url` is set)
+Highest priority CTA when you have a community. Skipped entirely otherwise.
 
 ```
 Callout block:
   Icon: 💬
-  Text: "Join [MEMBER_COUNT]+ [COMMUNITY_DESCRIPTION]: "
-  Link: "[Community Name]" → community URL (from config.yaml, optional) (bold)
+  Text: community.callout_line, e.g. "Join 100+ people automating their inbox: "
+  Link: community.name (bold) -> community.url
 ```
+
+Keep the count in `callout_line` honest and bump it as the community grows; never let it read smaller than reality.
 
 ### 2. Guide Description Callout
 One-sentence summary of what the reader will learn/build.
@@ -26,11 +28,19 @@ Callout block:
 ```
 
 ### 3. Author Byline
-Paragraph with gray text. Links to the author's LinkedIn profile.
+Gray paragraph. The name links to `author.linkedin_url`.
 
 ```
 Paragraph:
-  "By " (gray) + "[Author Name]" (bold, gray, linked to LinkedIn URL (from config.yaml))
+  "By " (gray) + author.name (bold, gray, linked to author.linkedin_url)
+```
+
+### 3b. Secondary-Channel Credit Line (only when `secondary_channel.url` is set)
+Directly under the byline, same gray, understated. It is a credit, not a second CTA: it must not compete with the community callout and it never says "Subscribe!".
+
+```
+Paragraph:
+  secondary_channel.credit_line (gray), e.g. "YouTube: " + secondary_channel.handle (bold, gray, linked to secondary_channel.url)
 ```
 
 ### 4. Empty Line
@@ -99,7 +109,7 @@ When the guide rests on an institutional lecture, say so in the body (institutio
 
 1. **No Index section.** Child pages display automatically in Notion. Don't duplicate them as manual links.
 2. **No footer.** Author byline at the top is enough. No "Built by" or "Questions? DM me" at the bottom.
-3. **Community CTA first.** If configured, always above the guide description callout, never below. If no community URL is set in config.yaml, skip this block entirely.
+3. **Community CTA first.** If `community.url` is set, always above the guide description callout, never below. Otherwise skip the block entirely. Same for the credit line: present only with `secondary_channel.url`.
 4. **Page icon.** Set a relevant emoji as the page icon (e.g., 🛠️ for a tools guide, 🤖 for an AI guide).
 5. **Subpage icons.** Each subpage gets an emoji icon matching its step emoji.
 6. **Cover image.** Generated via `scripts/banner_generator.py` and uploaded automatically as the page cover. See `references/banner-guide.md` for prompt templates, logo workflow, and style rules.

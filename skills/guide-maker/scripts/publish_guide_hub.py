@@ -5,10 +5,11 @@ Publish a guide as a hub page + subpages to Notion.
 Creates the hub page in the Guide Database, publishes each subpage from
 markdown files, then builds the hub content with links to all subpages.
 
-Follows the approved hub page layout:
-  Community callout (optional) → guide description callout → author byline →
-  (child pages auto-render) → What You'll Build → Who This Is For →
-  The Guide (step links) → Sources
+Follows the hub page layout (references/guides/hub-page-layout.md):
+  Community callout (only when community.url is set) -> guide description
+  callout -> author byline (author.*) -> secondary-channel credit line (only
+  when secondary_channel.url is set) -> (child pages auto-render) ->
+  What You'll Build -> Who This Is For -> The Guide (step links) -> Sources
 
 Usage:
     python3 publish_guide_hub.py \
@@ -78,9 +79,10 @@ def get_guide_db():
 
 def get_community_info():
     return {
+        "platform": cfg_get(config(), "community.platform", "none"),
         "name": cfg_get(config(), "community.name", ""),
         "url": cfg_get(config(), "community.url", ""),
-        "description": cfg_get(config(), "community.callout_line", ""),
+        "callout_line": cfg_get(config(), "community.callout_line", ""),
     }
 
 
@@ -88,6 +90,15 @@ def get_author_info():
     return {
         "name": cfg_get(config(), "author.name", ""),
         "linkedin_url": cfg_get(config(), "author.linkedin_url", ""),
+    }
+
+
+def get_secondary_channel():
+    return {
+        "type": cfg_get(config(), "secondary_channel.type", "none"),
+        "handle": cfg_get(config(), "secondary_channel.handle", ""),
+        "url": cfg_get(config(), "secondary_channel.url", ""),
+        "credit_line": cfg_get(config(), "secondary_channel.credit_line", ""),
     }
 
 
@@ -160,17 +171,21 @@ def build_hub_blocks(description, build_items, audience_items, nav_note,
     """Build all hub page blocks following the approved layout."""
     blocks = []
 
-    # 1. Community callout (optional, only if community_url is configured)
+    # 1. Community callout: only when community.url is set. The text is
+    #    community.callout_line ("Join 100+ people learning X: "), the link
+    #    text is community.name. Nothing here is hardcoded.
     community = get_community_info()
     if community["url"]:
-        community_text = community.get("description", "Join our community")
-        community_name = community.get("name", "Our Community")
+        callout_text = (community["callout_line"] or "Join the community: ").rstrip()
+        if not callout_text.endswith(":"):
+            callout_text += ":"
+        community_name = community["name"] or community["url"]
         blocks.append({
             "type": "callout",
             "callout": {
                 "icon": {"type": "emoji", "emoji": "💬"},
                 "rich_text": [
-                    {"type": "text", "text": {"content": f"{community_text}: "}},
+                    {"type": "text", "text": {"content": callout_text + " "}},
                     {"type": "text",
                      "text": {"content": community_name,
                               "link": {"url": community["url"]}},
@@ -213,6 +228,28 @@ def build_hub_blocks(description, build_items, audience_items, nav_note,
         blocks.append({
             "type": "paragraph",
             "paragraph": {"rich_text": byline_parts}
+        })
+
+    # 3b. Secondary-channel credit line: only when secondary_channel.url is
+    #     set. Understated, gray, directly under the byline. A credit, not a
+    #     second CTA; it must not compete with the community callout.
+    channel = get_secondary_channel()
+    if channel["url"]:
+        label = channel["credit_line"] or (
+            f"{channel['type'].capitalize()}: " if channel["type"] not in ("", "none") else "Also on: ")
+        label = label.rstrip()
+        if not label.endswith(":"):
+            label += ":"
+        blocks.append({
+            "type": "paragraph",
+            "paragraph": {"rich_text": [
+                {"type": "text", "text": {"content": label + " "},
+                 "annotations": {"color": "gray"}},
+                {"type": "text",
+                 "text": {"content": channel["handle"] or channel["url"],
+                          "link": {"url": channel["url"]}},
+                 "annotations": {"bold": True, "color": "gray"}},
+            ]}
         })
 
     # 4. Empty line
