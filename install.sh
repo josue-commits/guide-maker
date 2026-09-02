@@ -74,6 +74,14 @@ if [[ "$WITH_TOPIC_FINDER" == "1" ]]; then
   fi
 fi
 
+# never let a project commit the config with ids and keys
+if [[ ! -f "$TARGET/guide-maker/.gitignore" ]]; then
+  printf 'config.yaml\nconfig.json\n__pycache__/\n*.pyc\n' > "$TARGET/guide-maker/.gitignore"
+fi
+if [[ ! -f "$TARGET/graphics-maker/.gitignore" && -d "$TARGET/graphics-maker" ]]; then
+  printf 'format-usage-log.jsonl\n__pycache__/\n*.pyc\n' > "$TARGET/graphics-maker/.gitignore"
+fi
+
 if [[ ! -f "$TARGET/guide-maker/config.yaml" ]]; then
   cp "$TARGET/guide-maker/config.example.yaml" "$TARGET/guide-maker/config.yaml"
   echo
