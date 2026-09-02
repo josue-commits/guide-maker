@@ -11,6 +11,7 @@ skills/topic-finder/
 
 # Runtime state
 format-usage-log.jsonl
+skills/graphics-maker/format-usage-log.jsonl
 closer-log.jsonl
 /tmp/
 work/
