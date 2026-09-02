@@ -43,6 +43,44 @@ NOTION_BASE = "https://api.notion.com/v1"
 MAX_BLOCKS_PER_REQUEST = 100
 MAX_RICH_TEXT_LENGTH = 2000
 
+# Notion only accepts code-block languages from a fixed enum. Anything outside
+# it ("js", "text", "sh", "yml", ...) makes the page-create call return 400 and
+# the whole publish fails. Normalize every fence tag before it reaches the API.
+NOTION_CODE_LANGS = {
+    "abap", "agda", "arduino", "ascii art", "assembly", "bash", "basic", "bnf",
+    "c", "c#", "c++", "clojure", "coffeescript", "coq", "css", "dart", "dhall",
+    "diff", "docker", "ebnf", "elixir", "elm", "erlang", "f#", "flow", "fortran",
+    "gherkin", "glsl", "go", "graphql", "groovy", "haskell", "hcl", "html",
+    "idris", "java", "javascript", "json", "julia", "kotlin", "latex", "less",
+    "lisp", "livescript", "llvm ir", "lua", "makefile", "markdown", "markup",
+    "matlab", "mermaid", "nix", "notion formula", "objective-c", "ocaml",
+    "pascal", "perl", "php", "plain text", "powershell", "prolog", "protobuf",
+    "purescript", "python", "r", "racket", "reason", "ruby", "rust", "sass",
+    "scala", "scheme", "scss", "shell", "solidity", "sql", "swift", "toml",
+    "typescript", "vb.net", "verilog", "vhdl", "visual basic", "webassembly",
+    "xml", "yaml",
+}
+NOTION_CODE_LANG_ALIASES = {
+    "js": "javascript", "jsx": "javascript", "mjs": "javascript",
+    "ts": "typescript", "tsx": "typescript", "py": "python", "py3": "python",
+    "sh": "bash", "zsh": "bash", "shell-session": "shell", "console": "shell",
+    "text": "plain text", "txt": "plain text", "plaintext": "plain text",
+    "": "plain text", "yml": "yaml", "dockerfile": "docker", "md": "markdown",
+    "node": "javascript", "jsonc": "json", "json5": "json", "env": "bash",
+    "dotenv": "bash", "ini": "plain text", "rb": "ruby", "rs": "rust",
+    "golang": "go", "cs": "c#", "cpp": "c++", "objc": "objective-c",
+    "ps1": "powershell", "pwsh": "powershell", "svg": "xml", "vue": "html",
+    "tf": "hcl", "terraform": "hcl", "make": "makefile",
+}
+
+
+def _normalize_code_lang(lang):
+    """Map a markdown fence language to a Notion-valid code language."""
+    key = (lang or "").strip().lower()
+    if key in NOTION_CODE_LANGS:
+        return key
+    return NOTION_CODE_LANG_ALIASES.get(key, "plain text")
+
 
 # --- HTTP helpers (stdlib only, no requests dependency) ---
 
@@ -271,7 +309,7 @@ def md_to_blocks(md_text, skip_first_h1=True):
 
         # Code block
         if stripped.startswith('```'):
-            lang = stripped[3:].strip() or "plain text"
+            lang = _normalize_code_lang(stripped[3:].strip())
             code_lines = []
             i += 1
             while i < len(lines) and not lines[i].strip().startswith('```'):
