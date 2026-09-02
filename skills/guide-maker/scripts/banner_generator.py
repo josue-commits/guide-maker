@@ -49,8 +49,40 @@ PURPLE = "#8033F4"
 
 # Notion + KieAI config loaded from config.yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _config import get_kieai_key, get_brand_colors, load_config
+from _config import load_config, cfg_get, secret, add_config_arg
 import _notion
+
+_CFG = None
+_CFG_PATH = None
+
+
+def config():
+    """Config loaded lazily so `simple` still works with no config at all."""
+    global _CFG
+    if _CFG is None:
+        _CFG = load_config(_CFG_PATH)
+        _notion.init(_CFG)
+    return _CFG
+
+
+def get_brand_colors():
+    try:
+        colors = cfg_get(config(), "brand.colors") or {}
+    except FileNotFoundError:
+        colors = {}
+    return {
+        "dark": colors.get("dark") or DARK,
+        "light": colors.get("light") or LIGHT,
+        "accent_1": colors.get("accent_1") or GREEN,
+        "accent_2": colors.get("accent_2") or PURPLE,
+    }
+
+
+def get_kieai_key():
+    try:
+        return secret(config(), "kieai")
+    except FileNotFoundError:
+        return secret({}, "kieai")
 
 # KieAI config
 KIEAI_API_BASE = "https://api.kie.ai/api/v1"
@@ -107,10 +139,9 @@ _font_warned = set()
 def _config_font(bold):
     """Font path from brand.fonts.* in the config, or empty string."""
     try:
-        cfg = load_config()
+        fonts = cfg_get(config(), "brand.fonts") or {}
     except Exception:
         return ""
-    fonts = (cfg.get("brand", {}) or {}).get("fonts", {}) or {}
     return (fonts.get("bold" if bold else "regular") or "").strip()
 
 
@@ -301,7 +332,8 @@ def _load_kieai_key():
     if key:
         return key
     print("Error: KieAI API key not configured.", file=sys.stderr)
-    print("Add kieai_api_key to your config.yaml, or create ~/.config/kieai/api_key", file=sys.stderr)
+    print("Set KIEAI_API_KEY, create ~/.config/kieai/api_key, or set "
+          "providers.kieai.api_key in config.yaml", file=sys.stderr)
     return None
 
 
@@ -559,7 +591,10 @@ def main():
     upload.add_argument("--file", required=True, help="Path to banner image")
     upload.add_argument("--page-id", required=True, help="Notion page ID")
 
+    add_config_arg(parser, [simple, ai, upload])
     args = parser.parse_args()
+    global _CFG_PATH
+    _CFG_PATH = getattr(args, "config", None)
 
     if args.command == "simple":
         path = generate_simple_banner(

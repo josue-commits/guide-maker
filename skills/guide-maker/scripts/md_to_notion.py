@@ -63,8 +63,27 @@ HTML_COMMENT_LINE = re.compile(r'^<!--.*-->$')
 
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _config import get_content_board_db
+from _config import load_config, cfg_get, add_config_arg
 import _notion
+
+_CFG = None
+
+
+def config(path=None):
+    """Load (once) and return the config; also primes the Notion token."""
+    global _CFG
+    if _CFG is None:
+        _CFG = load_config(path)
+        _notion.init(_CFG)
+    return _CFG
+
+
+def get_content_board_db():
+    db = cfg_get(config(), "notion.content_board_database_id", "")
+    if not db:
+        raise SystemExit("notion.content_board_database_id is empty in the config; "
+                         "the Content Board card cannot be created.")
+    return db
 from _notion import NOTION_VERSION, NOTION_BASE  # re-exported for callers
 
 MAX_BLOCKS_PER_REQUEST = 100
@@ -878,7 +897,14 @@ def main():
                     help="Override content_board_database_id from config")
     ce.add_argument("--dry-run", action="store_true", help="Print payload, do not publish")
 
+    add_config_arg(parser, [pg, ps, bl, ce])
     args = parser.parse_args()
+    config_path = getattr(args, "config", None)
+
+    if args.command != "blocks" and not getattr(args, "dry_run", False):
+        config(config_path)
+    elif config_path:
+        config(config_path)
 
     if args.command == "publish-guide":
         cmd_publish_guide(args)

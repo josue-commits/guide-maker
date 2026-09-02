@@ -1,0 +1,2 @@
+# Optional providers. Install only what your config enables.
+openai>=1.0   # graphics.provider: openai

@@ -52,7 +52,40 @@ from md_to_notion import (
     notion_request, md_to_blocks, append_blocks,
     parse_inline, split_rich_text, MAX_BLOCKS_PER_REQUEST
 )
-from _config import get_guide_db, get_community_info, get_author_info
+from _config import load_config, cfg_get, add_config_arg
+import _notion
+
+_CFG = None
+
+
+def config(path=None):
+    global _CFG
+    if _CFG is None:
+        _CFG = load_config(path)
+        _notion.init(_CFG)
+    return _CFG
+
+
+def get_guide_db():
+    db = cfg_get(config(), "notion.guide_database_id", "")
+    if not db:
+        raise SystemExit("notion.guide_database_id is empty in the config.")
+    return db
+
+
+def get_community_info():
+    return {
+        "name": cfg_get(config(), "community.name", ""),
+        "url": cfg_get(config(), "community.url", ""),
+        "description": cfg_get(config(), "community.callout_line", ""),
+    }
+
+
+def get_author_info():
+    return {
+        "name": cfg_get(config(), "author.name", ""),
+        "linkedin_url": cfg_get(config(), "author.linkedin_url", ""),
+    }
 
 
 def create_hub_page(title, keyword, guide_type, week, icon_emoji):
@@ -367,8 +400,10 @@ def main():
                         help="Source: 'type|title|url'")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print plan without publishing")
+    add_config_arg(parser)
 
     args = parser.parse_args()
+    config(args.config)
 
     if not args.step:
         print("Error: At least one --step is required.", file=sys.stderr)

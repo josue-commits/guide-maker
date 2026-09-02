@@ -1,0 +1,24 @@
+# Real configs (they hold database ids and, if you choose, API keys)
+config.yaml
+config.json
+skills/*/config.yaml
+skills/*/config.json
+skills/topic-finder/config/*.json
+!skills/topic-finder/config/*.example.json
+
+# The topic-finder sibling is cloned by install.sh, not tracked here
+skills/topic-finder/
+
+# Runtime state
+format-usage-log.jsonl
+closer-log.jsonl
+/tmp/
+work/
+
+# Python
+*.pyc
+__pycache__/
+.venv/
+
+# OS
+.DS_Store
