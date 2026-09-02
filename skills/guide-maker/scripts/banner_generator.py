@@ -7,6 +7,8 @@ Two modes:
   - AI (KieAI): AI-generated banners for tech guides. Requires API key.
 
 Both modes output 1500x600px PNGs (Notion optimal cover size).
+Typeface: brand.fonts.* from config, else the bundled Inter (assets/fonts),
+else a platform font, else Pillow's default with a warning.
 Includes Notion file upload to set banners as page covers.
 
 Usage:
@@ -47,7 +49,7 @@ PURPLE = "#8033F4"
 
 # Notion + KieAI config loaded from config.yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _config import get_notion_token, get_kieai_key, get_brand_colors
+from _config import get_notion_token, get_kieai_key, get_brand_colors, load_config
 
 NOTION_BASE = "https://api.notion.com/v1"
 NOTION_VERSION_UPLOAD = "2025-09-03"
@@ -55,41 +57,98 @@ NOTION_VERSION_UPLOAD = "2025-09-03"
 # KieAI config
 KIEAI_API_BASE = "https://api.kie.ai/api/v1"
 
-# Font paths (macOS)
-FONT_PATHS = [
-    "/Library/Fonts/Poppins-Bold.ttf",
-    "/Library/Fonts/Poppins-SemiBold.ttf",
-    os.path.expanduser("~/Library/Fonts/Poppins-Bold.ttf"),
-    os.path.expanduser("~/Library/Fonts/Poppins-SemiBold.ttf"),
-]
+# --- Fonts ---
+#
+# Resolution order for the banner typeface:
+#   1. brand.fonts.bold / brand.fonts.regular from the config (absolute paths)
+#   2. the bundled Inter faces in assets/fonts (OFL, ship with the skill)
+#   3. platform fonts: macOS Poppins or HelveticaNeue.ttc, Linux DejaVu or
+#      Liberation, Windows Arial
+#   4. Pillow's built-in bitmap font, with a warning (banner will look rough)
+
+SKILL_DIR = Path(__file__).resolve().parent.parent
+BUNDLED_BOLD = SKILL_DIR / "assets" / "fonts" / "Inter-Bold.ttf"
+BUNDLED_REGULAR = SKILL_DIR / "assets" / "fonts" / "Inter-Regular.ttf"
+
+# (path, face index) pairs. A .ttc holds several faces; the index picks one.
+# Verified with fonttools against HelveticaNeue.ttc: 0=Regular 1=Bold 2=Italic
+# 3=Bold Italic 10=Medium. Index 4 is "Condensed Bold", not Bold. Do not guess
+# these, .ttc ordering is not stable across OS versions.
 FALLBACK_FONT = "/System/Library/Fonts/HelveticaNeue.ttc"
-FALLBACK_FONT_INDEX = 4  # Bold weight
+FALLBACK_FONT_INDEX = 1  # Bold (was 4 = Condensed Bold, a bug)
+FALLBACK_FONT_REGULAR_INDEX = 0  # Regular
 
-FONT_PATHS_REGULAR = [
-    "/Library/Fonts/Poppins-Regular.ttf",
-    "/Library/Fonts/Poppins-Medium.ttf",
-    os.path.expanduser("~/Library/Fonts/Poppins-Regular.ttf"),
-    os.path.expanduser("~/Library/Fonts/Poppins-Medium.ttf"),
+PLATFORM_FONTS_BOLD = [
+    ("/Library/Fonts/Poppins-Bold.ttf", 0),
+    ("/Library/Fonts/Poppins-SemiBold.ttf", 0),
+    (os.path.expanduser("~/Library/Fonts/Poppins-Bold.ttf"), 0),
+    (os.path.expanduser("~/Library/Fonts/Poppins-SemiBold.ttf"), 0),
+    (FALLBACK_FONT, FALLBACK_FONT_INDEX),
+    ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 0),
+    ("/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf", 0),
+    ("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 0),
+    ("/usr/share/fonts/liberation/LiberationSans-Bold.ttf", 0),
+    ("C:\\Windows\\Fonts\\arialbd.ttf", 0),
 ]
-FALLBACK_FONT_REGULAR = "/System/Library/Fonts/HelveticaNeue.ttc"
-FALLBACK_FONT_REGULAR_INDEX = 0  # Regular weight
+PLATFORM_FONTS_REGULAR = [
+    ("/Library/Fonts/Poppins-Regular.ttf", 0),
+    ("/Library/Fonts/Poppins-Medium.ttf", 0),
+    (os.path.expanduser("~/Library/Fonts/Poppins-Regular.ttf"), 0),
+    (os.path.expanduser("~/Library/Fonts/Poppins-Medium.ttf"), 0),
+    (FALLBACK_FONT, FALLBACK_FONT_REGULAR_INDEX),
+    ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 0),
+    ("/usr/share/fonts/dejavu/DejaVuSans.ttf", 0),
+    ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 0),
+    ("/usr/share/fonts/liberation/LiberationSans-Regular.ttf", 0),
+    ("C:\\Windows\\Fonts\\arial.ttf", 0),
+]
+
+_font_warned = set()
 
 
-# --- Font Loading ---
+def _config_font(bold):
+    """Font path from brand.fonts.* in the config, or empty string."""
+    try:
+        cfg = load_config()
+    except Exception:
+        return ""
+    fonts = (cfg.get("brand", {}) or {}).get("fonts", {}) or {}
+    return (fonts.get("bold" if bold else "regular") or "").strip()
+
+
+def resolve_font_path(bold=True):
+    """Return (path, index) of the first usable font, or (None, 0)."""
+    candidates = []
+    configured = _config_font(bold)
+    if configured:
+        candidates.append((os.path.expanduser(configured), 0))
+    candidates.append((str(BUNDLED_BOLD if bold else BUNDLED_REGULAR), 0))
+    candidates.extend(PLATFORM_FONTS_BOLD if bold else PLATFORM_FONTS_REGULAR)
+    for path, index in candidates:
+        if os.path.exists(path):
+            return path, index
+    return None, 0
+
 
 def load_font(size, bold=True):
-    """Load Poppins if available, fall back to HelveticaNeue."""
-    paths = FONT_PATHS if bold else FONT_PATHS_REGULAR
-    for path in paths:
-        if os.path.exists(path):
-            try:
-                return ImageFont.truetype(path, size)
-            except Exception:
-                continue
-    # Fallback
-    fallback = FALLBACK_FONT if bold else FALLBACK_FONT_REGULAR
-    index = FALLBACK_FONT_INDEX if bold else FALLBACK_FONT_REGULAR_INDEX
-    return ImageFont.truetype(fallback, size, index=index)
+    """Load the best available font at the given size (see resolution order)."""
+    path, index = resolve_font_path(bold)
+    if path:
+        try:
+            return ImageFont.truetype(path, size, index=index)
+        except Exception as exc:  # corrupt file, unsupported format
+            print(f"Warning: could not load font {path}: {exc}", file=sys.stderr)
+    key = "bold" if bold else "regular"
+    if key not in _font_warned:
+        _font_warned.add(key)
+        print("Warning: no TrueType font found (bundled Inter missing and no "
+              "platform font). Falling back to Pillow's bitmap font; set "
+              "brand.fonts.* in your config for a proper banner.",
+              file=sys.stderr)
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:  # Pillow < 10.1 has no size argument
+        return ImageFont.load_default()
 
 
 # --- Color Helpers ---
@@ -163,6 +222,7 @@ def generate_simple_banner(title, subtitle=None, style="dark",
             y_absolute=subtitle_y
         )
 
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
     img.save(output_path, "PNG", optimize=True)
     print(f"Simple banner saved: {output_path} ({BANNER_WIDTH}x{BANNER_HEIGHT})")
     return output_path
@@ -393,7 +453,10 @@ def _download_and_crop(url, output_path):
     with urllib.request.urlopen(req) as resp:
         image_data = resp.read()
 
-    # Save raw download temporarily
+    # Save raw download temporarily. The generation already cost an API call
+    # by this point, so create the output dir rather than losing it to a
+    # missing path.
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
     raw_path = output_path + ".raw.png"
     with open(raw_path, "wb") as f:
         f.write(image_data)
