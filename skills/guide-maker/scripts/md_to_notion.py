@@ -34,6 +34,20 @@ import argparse
 import urllib.request
 import urllib.error
 
+# Authoring directives a writer may leave at the top of a subpage. These are
+# notes to the publisher, not content, and must never reach the page body.
+# Matches "**Page icon:** X", "Page icon: X", "icon: X", "**Icon:** X" and the
+# like, but deliberately NOT prose that merely starts with the word icon (the
+# value has to be short, so "Icons: here is why they matter" is left alone).
+# The page icon is set from --icon at creation time, so these lines carry no
+# information the publisher needs. Drop them.
+DIRECTIVE_LINE = re.compile(
+    r'^\*{0,2}(?:page\s+)?icon\*{0,2}\s*:\s*\**\s*\S{1,8}\s*\**\s*$',
+    re.IGNORECASE)
+
+# HTML comments ("<!-- icon: X -->") are never rendered either.
+HTML_COMMENT_LINE = re.compile(r'^<!--.*-->$')
+
 # --- Configuration ---
 
 from _config import get_notion_token, get_content_board_db
@@ -298,6 +312,11 @@ def md_to_blocks(md_text, skip_first_h1=True):
 
         # Empty line: skip
         if not stripped:
+            i += 1
+            continue
+
+        # HTML comments and authoring directives never render as text
+        if HTML_COMMENT_LINE.match(stripped) or DIRECTIVE_LINE.match(stripped):
             i += 1
             continue
 
