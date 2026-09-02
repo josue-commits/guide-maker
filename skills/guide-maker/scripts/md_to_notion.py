@@ -9,22 +9,33 @@ Usage:
     python3 md_to_notion.py publish-guide <md_file> <database_id> [options]
     python3 md_to_notion.py publish-subpage <md_file> <parent_page_id>
     python3 md_to_notion.py create-content-entry [options]
+    python3 md_to_notion.py blocks <md_file>
 
 Options for publish-guide:
     --keyword TEXT       Keyword for the guide (e.g., SKILLS)
     --type TEXT          Guide type (e.g., "Technical Tutorial")
     --week DATE          Week date in YYYY-MM-DD format
     --status TEXT        Status (default: Review)
+    --dry-run            Print the block plan, do not call Notion
 
-Options for create-content-entry:
-    --title TEXT         Post title
-    --account TEXT       Account name
+Options for create-content-entry (one card per guide):
+    --title TEXT         Card title, e.g. "KEYWORD | Mon 09/07"
+    --account TEXT       Account name (select option in the board)
     --post-date DATE     Post date YYYY-MM-DD
     --day TEXT           Day of week (Monday/Wednesday/Friday)
-    --content-type TEXT  Type (AI Guide/Sales Resource)
-    --keyword TEXT       Keyword
-    --guide-link URL     Guide link (optional)
-    --variation TEXT     Repeatable: "Angle Name|post text"
+    --type TEXT          Type select option (default: guide)
+    --status TEXT        Status select option (default: Draft)
+    --keyword TEXT       Keyword (same as the guide's)
+    --guide-link URL     In-app guide URL (optional)
+    --variation TEXT     Repeatable: "Label|post text" or "Label|@/path/file.txt"
+    --dm TEXT            Repeatable: "Label|dm text" or "Label|@/path/file.txt"
+    --graphic PATH       PNG to attach to the `Graphic` files property. Never an
+                         image block in the body: calendar and gallery views only
+                         surface the property.
+    --dry-run            Print the payload, do not call Notion
+
+The `blocks` subcommand converts a markdown file and prints the Notion block
+JSON. Use it to check fences, directives and tables without touching Notion.
 """
 
 import re
@@ -50,8 +61,8 @@ HTML_COMMENT_LINE = re.compile(r'^<!--.*-->$')
 
 # --- Configuration ---
 
-import os as _os
-sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _config import get_content_board_db
 import _notion
 from _notion import NOTION_VERSION, NOTION_BASE  # re-exported for callers
@@ -560,71 +571,117 @@ def create_subpage(parent_page_id, title, blocks=None):
     return page_id, url
 
 
-def create_content_entry(title, account, post_date, day, content_type, keyword,
-                         guide_link=None, variations=None):
+def _toggle_block(level, label, text):
+    """A toggleable heading whose child is a plain-text code block.
+
+    The code block gives Notion's native copy button, so a person can paste
+    the variation or DM with one click.
     """
-    Create a Content Board entry in the content board database.
-    Variations is a list of (angle_name, post_text) tuples that become
-    toggle blocks with code block children (language: plain text).
-    Returns (page_id, url).
-    """
-    properties = {
-        "Title": {
-            "title": [{"type": "text", "text": {"content": title}}]
-        },
-        "Account": {"select": {"name": account}},
-        "Post Date": {"date": {"start": post_date}},
-        "Day": {"select": {"name": day}},
-        "Type": {"select": {"name": content_type}},
-        "Status": {"select": {"name": "Review"}},
-        "Keyword": {
-            "rich_text": [{"type": "text", "text": {"content": keyword}}]
+    heading = f"heading_{level}"
+    return {
+        "type": heading,
+        heading: {
+            "rich_text": [{"type": "text", "text": {"content": label}}],
+            "is_toggleable": True,
+            "children": [{
+                "type": "code",
+                "code": {
+                    "rich_text": split_rich_text([
+                        {"type": "text", "text": {"content": text}}
+                    ]),
+                    "language": "plain text",
+                }
+            }],
         },
     }
+
+
+def build_content_entry(title, account, post_date, day, content_type, keyword,
+                        guide_link=None, variations=None, dms=None,
+                        status="Draft", notes=""):
+    """Return (properties, children) for a Content Board card.
+
+    Variations become H2 toggles, DMs go under a divider and an H2 "DM
+    Templates" heading as H3 toggles. Each toggle wraps a plain-text code
+    block. The graphic is NOT part of the body; see set_graphic().
+    """
+    properties = {
+        "Title": {"title": [{"type": "text", "text": {"content": title}}]},
+        "Post Date": {"date": {"start": post_date}},
+        "Type": {"select": {"name": content_type}},
+        "Status": {"select": {"name": status}},
+        "Keyword": {"rich_text": [{"type": "text", "text": {"content": keyword}}]},
+    }
+    if account:
+        properties["Account"] = {"select": {"name": account}}
+    if day:
+        properties["Day"] = {"select": {"name": day}}
     if guide_link:
         properties["Guide Link"] = {"url": guide_link}
+    if notes:
+        properties["Notes"] = {"rich_text": [{"type": "text", "text": {"content": notes[:2000]}}]}
 
-    # Build toggle blocks for variations
     children = []
-    if variations:
-        for angle_name, post_text in variations:
-            toggle_block = {
-                "type": "heading_2",
-                "heading_2": {
-                    "rich_text": [{"type": "text", "text": {"content": angle_name}}],
-                    "is_toggleable": True,
-                    "children": [
-                        {
-                            "type": "code",
-                            "code": {
-                                "rich_text": split_rich_text([
-                                    {"type": "text", "text": {"content": post_text}}
-                                ]),
-                                "language": "plain text",
-                            }
-                        }
-                    ]
-                }
-            }
-            children.append(toggle_block)
+    for label, text in (variations or []):
+        children.append(_toggle_block(2, label, text))
+    if dms:
+        children.append({"type": "divider", "divider": {}})
+        children.append({
+            "type": "heading_2",
+            "heading_2": {
+                "rich_text": [{"type": "text", "text": {"content": "DM Templates"}}],
+                "is_toggleable": False,
+            },
+        })
+        for label, text in dms:
+            children.append(_toggle_block(3, label, text))
+    return properties, children
+
+
+def create_content_entry(title, account, post_date, day, content_type, keyword,
+                         guide_link=None, variations=None, dms=None,
+                         status="Draft", notes="", graphic=None, database_id=None):
+    """
+    Create a Content Board card. Returns (page_id, url).
+
+    `variations` and `dms` are lists of (label, text) tuples. `graphic` is a
+    local image path attached to the `Graphic` files property.
+    """
+    properties, children = build_content_entry(
+        title, account, post_date, day, content_type, keyword,
+        guide_link=guide_link, variations=variations, dms=dms,
+        status=status, notes=notes)
+
+    if graphic:
+        upload_id = _notion.upload_file(graphic)
+        properties["Graphic"] = {"files": [{
+            "type": "file_upload",
+            "file_upload": {"id": upload_id},
+            "name": os.path.basename(graphic),
+        }]}
 
     first_batch = children[:MAX_BLOCKS_PER_REQUEST]
     remaining = children[MAX_BLOCKS_PER_REQUEST:]
-
     body = {
-        "parent": {"database_id": get_content_board_db()},
+        "parent": {"database_id": database_id or get_content_board_db()},
         "properties": properties,
         "children": first_batch,
     }
-
-    result = notion_request("POST", "/pages", body)
+    # A file_upload reference in a property needs the newer API version.
+    version = _notion.NOTION_VERSION_UPLOAD if graphic else None
+    result = _notion.request("POST", "/pages", body, version=version)
     page_id = result["id"]
     url = result["url"]
-
     if remaining:
         append_blocks(page_id, remaining)
-
     return page_id, url
+
+
+def set_graphic(page_id, graphic_path):
+    """Attach a local image to an existing card's `Graphic` files property."""
+    upload_id = _notion.upload_file(graphic_path)
+    _notion.set_files_property(page_id, "Graphic", upload_id, os.path.basename(graphic_path))
+    return upload_id
 
 
 # --- Title extraction ---
@@ -651,6 +708,10 @@ def cmd_publish_guide(args):
     print(f"Publishing guide: {title}")
     print(f"  Database: {args.database_id}")
     print(f"  Blocks: {len(blocks)}")
+    if args.dry_run:
+        print(json.dumps(blocks[:5], indent=2, ensure_ascii=False))
+        print("Dry run: no changes made.")
+        return None, None
 
     page_id, url = create_guide_page(
         db_id=args.database_id,
@@ -678,6 +739,10 @@ def cmd_publish_subpage(args):
     print(f"Publishing subpage: {title}")
     print(f"  Parent: {args.parent_page_id}")
     print(f"  Blocks: {len(blocks)}")
+    if args.dry_run:
+        print(json.dumps(blocks[:5], indent=2, ensure_ascii=False))
+        print("Dry run: no changes made.")
+        return None, None
 
     page_id, url = create_subpage(
         parent_page_id=args.parent_page_id,
@@ -690,31 +755,80 @@ def cmd_publish_subpage(args):
     return page_id, url
 
 
+def _parse_labeled(items, kind):
+    """Parse repeatable "Label|text-or-@file" arguments into (label, text)."""
+    out = []
+    for item in items or []:
+        if "|" not in item:
+            print(f"Error: --{kind} needs the form 'Label|text' or 'Label|@file': {item!r}",
+                  file=sys.stderr)
+            sys.exit(2)
+        label, text = item.split("|", 1)
+        label, text = label.strip(), text.strip()
+        if text.startswith("@"):
+            path = text[1:]
+            if not os.path.exists(path):
+                print(f"Error: --{kind} file not found: {path}", file=sys.stderr)
+                sys.exit(2)
+            with open(path, "r", encoding="utf-8") as fh:
+                text = fh.read().strip()
+        if not label or not text:
+            print(f"Error: empty label or text in --{kind}: {item!r}", file=sys.stderr)
+            sys.exit(2)
+        out.append((label, text))
+    return out
+
+
 def cmd_create_content_entry(args):
-    """Create a content board entry."""
-    variations = []
-    if args.variation:
-        for v in args.variation:
-            if '|' in v:
-                angle, text = v.split('|', 1)
-                variations.append((angle.strip(), text.strip()))
+    """Create a Content Board card with copy toggles, DM toggles and graphic."""
+    variations = _parse_labeled(args.variation, "variation")
+    dms = _parse_labeled(args.dm, "dm")
+
+    if args.graphic and not os.path.exists(args.graphic):
+        print(f"Error: graphic not found: {args.graphic}", file=sys.stderr)
+        sys.exit(2)
+    if args.guide_link and "notion.site" in args.guide_link:
+        print("Warning: Guide Link is normally the in-app URL; the public "
+              "notion.site URL belongs in the DMs.", file=sys.stderr)
+
+    if args.dry_run:
+        properties, children = build_content_entry(
+            args.title, args.account, args.post_date, args.day, args.type,
+            args.keyword, guide_link=args.guide_link, variations=variations,
+            dms=dms, status=args.status, notes=args.notes)
+        plan = {
+            "database_id": args.database_id or "(content_board_database_id from config)",
+            "properties": properties,
+            "children": children,
+            "graphic": args.graphic,
+            "toggles": {"copy": len(variations), "dm": len(dms)},
+        }
+        print(json.dumps(plan, indent=2, ensure_ascii=False))
+        print(f"\nDry run: {len(variations)} copy toggles, {len(dms)} DM toggles, "
+              f"graphic={'yes' if args.graphic else 'no'}. No changes made.")
+        return None, None
 
     print(f"Creating content entry: {args.title}")
-
     page_id, url = create_content_entry(
-        title=args.title,
-        account=args.account,
-        post_date=args.post_date,
-        day=args.day,
-        content_type=args.content_type,
-        keyword=args.keyword,
-        guide_link=args.guide_link,
-        variations=variations,
-    )
-
+        title=args.title, account=args.account, post_date=args.post_date,
+        day=args.day, content_type=args.type, keyword=args.keyword,
+        guide_link=args.guide_link, variations=variations, dms=dms,
+        status=args.status, notes=args.notes, graphic=args.graphic,
+        database_id=args.database_id)
     print(f"  Page ID: {page_id}")
     print(f"  URL: {url}")
+    print(f"  Toggles: {len(variations)} copy, {len(dms)} DM"
+          + (", graphic attached" if args.graphic else ""))
     return page_id, url
+
+
+def cmd_blocks(args):
+    """Convert a markdown file and print the Notion block JSON."""
+    with open(args.md_file, "r", encoding="utf-8") as fh:
+        md_text = fh.read()
+    blocks = md_to_blocks(md_text, skip_first_h1=not args.keep_h1)
+    print(json.dumps(blocks, indent=2, ensure_ascii=False))
+    print(f"\n{len(blocks)} blocks, title: {extract_title(md_text)!r}", file=sys.stderr)
 
 
 def main():
@@ -729,22 +843,40 @@ def main():
     pg.add_argument("--type", default="", help="Guide type")
     pg.add_argument("--week", default="", help="Week date YYYY-MM-DD")
     pg.add_argument("--status", default="Review", help="Status")
+    pg.add_argument("--dry-run", action="store_true", help="Print blocks, do not publish")
 
     # publish-subpage
     ps = subparsers.add_parser("publish-subpage", help="Publish markdown as subpage")
     ps.add_argument("md_file", help="Path to markdown file")
     ps.add_argument("parent_page_id", help="Parent page ID in Notion")
+    ps.add_argument("--dry-run", action="store_true", help="Print blocks, do not publish")
+
+    # blocks
+    bl = subparsers.add_parser("blocks", help="Print Notion block JSON for a markdown file")
+    bl.add_argument("md_file", help="Path to markdown file")
+    bl.add_argument("--keep-h1", action="store_true", help="Keep the first H1 as a heading")
 
     # create-content-entry
-    ce = subparsers.add_parser("create-content-entry", help="Create content board entry")
-    ce.add_argument("--title", required=True, help="Post title")
-    ce.add_argument("--account", required=True, help="Account name")
+    ce = subparsers.add_parser("create-content-entry", help="Create a Content Board card")
+    ce.add_argument("--title", required=True, help="Card title")
+    ce.add_argument("--account", default="", help="Account name (select option)")
     ce.add_argument("--post-date", required=True, help="Post date YYYY-MM-DD")
-    ce.add_argument("--day", required=True, help="Day of week")
-    ce.add_argument("--content-type", required=True, help="Content type")
+    ce.add_argument("--day", default="", help="Day of week")
+    ce.add_argument("--type", "--content-type", dest="type", default="guide",
+                    help="Type select option (default: guide)")
+    ce.add_argument("--status", default="Draft", help="Status select option (default: Draft)")
     ce.add_argument("--keyword", required=True, help="Keyword")
-    ce.add_argument("--guide-link", default=None, help="Guide link URL")
-    ce.add_argument("--variation", action="append", help="Variation as 'Angle|text'")
+    ce.add_argument("--guide-link", default=None, help="In-app guide URL")
+    ce.add_argument("--variation", action="append", default=[],
+                    help="Repeatable: 'Label|text' or 'Label|@file'")
+    ce.add_argument("--dm", action="append", default=[],
+                    help="Repeatable: 'Label|text' or 'Label|@file'")
+    ce.add_argument("--graphic", default=None,
+                    help="Image to attach to the Graphic files property")
+    ce.add_argument("--notes", default="", help="Notes property text")
+    ce.add_argument("--database-id", default=None,
+                    help="Override content_board_database_id from config")
+    ce.add_argument("--dry-run", action="store_true", help="Print payload, do not publish")
 
     args = parser.parse_args()
 
@@ -752,6 +884,8 @@ def main():
         cmd_publish_guide(args)
     elif args.command == "publish-subpage":
         cmd_publish_subpage(args)
+    elif args.command == "blocks":
+        cmd_blocks(args)
     elif args.command == "create-content-entry":
         cmd_create_content_entry(args)
     else:
