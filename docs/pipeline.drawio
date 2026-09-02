@@ -1,0 +1,434 @@
+<mxGraphModel dx="3129" dy="1871" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4100" pageHeight="1350" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="title" parent="1" style="text;html=1;fontSize=28;fontStyle=1;fontColor=#1A1A1C;align=left;verticalAlign=middle;" value="Lead-magnet guide pipeline, end to end  ·  v3 (generic)" vertex="1">
+      <mxGeometry height="42" width="1600" x="20" y="10" as="geometry" />
+    </mxCell>
+    <mxCell id="subtitle" parent="1" style="text;html=1;fontSize=13;fontColor=#5A5A5A;align=left;verticalAlign=middle;" value="One operator, N accounts from config. Three distinct guides a week. The keyword lives in the post graphic, never in the copy. Green = human decides. Purple = orchestrator. Lilac = writer agent. Black mono = script. Grey outline = external system. Dashed purple = weekly feedback loop." vertex="1">
+      <mxGeometry height="24" width="2600" x="20" y="52" as="geometry" />
+    </mxCell>
+    <mxCell id="laneJ" parent="1" style="swimlane;horizontal=0;startSize=130;fillColor=#FAFAF5;strokeColor=#1A1A1C;fontStyle=1;fontSize=13;fontColor=#1A1A1C;swimlaneFillColor=#FAFAF5;" value="OPERATOR" vertex="1">
+      <mxGeometry height="155" width="3980" x="20" y="95" as="geometry" />
+    </mxCell>
+    <mxCell id="laneM" parent="1" style="swimlane;horizontal=0;startSize=130;fillColor=#F6F1FE;strokeColor=#1A1A1C;fontStyle=1;fontSize=13;fontColor=#1A1A1C;swimlaneFillColor=#F6F1FE;" value="ORCHESTRATOR
+(main agent)" vertex="1">
+      <mxGeometry height="140" width="3980" x="20" y="250" as="geometry" />
+    </mxCell>
+    <mxCell id="laneS" parent="1" style="swimlane;horizontal=0;startSize=130;fillColor=#EFE7FC;strokeColor=#1A1A1C;fontStyle=1;fontSize=13;fontColor=#1A1A1C;swimlaneFillColor=#EFE7FC;" value="WRITER AGENT
+(sub-agent)" vertex="1">
+      <mxGeometry height="210" width="3980" x="20" y="390" as="geometry" />
+    </mxCell>
+    <mxCell id="laneK" parent="1" style="swimlane;horizontal=0;startSize=130;fillColor=#F4F8E6;strokeColor=#1A1A1C;fontStyle=1;fontSize=13;fontColor=#1A1A1C;swimlaneFillColor=#F4F8E6;" value="SKILLS" vertex="1">
+      <mxGeometry height="130" width="3980" x="20" y="600" as="geometry" />
+    </mxCell>
+    <mxCell id="laneC" parent="1" style="swimlane;horizontal=0;startSize=130;fillColor=#EFEFEF;strokeColor=#1A1A1C;fontStyle=1;fontSize=13;fontColor=#1A1A1C;swimlaneFillColor=#EFEFEF;" value="SCRIPTS" vertex="1">
+      <mxGeometry height="185" width="3980" x="20" y="730" as="geometry" />
+    </mxCell>
+    <mxCell id="laneY" parent="1" style="swimlane;horizontal=0;startSize=130;fillColor=#FFFFFF;strokeColor=#1A1A1C;fontStyle=1;fontSize=13;fontColor=#1A1A1C;swimlaneFillColor=#FFFFFF;" value="SYSTEMS" vertex="1">
+      <mxGeometry height="140" width="3980" x="20" y="915" as="geometry" />
+    </mxCell>
+    <mxCell id="j0" parent="laneJ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#1A1A1C;fontColor=#1A1A1C;fontSize=11;fontStyle=1;" value="Asks for a topic&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;or hands over a URL / transcript&lt;/font&gt;" vertex="1">
+      <mxGeometry height="85" width="175" x="160" y="35" as="geometry" />
+    </mxCell>
+    <mxCell id="j1" parent="laneJ" style="rhombus;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#1A1A1C;fontColor=#1A1A1C;fontSize=10;fontStyle=1;" value="GATE 1&lt;br&gt;Approves&lt;br&gt;the outline" vertex="1">
+      <mxGeometry height="95" width="175" x="1160" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="j2" parent="laneJ" style="rhombus;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#1A1A1C;fontColor=#1A1A1C;fontSize=10;fontStyle=1;" value="GATE 2&lt;br&gt;Approves&lt;br&gt;the content&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;optional: gates: one | two&lt;/font&gt;" vertex="1">
+      <mxGeometry height="105" width="175" x="1560" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="j3" parent="laneJ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#1A1A1C;fontColor=#1A1A1C;fontSize=11;fontStyle=1;" value="Picks the&lt;br&gt;winning scene" vertex="1">
+      <mxGeometry height="85" width="175" x="2560" y="35" as="geometry" />
+    </mxCell>
+    <mxCell id="j4" parent="laneJ" style="rhombus;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#B03030;strokeWidth=3;fontColor=#1A1A1C;fontSize=10;fontStyle=1;" value="&lt;b&gt;RELEASE GATE&lt;/b&gt;&lt;br&gt;keyword legible,&lt;br&gt;spelled exactly,&lt;br&gt;identical to the&lt;br&gt;DM tool trigger" vertex="1">
+      <mxGeometry height="115" width="175" x="2760" y="20" as="geometry" />
+    </mxCell>
+    <mxCell id="j5" parent="laneJ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#B03030;strokeWidth=3;fontColor=#1A1A1C;fontSize=11;fontStyle=1;" value="Publishes the guide&lt;br&gt;to the web &lt;b&gt;BY HAND&lt;/b&gt;&lt;br&gt;(never automatic)" vertex="1">
+      <mxGeometry height="85" width="175" x="2960" y="35" as="geometry" />
+    </mxCell>
+    <mxCell id="j6" parent="laneJ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#1A1A1C;fontColor=#1A1A1C;fontSize=11;fontStyle=1;" value="Picks a variation,&lt;br&gt;schedules the post,&lt;br&gt;sets the keyword&lt;br&gt;in the DM tool" vertex="1">
+      <mxGeometry height="85" width="175" x="3160" y="35" as="geometry" />
+    </mxCell>
+    <mxCell id="j7" parent="laneJ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A6CB17;strokeColor=#1A1A1C;fontColor=#1A1A1C;fontSize=11;fontStyle=1;" value="Reads the weekly&lt;br&gt;numbers, overrides&lt;br&gt;rules in the strategy file" vertex="1">
+      <mxGeometry height="85" width="175" x="3760" y="35" as="geometry" />
+    </mxCell>
+    <mxCell id="m0" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Spawns writer agent&lt;br&gt;PHASE 0&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;never nested sub-agents&lt;/font&gt;" vertex="1">
+      <mxGeometry height="80" width="175" x="160" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m1" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Spawns writer agent&lt;br&gt;PHASE 1" vertex="1">
+      <mxGeometry height="80" width="175" x="760" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m7" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Keyword collision check&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;board + guide DB titles&lt;br&gt;+ DM tool&lt;/font&gt;" vertex="1">
+      <mxGeometry height="80" width="175" x="960" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m2" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Spawns writer agent&lt;br&gt;PHASE 2" vertex="1">
+      <mxGeometry height="80" width="175" x="1360" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m3" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Publishes to Notion&lt;br&gt;hub + N subpages&lt;br&gt;+ cover image (no keyword)" vertex="1">
+      <mxGeometry height="80" width="375" x="1760" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m3b" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Leak scan&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;directives, cross-guide refs,&lt;br&gt;banned words on live pages&lt;/font&gt;" vertex="1">
+      <mxGeometry height="80" width="175" x="2160" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m4" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Creates the card&lt;br&gt;&lt;b&gt;3 copy toggles&lt;/b&gt;&lt;br&gt;+ DM toggles per destination" vertex="1">
+      <mxGeometry height="80" width="175" x="2360" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m5" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Runs graphics-maker&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;format rotation, scene pass,&lt;br&gt;CTA bar, C2PA strip&lt;/font&gt;" vertex="1">
+      <mxGeometry height="80" width="175" x="2560" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="m6" parent="laneM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8033F4;strokeColor=#1A1A1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" value="Uploads the post graphic&lt;br&gt;to the Graphic property" vertex="1">
+      <mxGeometry height="80" width="175" x="2960" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="s0" parent="laneS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8033F4;strokeWidth=2;fontColor=#1A1A1C;fontSize=9;align=left;spacingLeft=6;spacingRight=4;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;PHASE 0  Topic research&lt;/b&gt;&lt;br&gt;Three sources, correlated.&lt;br&gt;YouTube in two tracks (tool / business), scored apart.&lt;br&gt;X ranked on bookmark rate, never views.&lt;br&gt;Tweet text is a lead, not a source.&lt;br&gt;&lt;b&gt;Scan-health block first:&lt;/b&gt; a dead source is a failure, not a web-search fallback.&lt;br&gt;Returns 3 topics with every resource." vertex="1">
+      <mxGeometry height="165" width="175" x="160" y="20" as="geometry" />
+    </mxCell>
+    <mxCell id="s0b" parent="laneS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8033F4;strokeWidth=2;fontColor=#1A1A1C;fontSize=9;align=left;spacingLeft=6;spacingRight=4;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;Filters (config)&lt;/b&gt;&lt;br&gt;· excluded_topics (competitors, banned subjects)&lt;br&gt;· already shipped: guide DB titles + board keywords&lt;br&gt;· depth gate: official docs + 3 sources + long-form source + 4-7 subpages&lt;br&gt;· hard reject: news, drama, single-feature drop, opinion&lt;br&gt;&lt;b&gt;Output: 3 topics&lt;/b&gt;" vertex="1">
+      <mxGeometry height="165" width="175" x="360" y="20" as="geometry" />
+    </mxCell>
+    <mxCell id="s05" parent="laneS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8033F4;strokeWidth=2;fontColor=#1A1A1C;fontSize=9;align=left;spacingLeft=6;spacingRight=4;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;PHASE 0.5  Calibration read&lt;/b&gt;&lt;br&gt;· top-performers.md (your slot)&lt;br&gt;· CTA bar rules&lt;br&gt;· voice.md + real-post examples&lt;br&gt;· strategy file: advisory, never authoritative" vertex="1">
+      <mxGeometry height="165" width="175" x="560" y="20" as="geometry" />
+    </mxCell>
+    <mxCell id="s1" parent="laneS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8033F4;strokeWidth=2;fontColor=#1A1A1C;fontSize=9;align=left;spacingLeft=6;spacingRight=4;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;PHASE 1  Research + outline&lt;/b&gt;&lt;br&gt;Transcript, guide type (4), verify EVERY URL and price against a first-party page.&lt;br&gt;Gap analysis vs existing guides (stays internal).&lt;br&gt;Returns title, keyword (derived from the guide name, one word), outline, tagged sources." vertex="1">
+      <mxGeometry height="165" width="175" x="760" y="20" as="geometry" />
+    </mxCell>
+    <mxCell id="s2" parent="laneS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8033F4;strokeWidth=2;fontColor=#1A1A1C;fontSize=9;align=left;spacingLeft=6;spacingRight=4;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;PHASE 2  Writes everything&lt;/b&gt;&lt;br&gt;N subpages, 3 copy variations per account (contrarian / problem / quantity hooks), DM templates per destination.&lt;br&gt;Copy never names the keyword, ends on one value line + 👇.&lt;br&gt;180-250 words (config). Runs lint until clean." vertex="1">
+      <mxGeometry height="165" width="175" x="1360" y="20" as="geometry" />
+    </mxCell>
+    <mxCell id="shum" parent="laneS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#A6CB17;fontSize=11;fontStyle=1;" value="HUMANIZER ALWAYS ON  ·  zero em dashes  ·  zero AI vocabulary  ·  zero engagement instruction in the copy  ·  no cross-guide references  ·  institutional sources cited, creator videos never" vertex="1">
+      <mxGeometry height="34" width="2000" x="1760" y="85" as="geometry" />
+    </mxCell>
+    <mxCell id="k0" parent="laneK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBA8;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=12;fontStyle=1;" value="topic-finder&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;sibling skill · 3 scanners + correlate · niche presets&lt;/font&gt;" vertex="1">
+      <mxGeometry height="70" width="375" x="160" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="k1" parent="laneK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBA8;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=12;fontStyle=1;" value="guide-maker  (orchestrator skill: doctor, research, writing, lint, publishing, Content Board)" vertex="1">
+      <mxGeometry height="70" width="1575" x="760" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="k2" parent="laneK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBA8;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=12;fontStyle=1;" value="graphics-maker&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;format library · two-pass generation · CTA bar as release gate · C2PA strip&lt;/font&gt;" vertex="1">
+      <mxGeometry height="70" width="375" x="2560" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="k3" parent="laneK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBA8;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=12;fontStyle=1;" value="dm-automation&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;manual (default) | LeadShark | your adapter&lt;/font&gt;" vertex="1">
+      <mxGeometry height="70" width="175" x="3360" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="c0a" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="scan_youtube.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;yt-dlp, --flat, 2 tracks&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="160" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c0c" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="scan_reddit.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;Apify, weighted subs&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="360" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c0d" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="scan_x.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;Apify, bookmark rate&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="560" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c0b" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4A4A4A;strokeColor=#A6CB17;strokeWidth=2;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="channels / subreddits /&lt;br&gt;x-accounts .json&lt;br&gt;&lt;font color=&quot;#A6CB17&quot;&gt;presets per niche&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="160" y="97" as="geometry" />
+    </mxCell>
+    <mxCell id="c0e" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="correlate.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;topics from config, health.json&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="360" y="97" as="geometry" />
+    </mxCell>
+    <mxCell id="c8" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="doctor.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;config, Notion, yt-dlp,&lt;br&gt;keys, fonts&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="560" y="97" as="geometry" />
+    </mxCell>
+    <mxCell id="c1" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="yt-dlp&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;(transcript)&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="760" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="ckw" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="keyword_check.py" vertex="1">
+      <mxGeometry height="60" width="175" x="960" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c9" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="lint_copy.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;banned words, em dashes,&lt;br&gt;keyword-in-copy, word count&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="1360" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c3a" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="md_to_notion.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;directive strip, code-lang fix&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="1760" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c3b" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="publish_guide_hub.py" vertex="1">
+      <mxGeometry height="60" width="175" x="1760" y="97" as="geometry" />
+    </mxCell>
+    <mxCell id="c3c" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="banner_generator.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;Notion cover,&lt;br&gt;NEVER carries the keyword&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="1960" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c3d" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="scan_published_leaks.py" vertex="1">
+      <mxGeometry height="60" width="175" x="2160" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c6" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="create-content-entry&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;card + Graphic property&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="2360" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c5a" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="graphics_generate.py scene&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;2 variants, no text&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="2560" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c5d" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="graphics_generate.py card&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;Pillow only, zero cost&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="2560" y="97" as="geometry" />
+    </mxCell>
+    <mxCell id="c5b" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="cta_bar.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;composites the band locally&lt;br&gt;(Pillow) or via text pass&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="2760" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c5c" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="strip_credentials.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;C2PA out, automatic&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="2760" y="97" as="geometry" />
+    </mxCell>
+    <mxCell id="c7" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#1A1A1C;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="dm_cli.py&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;render · schedule --dry-run&lt;br&gt;adapters: manual, LeadShark&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="3360" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="c10" parent="laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A1A1C;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#F7F7F7;fontSize=10;fontFamily=Courier New;" value="metrics scraper&lt;br&gt;&lt;font color=&quot;#8C8C8C&quot;&gt;optional, any source&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="175" x="3560" y="25" as="geometry" />
+    </mxCell>
+    <mxCell id="y0" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="YouTube&lt;br&gt;N channels, 2 tracks" vertex="1">
+      <mxGeometry height="80" width="175" x="160" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y0b" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="Reddit&lt;br&gt;weighted subreddits" vertex="1">
+      <mxGeometry height="80" width="175" x="360" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y0c" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="X / Twitter&lt;br&gt;curated accounts" vertex="1">
+      <mxGeometry height="80" width="175" x="560" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y3" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="Notion&lt;br&gt;Guide DB&lt;br&gt;hub + subpages" vertex="1">
+      <mxGeometry height="80" width="175" x="1760" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y3b" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="Image provider (cover)&lt;br&gt;KieAI | OpenAI |&lt;br&gt;Pillow fallback" vertex="1">
+      <mxGeometry height="80" width="175" x="1960" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y4" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="Notion&lt;br&gt;Content Board DB&lt;br&gt;Graphic files property" vertex="1">
+      <mxGeometry height="80" width="175" x="2360" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y5" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="Image provider (post)&lt;br&gt;scene model +&lt;br&gt;optional text model" vertex="1">
+      <mxGeometry height="80" width="175" x="2560" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y6" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="LinkedIn&lt;br&gt;N accounts&lt;br&gt;posting window from config" vertex="1">
+      <mxGeometry height="80" width="175" x="3160" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y7" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="DM tool&lt;br&gt;keyword comment&lt;br&gt;→ auto-DM" vertex="1">
+      <mxGeometry height="80" width="175" x="3360" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y8" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="Destinations&lt;br&gt;community | direct link |&lt;br&gt;secondary channel" vertex="1">
+      <mxGeometry height="80" width="175" x="3560" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="y9" parent="laneY" style="shape=cylinder3;boundedLbl=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;" value="Strategy file&lt;br&gt;active rules +&lt;br&gt;discarded hypotheses" vertex="1">
+      <mxGeometry height="80" width="175" x="3760" y="30" as="geometry" />
+    </mxCell>
+    <mxCell id="e1" edge="1" parent="1" source="j0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="m0">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e1b" edge="1" parent="1" source="j0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#1A1A1C;dashed=1;endArrow=block;endFill=1;fontSize=9;" target="m1" value="URL or transcript: skips Phase 0">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="-10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e2" edge="1" parent="1" source="m0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="s0">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e3" edge="1" parent="1" source="s0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="s0b">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e3b" edge="1" parent="1" source="s0b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="s05">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e4" edge="1" parent="1" source="s05" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="s1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e5" edge="1" parent="1" source="m1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="s1" value="spawn">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e5b" edge="1" parent="1" source="s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="m7" value="outline + keyword">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="-10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e6" edge="1" parent="1" source="m7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="j1" value="keyword free?">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="-10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" edge="1" parent="1" source="j1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="m2" value="ok">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e8" edge="1" parent="1" source="m2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="s2" value="spawn">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e9" edge="1" parent="1" source="s2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="j2" value="bundle, lint clean">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e10" edge="1" parent="1" source="j2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="m3" value="ok (auto when gates: one)">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="-10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e11" edge="1" parent="1" source="m3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="m3b">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e11b" edge="1" parent="1" source="m3b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="m4">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e12" edge="1" parent="1" source="m4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="m5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e13" edge="1" parent="1" source="m5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="j3" value="pass A">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e14" edge="1" parent="1" source="j3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="j4" value="pass B">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="-10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e15" edge="1" parent="1" source="j4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="m6" value="pass">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="12" y="0" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e15b" edge="1" parent="1" source="j4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#B03030;dashed=1;endArrow=block;endFill=1;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="m5" value="fails: does not ship">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="12" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e16" edge="1" parent="1" source="m6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="j5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e17" edge="1" parent="1" source="j5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="j6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e18" edge="1" parent="1" source="j6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#1A1A1C;endArrow=block;endFill=1;fontSize=10;" target="y6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e19" edge="1" parent="1" source="y6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#A6CB17;endArrow=block;endFill=1;fontSize=9;" target="y7" value="comments the keyword seen in the GRAPHIC">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="58" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e20" edge="1" parent="1" source="y7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#A6CB17;endArrow=block;endFill=1;fontSize=9;" target="y8" value="auto-DM">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="58" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e21" edge="1" parent="1" source="y6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#8033F4;dashed=1;endArrow=open;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="y9" value="weekly numbers">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e23" edge="1" parent="1" source="y9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#8033F4;dashed=1;endArrow=open;fontSize=9;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="j7">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e24" edge="1" parent="1" source="j7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#8033F4;dashed=1;endArrow=open;fontSize=9;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="s05" value="rules and overrides feed the next run">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="-10" as="offset" />
+        <Array as="points"><mxPoint x="3867" y="86" /><mxPoint x="667" y="86" /></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="u1" edge="1" parent="1" source="s0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="k0">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u2" edge="1" parent="1" source="k0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.23;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c0a">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u2b" edge="1" parent="1" source="k0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.77;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c0c">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u2c" edge="1" parent="1" source="k0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c0d">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u2d" edge="1" parent="1" source="k0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c0e">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u3" edge="1" parent="1" source="c0a" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="y0">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u3b" edge="1" parent="1" source="c0c" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="y0b">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u3c" edge="1" parent="1" source="c0d" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="y0c">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u3d" edge="1" parent="1" source="c0b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c0a">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u4" edge="1" parent="1" source="c8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.15;entryY=1;entryDx=0;entryDy=0;" target="k1" value="pre-flight">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u5" edge="1" parent="1" source="s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="k1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u6" edge="1" parent="1" source="s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u5b" edge="1" parent="1" source="m7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="ckw">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u19" edge="1" parent="1" source="s2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="k1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u19b" edge="1" parent="1" source="s2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c9">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u7" edge="1" parent="1" source="m3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c3a">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u8" edge="1" parent="1" source="c3a" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="y3">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u9" edge="1" parent="1" source="c3b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="y3">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u10" edge="1" parent="1" source="m3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c3c">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u11" edge="1" parent="1" source="c3c" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="y3b">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u10b" edge="1" parent="1" source="m3b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c3d">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u11b" edge="1" parent="1" source="c3d" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="y3">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u12" edge="1" parent="1" source="m4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u12b" edge="1" parent="1" source="c6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="y4">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u13" edge="1" parent="1" source="m5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="k2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u14" edge="1" parent="1" source="k2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.23;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c5a">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u14b" edge="1" parent="1" source="k2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c5d">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u14c" edge="1" parent="1" source="k2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.77;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c5b">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u15" edge="1" parent="1" source="c5a" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="y5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u16" edge="1" parent="1" source="c5b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c5c">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u17" edge="1" parent="1" source="m6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#A6CB17;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="y4" value="to the Graphic property">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="u18" edge="1" parent="1" source="y3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" target="y4" value="guide link (public URL, checked)">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="0" y="10" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="u20" edge="1" parent="1" source="j6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=0.9;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="k3">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u21" edge="1" parent="1" source="k3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="c7">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u22" edge="1" parent="1" source="c7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;" target="y7">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="u23" edge="1" parent="1" source="c10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=1.5;strokeColor=#8C8C8C;dashed=1;endArrow=open;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="y9">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;strokeColor=#B03030;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;align=left;spacingLeft=12;spacingRight=12;verticalAlign=top;spacingTop=8;" value="&lt;b&gt;The rule that outranks everything else&lt;/b&gt;&lt;br&gt;&lt;br&gt;LinkedIn suppresses the reach of posts whose COPY carries an engagement instruction (comment X, like this, repost this). The keyword moved into the graphic and now has exactly one carrier.&lt;br&gt;&lt;br&gt;· Same asset, before and after the change: &lt;b&gt;95 → 11,432 impressions&lt;/b&gt;&lt;br&gt;· One account&#x27;s post with Comment &quot;KEYWORD&quot; in the copy: &lt;b&gt;43 impressions&lt;/b&gt;, the week after a post did 62,000&lt;br&gt;&lt;br&gt;Consequence: a graphic without a legible bar is a post that asks for nothing. There is no backup in the copy, by design. That is why the release gate is red.&lt;br&gt;&lt;br&gt;&lt;b&gt;Two image pipelines, do not confuse them:&lt;/b&gt; the cover generator makes the Notion page cover and NEVER carries the keyword. graphics-maker makes the post graphic and is the only place the keyword exists. &lt;b&gt;cta_mode: copy&lt;/b&gt; exists for people who want to test the old pattern; lint and doctor print these numbers every time it is on." vertex="1">
+      <mxGeometry height="240" width="1290" x="20" y="1080" as="geometry" />
+    </mxCell>
+    <mxCell id="n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F8E6;strokeColor=#A6CB17;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;align=left;spacingLeft=12;spacingRight=12;verticalAlign=top;spacingTop=8;" value="&lt;b&gt;Human gates (the operator only)&lt;/b&gt;&lt;br&gt;&lt;br&gt;1. Approves the outline. Always.&lt;br&gt;2. Approves the written content. Only when &lt;b&gt;gates: two&lt;/b&gt; (default). With gates: one, Phase 2 ships the bundle with defaults.&lt;br&gt;3. Picks the winning scene for the graphic.&lt;br&gt;4. &lt;b&gt;Release gate:&lt;/b&gt; reads the keyword character by character, at feed scale. A misspelled keyword breaks the DM trigger silently and the copy cannot save it. The Pillow bar typesets the exact string, so this gate is about legibility and identity, not spelling.&lt;br&gt;5. Publishes the guide to the web by hand. Never automatic. Until then the public link in the DM does not resolve; the publisher checks the URL.&lt;br&gt;6. Picks a variation, schedules the post, sets the keyword in the DM tool (or pastes the manual bundle).&lt;br&gt;7. Reads the weekly numbers and overrides rules in the strategy file. The agent treats that file as advisory." vertex="1">
+      <mxGeometry height="240" width="1290" x="1340" y="1080" as="geometry" />
+    </mxCell>
+    <mxCell id="n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEFEF;strokeColor=#8C8C8C;strokeWidth=2;fontColor=#1A1A1C;fontSize=11;align=left;spacingLeft=12;spacingRight=12;verticalAlign=top;spacingTop=8;" value="&lt;b&gt;Adapt it to your strategy&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Config (yours):&lt;/b&gt; accounts and voices · community / direct / secondary-channel destinations · DM tool adapter and merge tag · image provider (or none: Pillow card) · word range and closers · hook taxonomy · excluded topics · channel, subreddit and X presets per niche · brand colors, fonts, logo · number of gates · one card per guide or per account.&lt;br&gt;&lt;br&gt;&lt;b&gt;Opinionated (the evidence says keep it):&lt;/b&gt; keyword in the graphic only · humanizer always on · two assets, cover never carries the keyword · scan-health block instead of silent web-search fallback · one-word keyword derived from the guide name, unique across everything · institutional sources cited, creator videos never · no cross-guide references · no nested sub-agents.&lt;br&gt;&lt;br&gt;&lt;b&gt;Empty slots you fill:&lt;/b&gt; voice.md · your real posts in examples.md · top-performers.md · format library cards ingested from graphics you admire · strategy file." vertex="1">
+      <mxGeometry height="240" width="1290" x="2660" y="1080" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches: [main, v2]
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: Compile every script
+        run: python -m compileall -q skills tests
+      - name: Smoke test (no tokens, no network)
+        run: bash tests/run_smoke.sh
+      - name: Shipped examples pass their own linter
+        run: |
+          python skills/guide-maker/scripts/lint_copy.py copy tests/fixtures/copy/good-prose-1.txt tests/fixtures/copy/good-prose-2.txt --keyword SAMPLEKW
+          python skills/guide-maker/scripts/lint_copy.py dm tests/fixtures/dm/good-combined.txt
+
+  no-private-strings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail on secrets, ids, or author-specific strings
+        run: |
+          set -e
+          pattern='ntn_[A-Za-z0-9]{20,}|apify_api_[A-Za-z0-9]{10,}|sk-[A-Za-z0-9]{20,}|dapta\.notion\.site|skool\.com/ai-sales-beer|@AIJosue|josue|dapta'
+          if grep -rniE "$pattern" --exclude-dir=.git --exclude-dir=.github --exclude=install.sh --exclude=README.md --exclude=CHANGELOG.md . ; then
+            echo "private string found"; exit 1
+          fi
+          # Notion database ids: 32 hex chars not inside an example placeholder
+          if grep -rnoE '\b[0-9a-f]{32}\b' --exclude-dir=.git --exclude-dir=.github . | grep -viE 'example|0123456789abcdef|deadbeef|fixture' ; then
+            echo "32-hex id found"; exit 1
+          fi
+      - name: Fail on em dashes
+        run: |
+          if grep -rn $'\xe2\x80\x94\|\xe2\x80\x93' --exclude-dir=.git --exclude-dir=.github --exclude=pipeline.drawio --exclude=pipeline.png . ; then
+            echo "em dash or en dash found"; exit 1
+          fi

@@ -1,198 +1,103 @@
 # Guide Maker
 
-A Claude Code skill that turns YouTube videos into polished, multi-page Notion guides with LinkedIn lead magnet copy.
+A set of Claude Code skills that turn a YouTube video, a transcript, or a trending topic into a published Notion guide, a LinkedIn lead-magnet post with its graphic, and the DMs that deliver the guide to people who comment.
 
-**Watch the walkthrough:** [How This Skill Works (YouTube)](https://youtu.be/Z1zx4SivZ2Y)
+One rule shapes everything: **the keyword lives in the post graphic, never in the copy.** LinkedIn suppresses posts whose text asks for engagement. The same graphic and guide went from 95 to 11,432 impressions when the keyword left the copy; a post that carried `Comment "KEYWORD"` did 43 the week after one did 62,000. The skill writes copy that ends on a value line, puts the keyword in a CTA bar on the image, and lints anything that breaks the rule. Details and the rest of the rationale in [docs/strategy.md](docs/strategy.md).
 
-## What You Get
+![Pipeline](docs/pipeline.png)
 
-- **Notion guide** with hub page + 4-7 subpages (formatted with headers, code blocks, tables, callouts)
-- **3 LinkedIn post variations** per account (Story, Problem/Pain, Data/Framework angles)
-- **DM templates** for auto-sending guides to people who comment on your posts
-- **AI-generated banner** for the guide cover (optional, via KieAI)
-- **Topic research** scanning YouTube channels for trending topics
+Editable source: [docs/pipeline.drawio](docs/pipeline.drawio) (open at app.diagrams.net).
 
-## How It Works
+## What you get per guide
 
-1. You provide a YouTube URL (or topic)
-2. The skill extracts the transcript, researches the topic, and creates an outline
-3. You approve the outline
-4. It writes the full guide, LinkedIn copy, and DM templates
-5. You approve the content
-6. It publishes everything to Notion
+- A Notion guide: hub page plus 4 to 7 subpages, with a cover image.
+- Three LinkedIn post variations (contrarian, problem, quantity hooks), 180 to 250 words, no keyword in the text.
+- A post graphic with the keyword CTA bar. Free with Pillow, or generated through an image provider.
+- DM templates for every destination you configure: direct link, community, secondary channel.
+- A Content Board card with the copy toggles, DM toggles and the graphic on a files property.
+- Optional: trending-topic research across YouTube (two tracks), Reddit and X, correlated, with a health gate.
 
-## Requirements
+## Install
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI)
-- Python 3.8+
-- A [Notion](https://notion.so) account (free tier works)
-- `pip install pyyaml pillow` (for config parsing and banner generation)
-- Optional: [yt-dlp](https://github.com/yt-dlp/yt-dlp) for YouTube transcript extraction
-- Optional: [KieAI](https://kie.ai) API key for AI-generated banners ($0.03/banner)
+```bash
+git clone https://github.com/josue-commits/guide-maker.git
+cd guide-maker && ./install.sh /path/to/your/project
+pip install -r requirements.txt
+python3 /path/to/your/project/.claude/skills/guide-maker/scripts/doctor.py
+```
 
-## Quick Start
+`install.sh` copies the three skills into `.claude/skills/`, fetches the `topic-finder` sibling, creates `config.yaml` from the example, and runs the doctor. Fill the four required keys (Notion token, Guide Database id, your name, your LinkedIn URL) and you are done. Full walkthrough: [docs/setup.md](docs/setup.md).
 
-1. Copy this folder into your Claude Code project:
-   ```bash
-   cp -r guide-maker/ your-project/.claude/skills/guide-maker/
-   ```
+Requirements: Python 3.9+, a Notion account, `pyyaml` and `pillow`. Everything else is optional and gated by config: yt-dlp (transcripts and the YouTube scanner), an Apify token (Reddit and X), a KieAI or OpenAI key (AI images), a LeadShark key (scheduling).
 
-2. Start Claude Code in your project and say:
-   ```
-   Make a guide from this video: https://youtube.com/watch?v=...
-   ```
+## 60-second dry run, no Notion needed
 
-3. Claude will detect the skill, notice `config.yaml` is missing, and walk you through setup.
+```bash
+S=skills/guide-maker/scripts
+python3 $S/doctor.py --offline --config tests/fixtures/config.test.yaml
+python3 $S/publish_guide_hub.py --dry-run --config tests/fixtures/config.test.yaml \
+  --title "Sample Guide" --description "A sample" --keyword SAMPLEKW --type "Technical Tutorial" --week 2026-01-05 --icon "🛠️" \
+  --build-item "A working setup" --audience-item "Operators" --nav-note "Skip to step 2 if installed." \
+  --step "🚀|Setup|Install and configure|tests/fixtures/sample-guide/01-setup.md" \
+  --source "official|Docs|https://example.com/docs"
+python3 skills/graphics-maker/scripts/graphics_generate.py card --title "Automate your CRM follow-ups" \
+  --subtitle "5 workflows" --stat "3|tools" --keyword SAMPLEKW --output /tmp/post.png --config tests/fixtures/config.test.yaml
+python3 $S/lint_copy.py copy tests/fixtures/copy/good-prose-1.txt --keyword SAMPLEKW
+```
 
-That's it. The skill handles the rest: transcript extraction, research, outline, writing, publishing.
+The whole smoke test: `bash tests/run_smoke.sh`.
 
-## Notion Database Setup
+## The pipeline
 
-You need one database (the Guide Database). A Content Board database is optional.
+| Step | What happens | Who decides |
+|---|---|---|
+| 0 | Topic research: three sources scanned, health-checked, correlated, filtered (excluded topics, already shipped, depth gate) | writer agent |
+| 0.5 | Calibration read: your top performers, CTA rules, voice | writer agent |
+| 1 | Transcript, research, every URL and price verified, gap analysis, outline, keyword | writer agent |
+| G1 | Approve the outline | you |
+| 2 | Guide, three copy variations, DM templates, lint until clean | writer agent |
+| G2 | Approve the content (`workflow.gates: two`, default) | you |
+| 3a | Publish hub and subpages to Notion, leak scan | orchestrator |
+| 3b | Cover image, no keyword on it, required | orchestrator |
+| 3c | Post graphic with the CTA bar, C2PA stripped | graphics-maker |
+| 3d | Content Board card, graphic on the `Graphic` property | orchestrator |
+| 3e | DM bundle rendered; scheduled if you use an adapter | dm-automation |
+| | Publish the Notion page to the web, pick a variation, post | you |
 
-### Guide Database
+Say `make a guide from this video: <url>`, `find me a topic`, `write the copy for this guide`, or `publish the guide`. Each phase can run alone.
 
-Create a new database in Notion with these properties:
+## Skills in this repo
 
-| Property | Type | Values |
-|----------|------|--------|
-| Guide Title | Title | (auto) |
-| Type | Select | Technical Tutorial, Strategic Framework, Comparison/Persuasion |
-| Week | Date | |
-| Keyword | Rich Text | |
-| Status | Select | Draft, Review, Published |
-
-Share the database with your Notion integration (the one whose API key you'll add to `config.yaml`).
-
-### Content Board Database (Optional)
-
-If you want to track LinkedIn posts and their performance, create a second database with these properties:
-
-| Property | Type | Values |
-|----------|------|--------|
-| Title | Title | (auto) |
-| Account | Select | (your account names) |
-| Post Date | Date | |
-| Day | Select | Monday, Wednesday, Friday |
-| Type | Select | guide, sales-resource |
-| Status | Select | Draft, Review, Published |
-| Keyword | Rich Text | |
-| Guide Link | URL | |
-| Scheduled | Checkbox | |
-| Impressions | Number | |
-| Comments | Number | |
-| DMs Sent | Number | |
-| Notes | Rich Text | |
+| Skill | Purpose | Needs |
+|---|---|---|
+| `skills/guide-maker` | The orchestrator: research, writing, publishing, lint, Content Board, doctor | Notion |
+| `skills/graphics-maker` | The post graphic: Pillow card or two-pass scene + text, CTA bar, C2PA strip | nothing (Pillow) or an image key |
+| `skills/dm-automation` | DM bundle and checklist, or scheduling through an adapter | nothing (manual) or a LeadShark key |
+| `topic-finder` (fetched by install.sh, [own repo](https://github.com/josue-commits/topic-finder)) | YouTube, Reddit and X scanners plus correlation and a health report | yt-dlp; Apify for Reddit and X |
 
 ## Configuration
 
-Copy `config.example.yaml` to `config.yaml` and fill in your details. The file is well-documented with comments explaining every field.
+One file, `skills/guide-maker/config.yaml`, every key commented in `config.example.yaml`. Secrets can live in env vars or `~/.config/<tool>/api_key` instead. The six keys most people change are in [docs/setup.md](docs/setup.md); everything you can bend is in [docs/customizing.md](docs/customizing.md): your voice and real posts, channel presets, excluded topics, closers, word range, `cta_mode`, multi-account, community and secondary channel, your own graphic formats, adding an image provider or a DM adapter.
 
-### Required Fields
+## Upgrading from v1
 
-- `notion_api_key` -- Your Notion integration token
-- `guide_database_id` -- The database ID where guides are stored
-- `author_name` -- Your name for the guide byline
-- `linkedin_url` -- Your LinkedIn profile URL
+v1 configs still load. `doctor.py --migrate-config` writes the v2 layout. The Content Board needs a `Graphic` files property. See [MIGRATION.md](MIGRATION.md) and [CHANGELOG.md](CHANGELOG.md).
 
-### Optional Fields
-
-- `community_url` -- Link to your community (Skool, Discord, Circle, etc.). When set, guides include a community callout at the top of the hub page.
-- `content_board_database_id` -- For LinkedIn post tracking and copy delivery
-- `kieai_api_key` -- For AI-generated guide banners. Without it, the skill generates simple Pillow banners using your brand colors.
-- `accounts` -- For multi-account LinkedIn posting. Each account has a name, voice type (founder/team/company), and CTA type (community/direct).
-- `brand_colors` -- Hex codes for Pillow banner generation
-- `ytdlp_path` -- Custom path to the yt-dlp binary
-
-## Customization
-
-### Adding Your Writing Voice
-
-Edit `references/writing/voice.md` to describe your writing personality and tone. The agent reads this file before writing any content.
-
-### Adding LinkedIn Post Examples
-
-Edit `references/linkedin/examples.md` with 5-10 of your best-performing LinkedIn posts. The agent uses these to calibrate voice, rhythm, and style.
-
-### Adding YouTube Channels for Topic Research
-
-Edit `channels.json` to add YouTube channels relevant to your niche. The skill scans these when you ask "find me a topic" or "what's trending." Each entry needs a channel ID and name.
-
-### Changing Guide Structure
-
-Edit `references/guides/hub-page-layout.md` to change how guide pages are structured in Notion. This controls the hub page block order, callout placement, and navigation format.
-
-### Adjusting the Humanizer Filter
-
-Edit `references/writing/humanizer.md` to add or remove banned vocabulary and patterns. The default list catches the most common AI writing tells.
-
-## The Pipeline
-
-The skill runs a multi-phase pipeline with user approval gates:
+## Repository layout
 
 ```
-Phase 0 (optional): Topic Research
-    Scan YouTube channels, cluster topics, score, return briefing
-
-Phase 1: Research + Outline
-    Extract transcript, research topic, classify guide type, create outline
-    --> USER APPROVAL GATE <--
-
-Phase 2: Write Everything
-    Hub page, subpages, LinkedIn copy (3 variations x N accounts), DM templates
-    --> USER APPROVAL GATE <--
-
-Phase 3: Publish
-    Create Guide Database entry, publish hub + subpages, generate banner
-
-Phase 4 (optional): Content Board
-    Create entries with copy + DM templates for each account
+install.sh                 copy skills into a project, fetch topic-finder, run doctor
+skills/guide-maker/        SKILL.md, AGENT.md, config.example.yaml, scripts/, references/, templates/, assets/fonts/
+skills/graphics-maker/     SKILL.md, scripts/ (providers/, cta_bar.py, strip_credentials.py), references/format-library/
+skills/dm-automation/      SKILL.md, scripts/ (dm_cli.py, adapters/), references/
+docs/                      setup, customizing, strategy, notion-databases, troubleshooting, pipeline diagram
+tests/                     smoke test and fixtures (no tokens, no network)
 ```
 
-Each phase can be run independently. You can say "just write the LinkedIn copy" or "just publish the guide" to run specific steps.
+## Background
 
-## File Structure
-
-```
-guide-maker/
-├── SKILL.md                           # Orchestrator (Claude Code skill file)
-├── AGENT.md                           # Writer agent (spawned for heavy lifting)
-├── config.example.yaml                # Configuration template
-├── config.yaml                        # Your configuration (git-ignored)
-├── README.md                          # This file
-├── LICENSE                            # MIT
-├── channels.json                      # YouTube channels for topic research
-├── scripts/
-│   ├── md_to_notion.py               # Markdown to Notion blocks + publishing
-│   ├── publish_guide_hub.py          # Hub page + subpages publisher
-│   ├── banner_generator.py           # KieAI or Pillow banner generation
-│   └── scan_channels.py             # YouTube channel scanner
-├── references/
-│   ├── writing/
-│   │   ├── guide-spec.md            # Full guide creation specification
-│   │   ├── humanizer.md             # AI writing patterns to avoid (24 rules)
-│   │   └── voice.md                 # Writing personality and tone
-│   ├── linkedin/
-│   │   ├── linkedin-prompt.md       # Master prompt for LinkedIn copy
-│   │   └── examples.md             # Real post examples for voice calibration
-│   ├── guides/
-│   │   ├── hub-page-layout.md      # Notion hub page block structure
-│   │   ├── guide-types.md          # Guide type definitions and criteria
-│   │   └── examples/               # Example guides by type
-│   └── troubleshooting.md          # Common issues and fixes
-└── templates/
-    ├── dm-community.md              # DM template for community CTA
-    └── dm-direct.md                 # DM template for direct guide link
-```
-
-## Tips
-
-- **Start with one account.** You can always add more later in `config.yaml`.
-- **Keep your examples.md fresh.** The more representative your examples are, the better the LinkedIn copy matches your voice.
-- **Use the topic research phase.** It saves time vs. guessing what to write about. Add 5-10 YouTube channels in your niche and let it find trending topics.
-- **Review the outline carefully.** It's much easier to change direction at the outline stage than after 7 subpages are written.
-- **Guides live in Notion, not locally.** The skill uses `/tmp/` for intermediate files and publishes directly. No local markdown files to manage.
+Built by [Josue Hernandez](https://www.linkedin.com/in/josue-hernandez04) to run a three-guides-a-week LinkedIn lead-magnet operation, then rewritten for anyone to adapt. The [original walkthrough video](https://youtu.be/Z1zx4SivZ2Y) shows v1: the pipeline is the same shape, but the CTA it demonstrates (keyword in the copy) is the one v2 removes. Read [docs/strategy.md](docs/strategy.md) for what changed and why.
 
 ## License
 
-MIT
+MIT. Fonts under `skills/guide-maker/assets/fonts/` are Inter, SIL Open Font License.
