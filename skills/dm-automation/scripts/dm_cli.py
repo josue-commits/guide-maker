@@ -476,7 +476,12 @@ def cmd_schedule(args) -> None:
     else:
         print("warning: no --image. The keyword lives in the graphic; a lead magnet post needs one.", file=sys.stderr)
 
-    replies = args.comment_reply if args.comment_reply else list(cfg_get(cfg, "dm_tool.leadshark.comment_replies") or [])
+    replies_cfg = cfg_get(cfg, "dm_tool.leadshark.comment_replies")
+    if isinstance(replies_cfg, bool):  # v1-style boolean: True means the built-in rotation
+        replies_cfg = ["sent", "sent!", "Sent over!", "Sending", "Sent! Check dms!"] if replies_cfg else []
+    elif isinstance(replies_cfg, str):
+        replies_cfg = [replies_cfg] if replies_cfg else []
+    replies = args.comment_reply if args.comment_reply else list(replies_cfg or [])
     nfd_cfg = cfg_get(cfg, "dm_tool.leadshark.non_first_degree_reply")
     nfd = args.non_first_degree_reply or ([nfd_cfg] if isinstance(nfd_cfg, str) and nfd_cfg else list(nfd_cfg or []))
     auto_connect = True if args.auto_connect else bool(cfg_get(cfg, "dm_tool.leadshark.auto_connect", True))
@@ -559,13 +564,28 @@ def cmd_image_fit(args) -> None:
     else:
         im = im.convert("RGB")
     quality = 95
+    scale_floor = 1080  # never go below this on the long edge; LinkedIn renders at most ~1200
     while True:
         # quality 95 with subsampling=0 keeps flat art and type crisp; LinkedIn re-encodes anyway
-        im.save(out, "JPEG", quality=quality, optimize=True, subsampling=0)
+        try:
+            im.save(out, "JPEG", quality=quality, optimize=True, subsampling=0)
+        except OSError:
+            # libjpeg "Suspension not allowed here" on large, high-entropy images with
+            # optimize=True: raise the encoder buffer and retry without the optimizer.
+            from PIL import ImageFile
+            ImageFile.MAXBLOCK = max(ImageFile.MAXBLOCK, im.width * im.height * 3)
+            im.save(out, "JPEG", quality=quality, optimize=False, subsampling=0)
         new_size = out.stat().st_size
-        if new_size <= max_bytes or quality <= 75:
+        if new_size <= max_bytes:
             break
-        quality -= 5
+        if quality > 75:
+            quality -= 5
+            continue
+        # quality floor reached: shrink the pixel dimensions by 15 percent and try again
+        if max(im.size) * 0.85 < scale_floor:
+            break
+        im = im.resize((int(im.width * 0.85), int(im.height * 0.85)), Image.LANCZOS)
+        quality = 90
     result = {
         "ok": new_size <= max_bytes,
         "input": str(src),
@@ -573,11 +593,12 @@ def cmd_image_fit(args) -> None:
         "output": str(out),
         "output_bytes": new_size,
         "quality": quality,
+        "size": list(im.size),
         "max_bytes": max_bytes,
     }
     emit(result)
     if not result["ok"]:
-        fail(f"Still {new_size} bytes at quality {quality}. Shrink the pixel dimensions and retry.")
+        fail(f"Still {new_size} bytes at quality {quality} and {im.width}x{im.height}. Simplify the artwork and retry.")
 
 
 # -------------------------------------------------------------------- parser

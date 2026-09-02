@@ -146,8 +146,8 @@ DEFAULTS = {
         "leadshark": {
             "base_url": "https://apex.leadshark.io",
             "auto_connect": True,
-            "comment_replies": True,
-            "non_first_degree_reply": "",
+            "comment_replies": ["sent", "sent!", "Sent over!", "Sending", "Sent! Check dms!"],
+            "non_first_degree_reply": "Please connect with me so I can send it! :)",
             "attachment_max_bytes": 4194304,
             "create_as": "Paused",
             "timezone": "UTC",

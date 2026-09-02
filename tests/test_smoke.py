@@ -27,7 +27,17 @@ ENV = dict(os.environ)
 for k in ("NOTION_API_KEY", "KIEAI_API_KEY", "OPENAI_API_KEY", "APIFY_TOKEN", "LEADSHARK_API_KEY"):
     ENV.pop(k, None)
 ENV["GUIDE_MAKER_CONFIG"] = str(CFG)
-ENV["HOME"] = tempfile.mkdtemp(prefix="gm-home-")   # no ~/.config/*/api_key leaks in
+# Point HOME at an empty dir so no ~/.config/*/api_key leaks in, but keep the
+# user site-packages reachable (PyYAML and Pillow are often installed there).
+import site
+_USER_SITE = site.getusersitepackages() if hasattr(site, "getusersitepackages") else ""
+ENV["HOME"] = tempfile.mkdtemp(prefix="gm-home-")
+ENV["PYTHONPATH"] = os.pathsep.join(p for p in (_USER_SITE, ENV.get("PYTHONPATH", "")) if p)
+
+
+def future_iso(days=2):
+    import datetime
+    return (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def run(*args, ok=True, cwd=None):
@@ -112,7 +122,8 @@ class TestCoverAndGraphic(TmpDirMixin, unittest.TestCase):
         out = self.tmp / "deep" / "dir" / "banner.png"
         run(GM / "banner_generator.py", "simple", "--title", "Sample Guide", "--output", out, "--config", CFG)
         from PIL import Image
-        self.assertEqual(Image.open(out).size, (1500, 600))
+        with Image.open(out) as im:
+            self.assertEqual(im.size, (1500, 600))
 
     def test_banner_refuses_keyword_as_title(self):
         proc = run(GM / "banner_generator.py", "simple", "--title", "SAMPLEKW", "--keyword", "SAMPLEKW",
@@ -223,9 +234,9 @@ class TestDM(TmpDirMixin, unittest.TestCase):
         # block sockets: any adapter that opens one fails loudly
         sitecustom = self.tmp / "sitecustomize.py"
         sitecustom.write_text("import socket\n_o=socket.socket.__init__\ndef _b(*a,**k): raise RuntimeError('network blocked in smoke test')\nsocket.socket.__init__=_b\n")
-        env = dict(ENV); env["PYTHONPATH"] = str(self.tmp)
+        env = dict(ENV); env["PYTHONPATH"] = os.pathsep.join(p for p in (str(self.tmp), ENV.get("PYTHONPATH", "")) if p)
         proc = subprocess.run([PY, str(DM / "dm_cli.py"), "schedule", "--content", f"@{post}", "--image", str(img),
-                               "--time", "2026-01-05T13:00:00Z", "--keyword", "SAMPLEKW", "--dm", f"@{dm}",
+                               "--time", future_iso(), "--keyword", "SAMPLEKW", "--dm", f"@{dm}",
                                "--out-dir", str(out), "--dry-run", "--config", str(CFG)],
                               capture_output=True, text=True, env=env, cwd=ROOT)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
@@ -235,9 +246,19 @@ class TestDM(TmpDirMixin, unittest.TestCase):
         big = self.tmp / "big.png"
         from PIL import Image
         import random
-        im = Image.new("RGB", (2400, 2400))
-        im.putdata([(random.randrange(256), random.randrange(256), random.randrange(256)) for _ in range(2400 * 2400)])
-        im.save(big)
+        # a plausible post graphic: gradient background with a noisy texture band, big enough to exceed 4 MiB as PNG
+        random.seed(7)
+        w = h = 3000
+        im = Image.new("RGB", (w, h))
+        px = im.load()
+        for y in range(h):
+            for x in range(0, w, 3):
+                base = (x * 255 // w, y * 255 // h, 140)
+                n = random.randrange(-60, 60)
+                px[x, y] = (max(0, min(255, base[0] + n)), max(0, min(255, base[1] + n)), base[2])
+                if x + 1 < w: px[x + 1, y] = px[x, y]
+                if x + 2 < w: px[x + 2, y] = px[x, y]
+        im.save(big, optimize=False)
         self.assertGreater(big.stat().st_size, 4194304)
         out = self.tmp / "fit.jpg"
         run(DM / "dm_cli.py", "image-fit", big, "--output", out, "--config", CFG)

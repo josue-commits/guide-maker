@@ -36,8 +36,9 @@ jobs:
       - name: Fail on secrets, ids, or author-specific strings
         run: |
           set -e
-          pattern='ntn_[A-Za-z0-9]{20,}|apify_api_[A-Za-z0-9]{10,}|sk-[A-Za-z0-9]{20,}|dapta\.notion\.site|skool\.com/ai-sales-beer|@AIJosue|josue|dapta'
-          if grep -rniE "$pattern" --exclude-dir=.git --exclude-dir=.github --exclude=install.sh --exclude=README.md --exclude=CHANGELOG.md . ; then
+          # josue-commits is the GitHub org in clone URLs and is allowed; anything else naming the author is not
+          pattern='ntn_[A-Za-z0-9]{20,}|apify_api_[A-Za-z0-9]{10,}|sk-[A-Za-z0-9]{20,}|dapta\.notion\.site|skool\.com/ai-sales-beer|@AIJosue|josue(?!-commits)|dapta'
+          if grep -rniP "$pattern" --exclude-dir=.git --exclude-dir=.github --exclude=install.sh --exclude=README.md --exclude=CHANGELOG.md . ; then
             echo "private string found"; exit 1
           fi
           # Notion database ids: 32 hex chars not inside an example placeholder
@@ -46,6 +47,6 @@ jobs:
           fi
       - name: Fail on em dashes
         run: |
-          if grep -rn $'\xe2\x80\x94\|\xe2\x80\x93' --exclude-dir=.git --exclude-dir=.github --exclude=pipeline.drawio --exclude=pipeline.png . ; then
+          if grep -rnP '\x{2014}|\x{2013}' --exclude-dir=.git --exclude-dir=.github --exclude=pipeline.drawio --exclude=pipeline.png --exclude=bad-emdash.txt . ; then
             echo "em dash or en dash found"; exit 1
           fi

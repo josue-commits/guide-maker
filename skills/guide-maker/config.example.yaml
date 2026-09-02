@@ -172,8 +172,13 @@ dm_tool:
   leadshark:                    # reference adapter in skills/dm-automation
     base_url: "https://apex.leadshark.io"
     auto_connect: true
-    comment_replies: true
-    non_first_degree_reply: ""  # reply text for commenters who are not 1st-degree
+    comment_replies:            # public replies the tool posts under the comment, rotated
+      - "sent"
+      - "sent!"
+      - "Sent over!"
+      - "Sending"
+      - "Sent! Check dms!"
+    non_first_degree_reply: "Please connect with me so I can send it! :)"  # for commenters outside your network
     attachment_max_bytes: 4194304   # 4 MiB ceiling on the post image
     create_as: Paused           # automations are created paused; you flip them on
     timezone: UTC
