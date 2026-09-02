@@ -1,0 +1,17 @@
+Your CRM is not a system of record. It is a system of guilt.
+
+Every rep knows the drill. Call ends, you promise yourself you will log it, three calls later the notes are gone and the deal stage is whatever it was last Tuesday. The pipeline review on Friday is a fiction everybody agrees to read out loud.
+
+Here's the thing nobody says out loud: the CRM was never going to get updated by the people it was built to measure. The incentive runs the wrong way.
+
+So I stopped asking. I wired a small agent between the inbox, the calendar and the CRM. Every reply, every booked call, every no-show now moves the deal stage on its own and writes a two-line note about what happened.
+
+It reads the thread. It decides if the stage moved. It logs the reason. I never touch a field.
+
+Four weeks in: 312 activities logged without a human, 0 deals sitting in a stage they had already left, and the Friday review took eleven minutes instead of forty.
+
+The reps did not become more disciplined. The work just stopped depending on them.
+
+I wrote up the whole setup: the three triggers, the stage rules, the prompt that decides when a deal is stuck, and the one guardrail that keeps it from closing deals that are not closed.
+
+I'm giving away the complete guide for free 👇

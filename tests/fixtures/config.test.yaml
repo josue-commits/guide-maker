@@ -1,0 +1,108 @@
+# Test config for the smoke tests. No tokens, no database ids, no paid providers.
+# Every script must run its offline paths with this file.
+schema_version: 2
+
+notion:
+  api_key: ""
+  guide_database_id: ""
+  content_board_database_id: ""
+  public_domain: "example.notion.site"
+  guide_types: ["Technical Tutorial", "Strategic Framework", "Comparison/Persuasion", "Use-case Stack"]
+
+author:
+  name: "Sam"
+  linkedin_url: "https://www.linkedin.com/in/example"
+  voice: founder
+  dm_signoff: "Sam"
+
+community:
+  platform: none
+  name: ""
+  url: ""
+  callout_line: ""
+
+secondary_channel:
+  type: none
+  handle: ""
+  url: ""
+  credit_line: ""
+
+accounts:
+  - name: "Sam"
+    voice: founder
+    dm_destination: auto
+
+workflow:
+  gates: two
+  work_dir: /tmp/guide-maker-test
+  language: en
+  post_days: [Monday, Wednesday, Friday]
+  one_card_per: guide
+  cover_required: true
+
+topic_finder:
+  path: ""
+  sources: [youtube, reddit, x]
+  lookback_days: {youtube: 7, reddit: 7, x: 8}
+  youtube_tracks: [tool, business]
+  scan_health:
+    min_channels_with_videos: 5
+    min_x_posts: 1
+    min_reddit_posts: 1
+    fail_on_missing_config: true
+  x_bookmark_rate: {substance: 0.8, noise: 0.1}
+
+excluded_topics:
+  - "crypto"
+  - "/^(?:get rich|make \\$\\d+)/"
+
+research:
+  depth_gate:
+    min_authoritative_sources: 3
+    require_official_docs: true
+    min_video_minutes: 20
+    min_written_pages: 10
+    min_subpages: 4
+    max_subpages: 7
+  gap_analysis: required
+
+sources:
+  cite_official_docs: true
+  cite_institutional_talks: true
+  cite_creator_videos: false
+  cross_guide_references: false
+
+copy:
+  cta_mode: graphic
+  structure: prose
+  variations: 3
+  hooks: [contrarian, problem_pain, quantity_build]
+  words: {min: 180, max: 250, target: 215, reject_below: 140, reject_above: 300}
+  closer_rotation_weeks: 3
+  extra_banned_words: []
+
+dm:
+  versions: auto
+  merge_tag: "{{firstName}}"
+  max_lines: 7
+  hard_wrap: false
+  guide_link_must_be_public: true
+  vary_opener_weekly: true
+
+dm_tool:
+  provider: manual
+
+brand:
+  colors: {dark: "#1A1A1C", light: "#F7F7F7", accent_1: "#A6CB17", accent_2: "#8033F4"}
+  fonts: {bold: "", regular: ""}
+
+cover:
+  mode: simple
+  style: dark
+  size: [1500, 600]
+
+graphics:
+  provider: none
+
+tools:
+  ytdlp_path: ""

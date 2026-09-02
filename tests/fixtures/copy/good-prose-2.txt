@@ -1,0 +1,21 @@
+You have 40 meeting summaries in a folder you have never opened.
+
+Every notetaker records the call. Every notetaker writes the summary. Then the summary sits in a tab, the action items sit under it, and by Thursday nobody remembers who owed what to whom.
+
+The old way: record, summarize, forget.
+
+The new way: record, summarize, route.
+
+Here's what nobody admits. The value of a meeting note is not the note. It is the follow-up that happens because of it. A summary that creates zero tasks is a transcript with better formatting.
+
+So I built a small routing step that runs after every call. It reads the summary, pulls out anything with a name and a verb, creates the task in the tool the team already checks, and drafts the follow-up email in the same thread the meeting came from.
+
+Read. Extract. Route. Draft.
+
+Two weeks of data: 27 calls, 61 action items created automatically, 58 of them closed by the owner without a reminder. Before this we were closing about a third.
+
+Nothing about the meetings got better. The notes just started doing something.
+
+The guide has the routing prompt, the task template, the email draft rules, and the one filter that stops it from turning small talk into tickets.
+
+Get free access 👇

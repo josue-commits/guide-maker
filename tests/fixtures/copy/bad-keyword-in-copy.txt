@@ -1,0 +1,17 @@
+I gave a spreadsheet agent 14 reports to build and went to lunch.
+
+Every ops team has the same Monday. Export the CSVs, paste them into the master sheet, fix the three columns that shifted, rebuild the pivot, screenshot it for the channel. Two hours if nothing breaks. Nothing breaking is rare.
+
+Here's the part that surprised me. The agent was not good at spreadsheets. It was good at the boring layer around them: reading the export, noticing the shifted column, asking one question when a header changed, and refusing to guess.
+
+That refusal is the whole trick. A script that guesses corrupts the sheet quietly. An agent that stops and asks corrupts nothing.
+
+The build took one afternoon. One prompt file that describes each report. One folder the exports land in. One rule: if a column is missing, stop and say which one.
+
+Fourteen reports. Forty minutes of runtime. Zero fixes by hand.
+
+Since then it has caught two vendor exports that silently dropped a currency column, which the old process would have pasted straight into the board deck.
+
+The guide walks through the prompt file, the folder convention, the stop rule, and how to add a fifteenth report without touching the first fourteen.
+
+Want it? Comment "SAMPLEKW" and I'll send it 👇

@@ -1,0 +1,8 @@
+Hey {{firstName}}, glad this one landed. Full thing's here:
+https://example.notion.site/Sample-Guide-0123456789abcdef0123456789abcdef
+
+The whole CRM swap is three triggers and one stop rule, and I left the
+two deals it got wrong in the first week in there so you can see where
+it needs a guardrail.
+
+Sam

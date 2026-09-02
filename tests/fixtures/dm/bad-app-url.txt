@@ -1,0 +1,5 @@
+Hey {{firstName}}, glad this one landed. Full thing's here: https://app.notion.com/p/0123456789abcdef0123456789abcdef
+
+The whole CRM swap is three triggers and one stop rule.
+
+Sam

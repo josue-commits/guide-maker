@@ -1,0 +1,5 @@
+Hey {name}! Here's the full guide: https://example.notion.site/Sample-Guide-0123456789abcdef0123456789abcdef
+
+It covers the three triggers and the stop rule.
+
+Sam
