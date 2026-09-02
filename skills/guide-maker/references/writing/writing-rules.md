@@ -28,4 +28,4 @@ Read these before writing any guide content:
 - Comparison/Persuasion: 1,500-3,000 words
 
 ## Subpage Structure
-Break guides into 3-7 subpages (steps). Each subpage is a self-contained section stored as a separate markdown file in `/tmp/guides/`. Name files descriptively: `01-getting-started.md`, `02-configuration.md`, etc.
+Break guides into 4-7 subpages (steps), per `research.depth_gate.min_subpages` and `max_subpages`. Each subpage is a self-contained section stored as a separate markdown file under `workflow.work_dir`. Name files descriptively: `01-getting-started.md`, `02-configuration.md`, etc.

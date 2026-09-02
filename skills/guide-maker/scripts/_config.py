@@ -230,8 +230,8 @@ def sibling(name):
     if path.is_dir():
         return path
     hints = {
-        "topic-finder": ("git clone https://github.com/josue-commits/topic-finder "
-                         f"{path}  (or run install.sh at the repo root)"),
+        "topic-finder": (f"run install.sh at the repo root, or clone the topic-finder repo "
+                         f"into {path}"),
     }
     hint = hints.get(name, f"copy the {name} skill folder next to guide-maker, or set "
                            "GUIDE_MAKER_SKILLS_DIR to the folder that holds both")
@@ -541,6 +541,13 @@ def add_config_arg(parser, subparsers=None):
 
 
 if __name__ == "__main__":
-    cfg = load_config(sys.argv[1] if len(sys.argv) > 1 else None)
+    import argparse
+    _parser = argparse.ArgumentParser(
+        description="Load the guide-maker config and print its static validation")
+    _parser.add_argument("path", nargs="?", default=None, help="Config file (optional)")
+    add_config_arg(_parser)
+    _args = _parser.parse_args()
+    cfg = load_config(_args.path or _args.config)
+    print(f"config: {cfg.get('_path')}")
     for level, message in validate(cfg):
         print(f"{level:<4} {message}")

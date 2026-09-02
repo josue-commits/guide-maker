@@ -50,10 +50,10 @@ For each tool mentioned in the guide:
 4. **Never skip a tool.** If the first search fails, try: `"[tool name] icon PNG"`, `"[tool name] brand assets"`, `"[tool name] press kit PNG"`
 
 Good sources for logos:
-- `uxwing.com` — free PNGs, 512x512, transparent backgrounds
-- `freepnglogo.com` — PNG with transparent backgrounds
-- GitHub repos — `raw.githubusercontent.com` links (PNG files only)
-- Official brand/press pages — downloadable PNG assets
+- `uxwing.com`: free PNGs, 512x512, transparent backgrounds
+- `freepnglogo.com`: PNG with transparent backgrounds
+- GitHub repos: `raw.githubusercontent.com` links (PNG files only)
+- Official brand/press pages: downloadable PNG assets
 
 ### Using a previous banner as style reference
 

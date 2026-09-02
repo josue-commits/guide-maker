@@ -60,7 +60,7 @@ python3 {SKILL_DIR}/scripts/banner_generator.py simple \
   --title "Short Guide Title" \
   --subtitle "Optional subtitle" \
   --style dark \
-  --output /tmp/guides/cover.png \
+  --output {WORK_DIR}/cover.png \
   --upload-to HUB_PAGE_ID
 
 # AI cover (read references/banner-guide.md first)
@@ -69,11 +69,11 @@ python3 {SKILL_DIR}/scripts/banner_generator.py ai \
   --ref-image "STYLE_REF_URL" \
   --ref-image "LOGO_URL_1" \
   --ref-image "LOGO_URL_2" \
-  --output /tmp/guides/cover.png \
+  --output {WORK_DIR}/cover.png \
   --upload-to HUB_PAGE_ID
 
 # Upload only
-python3 {SKILL_DIR}/scripts/banner_generator.py upload --file /tmp/guides/cover.png --page-id HUB_PAGE_ID
+python3 {SKILL_DIR}/scripts/banner_generator.py upload --file {WORK_DIR}/cover.png --page-id HUB_PAGE_ID
 ```
 
 `--style` accepts `dark`, `gradient` or `accent`. `--upload-to` generates and sets the cover in one step. If AI generation fails, the script falls back to a `simple` cover automatically. The output directory is created if it does not exist.
