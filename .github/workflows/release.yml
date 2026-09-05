@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tag, VERSION and CHANGELOG agree
+        run: python3 scripts/check_version.py --check
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: Smoke test (no tokens, no network)
+        run: bash tests/run_smoke.sh
+      - name: Release notes from the CHANGELOG section
+        run: |
+          python3 - <<'PY' > "$RUNNER_TEMP/notes.md"
+          import pathlib, re
+          v = pathlib.Path("VERSION").read_text().strip()
+          s = pathlib.Path("CHANGELOG.md").read_text()
+          m = re.search(r"^## " + re.escape(v) + r"[^\n]*\n(.*?)(?=^## |\Z)", s, re.M | re.S)
+          if not m:
+              raise SystemExit(f"no CHANGELOG.md section for {v}")
+          print(m.group(1).strip())
+          PY
+          test -s "$RUNNER_TEMP/notes.md"
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: ${{ runner.temp }}/notes.md

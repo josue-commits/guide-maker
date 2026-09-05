@@ -1,0 +1,76 @@
+name: docs
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: README install block is byte-equal to .agents/install-block.md
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+          pat = re.compile(r"<!-- install-block:start -->\n(.*?)<!-- install-block:end -->", re.S)
+          blocks = {}
+          for name in ("README.md", ".agents/install-block.md"):
+              text = pathlib.Path(name).read_text()
+              found = pat.findall(text)
+              if len(found) != 1:
+                  sys.exit(f"FAIL {name}: expected exactly one install block, found {len(found)}")
+              blocks[name] = found[0]
+          if blocks["README.md"] != blocks[".agents/install-block.md"]:
+              import difflib
+              sys.stdout.writelines(difflib.unified_diff(
+                  blocks[".agents/install-block.md"].splitlines(True),
+                  blocks["README.md"].splitlines(True),
+                  ".agents/install-block.md", "README.md"))
+              sys.exit("FAIL README install block differs from .agents/install-block.md")
+          print("OK install block matches")
+          PY
+      - name: Every relative markdown link resolves
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+          root = pathlib.Path(".")
+          files = [root / "README.md", root / "skills" / "README.md"]
+          files += sorted(root.glob("docs/**/*.md"))
+          files += sorted(root.glob("skills/*/SKILL.md"))
+          files += sorted(root.glob(".agents/**/*.md"))
+          files += sorted(root.glob(".out-of-scope/*.md"))
+          link = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+          image = re.compile(r"!\[[^\]]*\]\(([^)\s]+)\)")
+          dead = []
+          for f in files:
+              if not f.exists():
+                  continue
+              text = f.read_text()
+              # skip fenced code blocks and inline code spans
+              text = re.sub(r"```.*?```", "", text, flags=re.S)
+              text = re.sub(r"`[^`\n]*`", "", text)
+              for rx in (link, image):
+                  for target in rx.findall(text):
+                      if target.startswith(("http://", "https://", "mailto:", "#")):
+                          continue
+                      path = target.split("#", 1)[0]
+                      if not path:
+                          continue
+                      resolved = (f.parent / path).resolve()
+                      if not resolved.exists():
+                          dead.append(f"{f}: {target}")
+          for line in dead:
+              print(f"DEAD {line}")
+          if dead:
+              sys.exit(f"FAIL {len(dead)} dead relative link(s)")
+          print(f"OK every relative link resolves in {len(files)} files")
+          PY
+      - name: VERSION matches the top CHANGELOG heading
+        run: python3 scripts/check_version.py --check
