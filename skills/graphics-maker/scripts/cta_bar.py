@@ -20,7 +20,7 @@ dark band with light text. --bg / --fg, or graphics.cta_bar.bg / fg in
 config, override the auto choice.
 
 Font: --font, else brand.fonts.bold from config, else the bundled Inter Bold
-shipped with the guide-maker sibling, else a platform bold sans, else
+shipped with the make-guide sibling, else a platform bold sans, else
 Pillow's built-in font.
 
 Usage:
@@ -109,13 +109,13 @@ def render_string(keyword, variant="primary"):
 
 
 def bundled_font_path(weight="bold"):
-    """The Inter face shipped with the guide-maker sibling skill, if present."""
+    """The Inter face shipped with the make-guide sibling skill, if present."""
     name = "Inter-Bold.ttf" if weight == "bold" else "Inter-Regular.ttf"
     here = pathlib.Path(__file__).resolve()
-    cands = [
-        here.parents[2] / "guide-maker" / "assets" / "fonts" / name,
-        skills_root() / "guide-maker" / "assets" / "fonts" / name,
-    ]
+    cands = []
+    for core in ("make-guide", "guide-maker"):   # v3 name, then the v2 name
+        cands.append(here.parents[2] / core / "assets" / "fonts" / name)
+        cands.append(skills_root() / core / "assets" / "fonts" / name)
     for c in cands:
         if c.exists():
             return str(c)

@@ -4,9 +4,11 @@
 This is the contract graphics-maker, dm-automation and topic-finder import.
 Keep the public surface stable:
 
-    skill_dir() -> Path            directory of skills/guide-maker
+    skill_dir() -> Path            directory of skills/make-guide
     skills_root() -> Path          parent of skill_dir(); env GUIDE_MAKER_SKILLS_DIR overrides
-    sibling(name) -> Path          skills_root()/name, FileNotFoundError with install hint
+    sibling(name) -> Path          skills_root()/name, FileNotFoundError with install hint;
+                                   "guide-maker" is accepted as an alias of "make-guide"
+                                   for one release (the v2 folder name)
     load_config(path=None) -> dict v2 nested dict; v1 flat keys are mapped in with ONE
                                    printed deprecation line
     cfg_get(cfg, "a.b.c", default) dotted accessor with schema defaults as the last fallback
@@ -212,7 +214,7 @@ _deprecation_printed = False
 # --- Paths --------------------------------------------------------------------
 
 def skill_dir():
-    """Directory of skills/guide-maker (this file lives in scripts/ under it)."""
+    """Directory of skills/make-guide (this file lives in scripts/ under it)."""
     return Path(__file__).resolve().parent.parent
 
 
@@ -224,16 +226,33 @@ def skills_root():
     return skill_dir().parent
 
 
+# The v2 folder name. sibling("guide-maker") resolves to make-guide for one
+# release so older callers keep working; drop the alias in 4.0.
+SIBLING_ALIASES = {"guide-maker": "make-guide"}
+
+
 def sibling(name):
-    """Path of a sibling skill. Raises FileNotFoundError with an install hint."""
-    path = skills_root() / name
-    if path.is_dir():
-        return path
+    """Path of a sibling skill. Raises FileNotFoundError with an install hint.
+
+    "guide-maker" (the v2 name of the core skill) is accepted as an alias of
+    "make-guide" for one release. When the folder was installed under the old
+    name, that path is returned so a half-upgraded tree still resolves.
+    """
+    wanted = [SIBLING_ALIASES.get(name, name)]
+    if name in SIBLING_ALIASES or name in SIBLING_ALIASES.values():
+        for old, new in SIBLING_ALIASES.items():
+            if new == wanted[0] and old not in wanted:
+                wanted.append(old)
+    for candidate in wanted:
+        path = skills_root() / candidate
+        if path.is_dir():
+            return path
+    path = skills_root() / wanted[0]
     hints = {
-        "topic-finder": (f"run install.sh at the repo root, or clone the topic-finder repo "
-                         f"into {path}"),
+        "topic-finder": (f"run install.sh at the repo root, or copy the topic-finder skill "
+                         f"folder into {path}"),
     }
-    hint = hints.get(name, f"copy the {name} skill folder next to guide-maker, or set "
+    hint = hints.get(name, f"copy the {wanted[0]} skill folder next to make-guide, or set "
                            "GUIDE_MAKER_SKILLS_DIR to the folder that holds both")
     raise FileNotFoundError(f"sibling skill '{name}' not found at {path}. Install it: {hint}")
 

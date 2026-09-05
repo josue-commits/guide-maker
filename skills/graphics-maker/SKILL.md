@@ -1,6 +1,6 @@
 ---
 name: graphics-maker
-description: Generate the LinkedIn post graphic for a lead-magnet guide, with the keyword CTA bar composited across the bottom edge and Content Credentials stripped. Use when the user asks to "make a graphic for this post", "generate a post image", "create the visual for the guide", or right after guide-maker publishes a guide and the post needs its image. Zero-cost Pillow card by default; optional two-pass generation through an image provider (KieAI or OpenAI).
+description: Generate the LinkedIn post graphic for a lead-magnet guide, with the keyword CTA bar composited across the bottom edge and Content Credentials stripped. Use when the user asks to "make a graphic for this post", "generate a post image", "create the visual for the guide", or right after make-guide publishes a guide and the post needs its image. Zero-cost Pillow card by default; optional two-pass generation through an image provider (KieAI or OpenAI).
 ---
 
 # graphics-maker
@@ -9,9 +9,10 @@ Produces the one image that goes with a lead-magnet post. The image carries the
 keyword; the post copy does not. That split is what keeps the post's reach, so
 this skill treats the CTA bar as a release gate, not decoration.
 
-Sibling of `guide-maker`. Reads the shared config (`config.yaml` from the
-guide-maker skill, or `GUIDE_MAKER_CONFIG`). Runs standalone if guide-maker is
-absent; the config loader falls back to `./config.yaml`.
+Sibling of `make-guide`. Reads the shared config through make-guide's
+loader (`.guide-maker/config.yaml` in your project, or `GUIDE_MAKER_CONFIG`).
+Runs standalone if make-guide is absent; the config loader then walks up from
+the working directory for the same file.
 
 ## What you get
 
@@ -28,7 +29,7 @@ Every path ends in `finalize`: CTA bar, optional logo, C2PA strip.
 
 - Python 3.9+, Pillow, PyYAML (`pip install -r requirements.txt` at the repo root)
 - Optional: `graphics.provider: kieai` with `KIEAI_API_KEY`, or `graphics.provider: openai` with `OPENAI_API_KEY` and `pip install -r requirements-optional.txt`
-- Fonts: `brand.fonts.bold` / `regular` if set, else the bundled Inter next to guide-maker, else a platform sans, else Pillow's built-in face
+- Fonts: `brand.fonts.bold` / `regular` if set, else the bundled Inter next to make-guide, else a platform sans, else Pillow's built-in face
 
 ## Config keys this skill reads
 
@@ -258,6 +259,6 @@ format-usage-log.jsonl                 created at runtime, gitignored
 
 ## Integration
 
-- guide-maker's Phase 3c calls `card` or the two-pass commands with the guide's title, subtitle, stats and keyword, then attaches the PNG to the Content Board card's `Graphic` property.
-- The hub cover (guide-maker's `banner_generator.py`) is a different asset and never carries the keyword. Do not reuse one for the other.
+- make-guide's Phase 3c calls `card` or the two-pass commands with the guide's title, subtitle, stats and keyword, then attaches the PNG to the Content Board card's `Graphic` property.
+- The hub cover (make-guide's `banner_generator.py`) is a different asset and never carries the keyword. Do not reuse one for the other.
 - dm-automation reads the same keyword. If the bar and the DM tool disagree, nothing fires.

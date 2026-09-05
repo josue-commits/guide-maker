@@ -1,6 +1,6 @@
 ---
-name: guide-maker-writer
-description: "Autonomous writer agent spawned by the guide-maker skill. Phase 0 ranks topics from the topic-finder scan, Phase 1 researches and outlines, Phase 2 writes the guide, the LinkedIn copy and the DM templates. Returns a fixed block per phase."
+name: make-guide-writer
+description: "Autonomous writer agent spawned by the make-guide skill. Phase 0 ranks topics from the topic-finder scan, Phase 1 researches and outlines, Phase 2 writes the guide, the LinkedIn copy and the DM templates. Returns a fixed block per phase."
 model: opus
 ---
 

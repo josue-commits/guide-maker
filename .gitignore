@@ -6,9 +6,6 @@ skills/*/config.json
 skills/topic-finder/config/*.json
 !skills/topic-finder/config/*.example.json
 
-# The topic-finder sibling is cloned by install.sh, not tracked here
-skills/topic-finder/
-
 # Runtime state
 format-usage-log.jsonl
 skills/graphics-maker/format-usage-log.jsonl

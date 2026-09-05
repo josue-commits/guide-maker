@@ -2,14 +2,14 @@
 
 **Every post graphic carries the keyword. There are no exceptions and there is no fallback.**
 
-With `copy.cta_mode: graphic` (the default in guide-maker v2) the post copy is
+With `copy.cta_mode: graphic` (the default since guide-maker v2) the post copy is
 forbidden from containing any engagement instruction. LinkedIn suppresses reach
 on posts whose copy says "comment X", "like this post" or "repost this". The
 keyword lives in exactly one place: the graphic.
 
 That makes this bar the only capture mechanism the post has. A graphic without
 it is a post that asks for nothing. The evidence behind the rule is in
-guide-maker's `references/strategy/cta-evidence.md`.
+make-guide's `references/strategy/cta-evidence.md`.
 
 ---
 
@@ -98,7 +98,7 @@ should read as a natural shorthand a human would type, not a tracking code.
 
 One word, 3 to 12 uppercase ASCII letters (`[A-Z]{3,12}`, enforced by
 `cta_bar.py`). Unique per guide, since it is the tracking key across your
-Content Board and your DM tool. Run guide-maker's `keyword_check.py` before
+Content Board and your DM tool. Run make-guide's `keyword_check.py` before
 assigning one.
 
 ---

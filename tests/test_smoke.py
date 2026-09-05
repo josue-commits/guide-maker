@@ -1,4 +1,4 @@
-"""Smoke test for guide-maker v2.
+"""Smoke test for guide-maker v3.
 
 Runs on a fresh machine with only `pip install -r requirements.txt`. No tokens,
 no network: every command here is a dry run, a Pillow render, a lint, or an
@@ -16,7 +16,7 @@ import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-GM = ROOT / "skills" / "guide-maker" / "scripts"
+GM = ROOT / "skills" / "make-guide" / "scripts"
 GX = ROOT / "skills" / "graphics-maker" / "scripts"
 DM = ROOT / "skills" / "dm-automation" / "scripts"
 FIX = ROOT / "tests" / "fixtures"
@@ -265,11 +265,11 @@ class TestDM(TmpDirMixin, unittest.TestCase):
         self.assertLessEqual(out.stat().st_size, 4194304)
 
 
-class TestTopicFinderIfPresent(TmpDirMixin, unittest.TestCase):
+class TestTopicFinder(TmpDirMixin, unittest.TestCase):
     def test_scan_all_none_writes_health_and_fails(self):
+        # topic-finder is a git subtree under skills/, so it is always present
         tf = ROOT / "skills" / "topic-finder" / "scripts" / "scan_all.py"
-        if not tf.exists():
-            self.skipTest("topic-finder not installed in this checkout (install.sh fetches it)")
+        self.assertTrue(tf.exists(), f"{tf} missing: the topic-finder subtree is gone")
         proc = run(tf, "--sources", "none", "--out-dir", self.tmp, ok=False)
         self.assertEqual(proc.returncode, 1)
         health = json.loads((self.tmp / "health.json").read_text())

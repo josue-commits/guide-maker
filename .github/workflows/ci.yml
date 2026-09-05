@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [main, v2]
+    branches: [main, v2, v3]
   pull_request:
 
 jobs:
@@ -26,8 +26,8 @@ jobs:
         run: bash tests/run_smoke.sh
       - name: Shipped examples pass their own linter
         run: |
-          python skills/guide-maker/scripts/lint_copy.py copy tests/fixtures/copy/good-prose-1.txt tests/fixtures/copy/good-prose-2.txt --keyword SAMPLEKW
-          python skills/guide-maker/scripts/lint_copy.py dm tests/fixtures/dm/good-combined.txt
+          python skills/make-guide/scripts/lint_copy.py copy tests/fixtures/copy/good-prose-1.txt tests/fixtures/copy/good-prose-2.txt --keyword SAMPLEKW
+          python skills/make-guide/scripts/lint_copy.py dm tests/fixtures/dm/good-combined.txt
 
   no-private-strings:
     runs-on: ubuntu-latest

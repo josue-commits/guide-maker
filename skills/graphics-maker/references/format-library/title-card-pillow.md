@@ -75,7 +75,7 @@ the keyword in your DM tool.
 
 ## Notes
 
-- Fonts: `brand.fonts.bold` and `regular` if set, else the bundled Inter next to guide-maker, else a platform sans (Arial Bold on macOS and Windows, DejaVu Sans Bold on Linux), else Pillow's built-in face. Set your own for a consistent look across machines.
+- Fonts: `brand.fonts.bold` and `regular` if set, else the bundled Inter next to make-guide, else a platform sans (Arial Bold on macOS and Windows, DejaVu Sans Bold on Linux), else Pillow's built-in face. Set your own for a consistent look across machines.
 - Auto contrast for the bar samples the bottom 15 percent of the art. On this card that area is the solid background, so dark art gets the `accent_1` band and light art gets the `dark` band. Override with `graphics.cta_bar.bg` / `fg`.
 - A title that equals the keyword is refused. The bar carries the keyword; the title says what the guide is.
 - `--size` changes the canvas (default 2048). Keep it square; LinkedIn crops other ratios in the feed.

@@ -7,7 +7,7 @@ non-zero on any failure. --dry-run prints the exact payload and never opens a
 socket, whichever adapter is configured.
 
 Subcommands:
-  render     fill the guide-maker DM templates with config values, lint, write .txt files
+  render     fill the make-guide DM templates with config values, lint, write .txt files
   keywords   list keywords already in use in your DM tool (collision check)
   schedule   schedule a post with graphic + keyword automation (manual: writes a bundle)
   attach     attach a keyword automation to a post that is already live
@@ -38,7 +38,7 @@ DEFAULT_MAX_LINES = 7
 DEFAULT_ATTACHMENT_MAX_BYTES = 4 * 1024 * 1024
 LEADSHARK_MAX_DM_CHARS = 2000
 
-# version id -> (template file in guide-maker/templates, config gate)
+# version id -> (template file in make-guide/templates, config gate)
 VERSIONS = {
     "direct": ("dm-direct.md", None),
     "combined": ("dm-combined.md", "community.url"),
@@ -51,7 +51,7 @@ PUBLISH_TO_WEB_MSG = (
     "This is a workspace link, not a public one. Notion's copy-link button hands you the "
     "app.notion.com / notion.so form, which gates on workspace membership: every commenter "
     "gets a dead link. Publish the page to the web from the Notion app (Share, Publish) and use "
-    "the <workspace>.notion.site URL. guide-maker's `md_to_notion.py public-url --check` prints it."
+    "the <workspace>.notion.site URL. make-guide's `md_to_notion.py public-url --check` prints it."
 )
 
 _URL_RE = re.compile(r"https?://[^\s<>\"')\]]+")
@@ -299,7 +299,7 @@ def templates_dir(cfg: dict, override: Optional[str]) -> Path:
             fail(f"--templates-dir {path} is not a directory")
         return path
     try:
-        return sibling("guide-maker") / "templates"
+        return sibling("make-guide") / "templates"
     except FileNotFoundError as e:
         fail(f"{e}\nOr pass --templates-dir /abs/path/to/templates.")
     return Path()  # unreachable, keeps type checkers calm
@@ -374,7 +374,7 @@ def cmd_render(args) -> None:
         src = tdir / fname
         if not src.is_file():
             fail(
-                f"Template {fname} not found in {tdir}. Install guide-maker v2 next to this skill "
+                f"Template {fname} not found in {tdir}. Install make-guide next to this skill "
                 "(it ships dm-direct.md, dm-combined.md, dm-community-only.md, dm-secondary-channel.md) "
                 "or pass --templates-dir."
             )
@@ -531,7 +531,7 @@ def cmd_test(args) -> None:
     provider = args.provider or str(cfg_get(cfg, "dm_tool.provider", "manual"))
     tool = get_adapter(cfg, provider, dry_run=args.dry_run)
     result = tool.test()
-    result["config_loader"] = "guide-maker/_config.py" if SHARED_LOADER else "standalone fallback"
+    result["config_loader"] = "make-guide/_config.py" if SHARED_LOADER else "standalone fallback"
     if provider == "leadshark":
         result["api_key_present"] = bool(secret(cfg, "leadshark"))
     emit(result)
@@ -607,7 +607,7 @@ def cmd_image_fit(args) -> None:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="dm_cli.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("--config", help="Absolute path to config.yaml (default: GUIDE_MAKER_CONFIG, then the guide-maker skill dir)")
+    common.add_argument("--config", help="Absolute path to config.yaml (default: GUIDE_MAKER_CONFIG, then the make-guide loader's search order)")
     common.add_argument("--provider", choices=["manual", "leadshark"], help="Override dm_tool.provider for this call")
     common.add_argument("--dry-run", action="store_true", help="Print the exact payload; never open a socket")
     sub = p.add_subparsers(dest="command", required=True)
@@ -617,7 +617,7 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--guide-title", help="Fills {guide_title} when the template uses it")
     r.add_argument("--version", action="append", help="direct | combined | community_only | secondary | all. Repeatable. Default: dm.versions")
     r.add_argument("--out-dir", help="Where the .txt files go (default: workflow.work_dir/dm-render)")
-    r.add_argument("--templates-dir", help="Override the template folder (default: guide-maker/templates next to this skill)")
+    r.add_argument("--templates-dir", help="Override the template folder (default: make-guide/templates next to this skill)")
     r.add_argument("--set", action="append", metavar="KEY=VALUE", help="Fill an extra {slot}; VALUE may be @/abs/path.txt. Repeatable")
     r.add_argument("--check-url", action="store_true", help="GET the guide URL and require a 200 (opens a socket)")
     r.set_defaults(func=cmd_render)

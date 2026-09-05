@@ -222,7 +222,7 @@ class ManualTool(DMTool):
     def list_keywords(self) -> list[str]:
         print(
             "Manual adapter has no keyword registry. Check keywords in your DM tool and in your "
-            "Content Board (guide-maker's keyword_check.py covers the Notion side).",
+            "Content Board (make-guide's keyword_check.py covers the Notion side).",
             file=sys.stderr,
         )
         return []

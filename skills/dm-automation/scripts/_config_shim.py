@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Config access for dm-automation.
 
-Prefers the shared loader that ships with the guide-maker sibling skill
-(skills/guide-maker/scripts/_config.py). When guide-maker is not installed
-next to this skill, a small standalone loader takes over so every command
+Prefers the shared loader that ships with the make-guide sibling skill
+(skills/make-guide/scripts/_config.py; the v2 folder name guide-maker is
+looked for after it). When neither is installed next to this skill, a small
+standalone loader takes over so every command
 still runs: it reads GUIDE_MAKER_CONFIG, then ./config.yaml, then
 <this skill>/config.yaml.
 
@@ -40,11 +41,18 @@ _KEY_FILES = {
 SHARED_LOADER = False
 
 
+# make-guide first (v3 name), then guide-maker (v2 name) for one release.
+_CORE_SKILL_NAMES = ("make-guide", "guide-maker")
+
+
 def _shared_candidates():
-    yield _HERE.parents[2] / "guide-maker" / "scripts"
+    roots = [_HERE.parents[2]]
     env_root = os.environ.get("GUIDE_MAKER_SKILLS_DIR", "")
     if env_root:
-        yield pathlib.Path(env_root).expanduser() / "guide-maker" / "scripts"
+        roots.append(pathlib.Path(env_root).expanduser())
+    for root in roots:
+        for name in _CORE_SKILL_NAMES:
+            yield root / name / "scripts"
 
 
 for _cand in _shared_candidates():
@@ -55,7 +63,7 @@ for _cand in _shared_candidates():
 
             SHARED_LOADER = True
         except ImportError:
-            # An older guide-maker (v1) is present but lacks the v2 API.
+            # An older core skill (v1) is present but lacks the v2 API.
             # Fall through to the standalone loader below.
             SHARED_LOADER = False
         break
@@ -116,7 +124,7 @@ if not SHARED_LOADER:
                 return cfg
         raise FileNotFoundError(
             "No config found. Pass --config /abs/path/config.yaml, set GUIDE_MAKER_CONFIG, "
-            "or put config.yaml in the working directory. guide-maker ships a "
+            "or put config.yaml in the working directory. make-guide ships a "
             "config.example.yaml to copy from."
         )
 

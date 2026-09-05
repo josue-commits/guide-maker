@@ -20,8 +20,8 @@ words, reads as a template in the feed.
 
 ## Decision tree by guide type
 
-guide-maker classifies every guide into one of four types
-(`skills/guide-maker/references/guides/guide-types.md`). Start there, then
+make-guide classifies every guide into one of four types
+(`skills/make-guide/references/guides/guide-types.md`). Start there, then
 narrow by the shape of the content. CTA presence is not a criterion; every
 format carries the bar.
 

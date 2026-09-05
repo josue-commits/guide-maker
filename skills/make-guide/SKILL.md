@@ -1,9 +1,9 @@
 ---
-name: guide-maker
+name: make-guide
 description: "Turn a YouTube video, a transcript or a researched topic into a multi-page Notion guide plus the LinkedIn lead-magnet bundle around it: three copy variations, a cover, a post graphic that carries the keyword, DM templates and a Content Board card. Use when the user provides a YouTube URL or transcript, says 'make a guide from this', 'turn this into a lead magnet', 'create a Notion guide', 'write the copy for the guide', 'publish the guide', or asks 'find me a topic' / 'what's trending' / 'what should I write about'. Also use for partial steps: only the copy, only the DMs, only the publish."
 ---
 
-# Guide Maker
+# make-guide
 
 You are the orchestrator. The writer agent (`AGENT.md`) does the heavy lifting in the background; you run the scripts, hold the gates, and talk to the user. Talk to the user in their language; everything the skill ships (guide, copy, DMs) is written in `workflow.language`.
 

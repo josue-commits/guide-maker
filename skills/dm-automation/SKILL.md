@@ -1,11 +1,11 @@
 ---
 name: dm-automation
-description: Turn a finished guide into the DM side of a keyword-comment lead magnet. Renders the DM versions from the guide-maker templates, lints them (merge tag, no hard wrap, public link only, no em dashes), and either writes a paste-ready bundle for whatever DM tool you use (default) or schedules the post with its graphic and keyword automation through an adapter (LeadShark ships as the reference). Use when the user says "set the keyword", "schedule the post", "render the DMs", "check if KEYWORD is taken", "pull the leads", "how did Monday's post do", or when guide-maker reaches step 3e.
+description: Turn a finished guide into the DM side of a keyword-comment lead magnet. Renders the DM versions from the make-guide templates, lints them (merge tag, no hard wrap, public link only, no em dashes), and either writes a paste-ready bundle for whatever DM tool you use (default) or schedules the post with its graphic and keyword automation through an adapter (LeadShark ships as the reference). Use when the user says "set the keyword", "schedule the post", "render the DMs", "check if KEYWORD is taken", "pull the leads", "how did Monday's post do", or when make-guide reaches step 3e.
 ---
 
 # dm-automation
 
-Optional sibling of guide-maker. guide-maker produces the guide, the copy, the
+Optional sibling of make-guide. make-guide produces the guide, the copy, the
 graphic and the DM text. This skill takes it from there: the keyword, the DM the
 tool sends when someone comments it, and the post going out with both attached.
 
@@ -18,9 +18,10 @@ python3 "$SKILL_DIR/scripts/dm_cli.py" --help
 ```
 
 Requirements: Python 3.9+, PyYAML, Pillow (for `image-fit` only). No other
-dependency. Config is the guide-maker `config.yaml`; the CLI finds it through
-guide-maker's `_config.py` when the two skills sit side by side, and falls back
-to `--config`, `GUIDE_MAKER_CONFIG` or `./config.yaml` when they do not.
+dependency. Config is the shared guide-maker `config.yaml`; the CLI finds it
+through make-guide's `_config.py` when the two skills sit side by side, and
+falls back to `--config`, `GUIDE_MAKER_CONFIG` or a `.guide-maker/config.yaml`
+found by walking up from the working directory when they do not.
 
 ## Manual by default, adapter when you have one
 
@@ -66,7 +67,7 @@ exact payload and never opens a socket, whichever adapter is configured.
 
 ### render: DM text from the templates
 
-Fills `skills/guide-maker/templates/dm-{direct,combined,community-only,secondary-channel}.md`
+Fills `skills/make-guide/templates/dm-{direct,combined,community-only,secondary-channel}.md`
 with config values and writes one plain-text file per version.
 
 ```bash
@@ -101,7 +102,7 @@ python3 "$SKILL_DIR/scripts/dm_cli.py" keywords --config /absolute/path/to/confi
 
 Exit 1 when the keyword is already on an automation. The manual adapter has no
 registry and returns an empty list; check your tool and your Content Board
-(guide-maker's `keyword_check.py` covers the Notion side). Keywords are one
+(make-guide's `keyword_check.py` covers the Notion side). Keywords are one
 word, 3 to 12 upper-case characters, derived from the guide name.
 
 ### schedule: post + graphic + keyword automation
@@ -174,7 +175,7 @@ Ceiling from `dm_tool.leadshark.attachment_max_bytes` or `--max-bytes`.
 
 ## Where this sits in the weekly pipeline
 
-1. guide-maker publishes the guide hub and produces the post copy, the post
+1. make-guide publishes the guide hub and produces the post copy, the post
    graphic with the keyword bar, and the DM text.
 2. **You publish the guide to the web from the Notion app.** No script does
    this. Until you do, every link in the DM is dead.
