@@ -2,7 +2,7 @@
 
 After publishing the guide, uploading the cover, and generating the post graphic, create the Content Board card.
 
-**Target:** Content Board database (ID from config.yaml) on your Notion workspace.
+**Target:** Content Board database (`notion.content_board_database_id` in the config) on your Notion workspace. `{CONFIG}` below is the `config_path` from `doctor.py --print-paths --json`.
 
 ## Entry Structure
 
@@ -25,7 +25,7 @@ The Content Board database has 14 properties:
 | Property | Type | Description |
 |----------|------|-------------|
 | Title | title | `KEYWORD \| Day MM/DD` |
-| Account | select | Account name (from config.yaml) |
+| Account | select | Account name (from `accounts[].name` in the config) |
 | Post Date | date | Scheduled post date |
 | Day | select | Monday/Wednesday/Friday |
 | Type | select | `guide` (default) |
@@ -50,7 +50,7 @@ This lets each account holder scan the hook lines, pick their favorite variation
 ## Creating the card
 
 ```bash
-python3 {SKILL_DIR}/scripts/md_to_notion.py create-content-entry --config {SKILL_DIR}/config.yaml \
+python3 {SKILL_DIR}/scripts/md_to_notion.py create-content-entry --config {CONFIG} \
   --title "KEYWORD | Mon 09/07" --keyword KEYWORD --post-date 2026-09-07 --day Monday \
   --guide-link "https://www.notion.so/..." --status Draft --type guide \
   --variation "Contrarian Hook|@{WORK_DIR}/copy/main-contrarian.txt" \

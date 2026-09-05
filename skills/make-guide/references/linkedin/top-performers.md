@@ -1,8 +1,8 @@
-# Top Performers (your slot)
+# Top Performers (the template for your slot)
 
-This file is empty on purpose. It is the first thing the writer agent reads before drafting copy, ahead of `examples.md`, so what you put here shapes every post.
+The writer agent reads `<project>/.guide-maker/top-performers.md` before drafting copy, ahead of `examples.md`, so what you put there shapes every post. This shipped file is the template: copy it to `.guide-maker/top-performers.md` in your project and fill it. Do not edit it here; a skill update replaces it, and the writer only reads the project copy once it exists.
 
-## What to put here
+## What to put in `.guide-maker/top-performers.md`
 
 Four to eight of **your own** posts that performed after you adopted the keyword-in-graphic rule (see `references/strategy/cta-evidence.md`). For each one:
 
@@ -25,4 +25,4 @@ Only posts that followed the current rules count. A post that carried `Comment "
 
 ## When it is empty
 
-The agent falls back to `examples.md` (three synthetic posts in the house structure) for shape and to `references/writing/voice.md` for voice. Fill this file after your first two or three weeks of posting.
+While `.guide-maker/top-performers.md` does not exist (or is empty), the agent falls back to `examples.md` (three synthetic posts in the house structure, or your `.guide-maker/examples.md` override) for shape and to `voice.md` (shipped, or your `.guide-maker/voice.md`) for voice. Create the project file after your first two or three weeks of posting.

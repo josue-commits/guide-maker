@@ -2,8 +2,8 @@
 
 Read these before writing any guide content:
 - Full guide spec: `references/writing/guide-spec.md`
-- Humanizer filter: `references/writing/humanizer.md`
-- Voice/personality: `references/writing/voice.md`
+- Humanizer filter: `references/writing/humanizer.md` (or the project's `.guide-maker/banned-words.md`)
+- Voice/personality: `references/writing/voice.md` (or the project's `.guide-maker/voice.md`)
 - Example guides matching your detected type (in `references/guides/examples/`)
 
 ## Structure

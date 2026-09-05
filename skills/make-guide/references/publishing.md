@@ -1,7 +1,7 @@
 # Publishing to Notion
 
 ## Target
-Guide Database on your Notion workspace (`notion.guide_database_id` in the config).
+Guide Database on your Notion workspace (`notion.guide_database_id` in the config). `{CONFIG}` below is the `config_path` from `doctor.py --print-paths --json`; `{SKILL_DIR}` is the make-guide folder.
 
 **CAUTION:** If this is a shared workspace, always confirm with the team before publishing. Use `--dry-run` first.
 
@@ -22,7 +22,7 @@ Producing only one and calling the guide done is the most common miss. A guide i
 
 ```bash
 python3 {SKILL_DIR}/scripts/publish_guide_hub.py \
-  --config {SKILL_DIR}/config.yaml \
+  --config {CONFIG} \
   --title "Guide Title Here" \
   --description "One-sentence guide description" \
   --keyword "KEYWORD" \
@@ -56,7 +56,7 @@ After publishing the hub page, generate a cover and set it as the page cover. **
 
 ```bash
 # Free cover
-python3 {SKILL_DIR}/scripts/banner_generator.py simple \
+python3 {SKILL_DIR}/scripts/banner_generator.py --config {CONFIG} simple \
   --title "Short Guide Title" \
   --subtitle "Optional subtitle" \
   --style dark \
@@ -64,7 +64,7 @@ python3 {SKILL_DIR}/scripts/banner_generator.py simple \
   --upload-to HUB_PAGE_ID
 
 # AI cover (read references/banner-guide.md first)
-python3 {SKILL_DIR}/scripts/banner_generator.py ai \
+python3 {SKILL_DIR}/scripts/banner_generator.py --config {CONFIG} ai \
   --prompt "Your prompt here" \
   --ref-image "STYLE_REF_URL" \
   --ref-image "LOGO_URL_1" \
@@ -73,7 +73,7 @@ python3 {SKILL_DIR}/scripts/banner_generator.py ai \
   --upload-to HUB_PAGE_ID
 
 # Upload only
-python3 {SKILL_DIR}/scripts/banner_generator.py upload --file {WORK_DIR}/cover.png --page-id HUB_PAGE_ID
+python3 {SKILL_DIR}/scripts/banner_generator.py --config {CONFIG} upload --file {WORK_DIR}/cover.png --page-id HUB_PAGE_ID
 ```
 
 `--style` accepts `dark`, `gradient` or `accent`. `--upload-to` generates and sets the cover in one step. If AI generation fails, the script falls back to a `simple` cover automatically. The output directory is created if it does not exist.

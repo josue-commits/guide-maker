@@ -10,18 +10,23 @@ graphic and the DM text. This skill takes it from there: the keyword, the DM the
 tool sends when someone comments it, and the post going out with both attached.
 
 Set `SKILL_DIR` to the absolute path of this folder first and use it in every
-command. Never call the scripts through a relative path.
+command. Never call the scripts through a relative path. Resolve `CONFIG`
+from make-guide's doctor, not from a guessed path:
 
 ```bash
 SKILL_DIR="/absolute/path/to/skills/dm-automation"
+CONFIG="$(python3 /absolute/path/to/skills/make-guide/scripts/doctor.py --print-paths --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["config_path"])')"
 python3 "$SKILL_DIR/scripts/dm_cli.py" --help
 ```
 
 Requirements: Python 3.9+, PyYAML, Pillow (for `image-fit` only). No other
-dependency. Config is the shared guide-maker `config.yaml`; the CLI finds it
-through make-guide's `_config.py` when the two skills sit side by side, and
-falls back to `--config`, `GUIDE_MAKER_CONFIG` or a `.guide-maker/config.yaml`
-found by walking up from the working directory when they do not.
+dependency. Config is the shared guide-maker `config.yaml` at
+`<project>/.guide-maker/config.yaml`; the CLI finds it through make-guide's
+`_config.py` when the two skills sit side by side, and falls back to
+`--config`, `GUIDE_MAKER_CONFIG` or a `.guide-maker/config.yaml` found by
+walking up from the working directory when they do not. Customisation (DM
+wording per guide, sign-off, community lines) is config and per-guide text,
+never an edit to the templates under make-guide's `templates/`.
 
 ## Manual by default, adapter when you have one
 
@@ -75,7 +80,7 @@ python3 "$SKILL_DIR/scripts/dm_cli.py" render \
   --guide-url "https://<workspace>.notion.site/<slug>-<page-id>" \
   --version all \
   --out-dir /absolute/path/to/work/dm-render \
-  --config /absolute/path/to/config.yaml
+  --config "$CONFIG"
 ```
 
 Versions and their gates: `direct` always; `combined` and `community_only` when
@@ -97,7 +102,7 @@ about the guide belongs to the writer, not the template; pass it that way.
 ### keywords: is this keyword taken
 
 ```bash
-python3 "$SKILL_DIR/scripts/dm_cli.py" keywords --config /absolute/path/to/config.yaml --check FLOWS
+python3 "$SKILL_DIR/scripts/dm_cli.py" keywords --config "$CONFIG" --check FLOWS
 ```
 
 Exit 1 when the keyword is already on an automation. The manual adapter has no
@@ -118,7 +123,7 @@ python3 "$SKILL_DIR/scripts/dm_cli.py" schedule \
   --comment-reply "Sent!" --comment-reply "Sent over, check your DMs" \
   --auto-connect \
   --out-dir /absolute/path/to/work \
-  --config /absolute/path/to/config.yaml \
+  --config "$CONFIG" \
   --dry-run
 ```
 
@@ -143,7 +148,7 @@ python3 "$SKILL_DIR/scripts/dm_cli.py" attach \
   --keyword FLOWS \
   --dm @/absolute/path/to/work/dm-render/dm-direct.txt \
   --status Paused \
-  --config /absolute/path/to/config.yaml \
+  --config "$CONFIG" \
   --dry-run
 ```
 
@@ -154,9 +159,9 @@ bundle without `post.txt`.
 ### stats, test, image-fit
 
 ```bash
-python3 "$SKILL_DIR/scripts/dm_cli.py" stats --range weekly --config /absolute/path/to/config.yaml
-python3 "$SKILL_DIR/scripts/dm_cli.py" test --config /absolute/path/to/config.yaml
-python3 "$SKILL_DIR/scripts/dm_cli.py" image-fit /absolute/path/to/work/graphic-final.png
+python3 "$SKILL_DIR/scripts/dm_cli.py" stats --range weekly --config "$CONFIG"
+python3 "$SKILL_DIR/scripts/dm_cli.py" test --config "$CONFIG"
+python3 "$SKILL_DIR/scripts/dm_cli.py" image-fit /absolute/path/to/work/graphic-final.png --config "$CONFIG"
 ```
 
 `stats` returns comments, DMs sent and connections per automation on an

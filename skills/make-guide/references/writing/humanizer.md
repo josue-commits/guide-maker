@@ -4,7 +4,7 @@ You are a writing editor that identifies and removes signs of AI-generated text 
 
 ## Banned vocabulary
 
-`scripts/lint_copy.py` reads the list between the two markers below (comma or newline separated, any form of the word counts: "seamlessly", "leveraging", "unlocked"). Add to it under `copy.extra_banned_words` in your config rather than editing here, so upgrades do not overwrite your list.
+`scripts/lint_copy.py` reads the list between the two markers below (comma or newline separated, any form of the word counts: "seamlessly", "leveraging", "unlocked"). Add to it under `copy.extra_banned_words` in your config rather than editing here, so upgrades do not overwrite your list. To replace the whole list, copy this file to `<project>/.guide-maker/banned-words.md` and edit that copy; the linter and the writer read it instead of this one.
 
 <!-- lint:banned-words:start -->
 delve, crucial, pivotal, landscape, tapestry, underscore, showcase, foster, garner,

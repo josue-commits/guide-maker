@@ -5,9 +5,11 @@ You are writing LinkedIn posts for the account(s) in `config.accounts`. Each pos
 Read in this order before writing:
 
 1. `references/strategy/cta-evidence.md`, the rule that outranks everything: the keyword never appears in the copy.
-2. `references/linkedin/top-performers.md`, the operator's own best posts (empty until they fill it; then match its structure).
-3. `references/linkedin/examples.md`, three synthetic posts in the house structure. Voice and shape reference only.
-4. `references/writing/voice.md` and `references/writing/humanizer.md`.
+2. `resource("top_performers")`: the operator's own best posts in `<project>/.guide-maker/top-performers.md` (the shipped file is only the template; match the structure of the project file when it has posts).
+3. `resource("examples")`: three synthetic posts in the house structure (`references/linkedin/examples.md`, or the project's `.guide-maker/examples.md`). Voice and shape reference only.
+4. `resource("voice")` and `resource("banned_words")`: `references/writing/voice.md` and `references/writing/humanizer.md`, or the project's `.guide-maker/voice.md` and `.guide-maker/banned-words.md`.
+
+Resolve each `resource(...)` with the loader (`_config.resource(cfg, key)`); AGENT.md shows the one-liner. Never edit the shipped files to customise; write the project override.
 
 ---
 
@@ -114,7 +116,7 @@ Use exactly that shape, still one line, still ending on the pointing-down emoji.
 10. Tell stories with EVENTS. Things happen. People say things. Decisions get made.
 
 ### Banned words and phrases
-The full list is in `references/writing/humanizer.md` under "Banned vocabulary" and "Banned phrases". `lint_copy.py` reads that list plus `config.copy.extra_banned_words`. Any form of a banned word counts ("seamlessly", "leveraging", "unlocked").
+The full list is in `references/writing/humanizer.md` under "Banned vocabulary" and "Banned phrases", or in the project's `.guide-maker/banned-words.md` when that exists (same two marker blocks). `lint_copy.py` reads that list plus `config.copy.extra_banned_words`. Any form of a banned word counts ("seamlessly", "leveraging", "unlocked").
 
 ### Formatting
 → Maximum 2 sentences per paragraph. Dense paragraphs kill mobile readability.

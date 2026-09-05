@@ -67,6 +67,18 @@ Every command below uses `$SKILL_DIR`, the absolute path of this folder
 use absolute paths for every input and output. Work files go in
 `workflow.work_dir` from config, or any absolute scratch folder.
 
+Resolve the config the same way every sibling does, from make-guide's doctor:
+
+```bash
+python3 <skills root>/make-guide/scripts/doctor.py --print-paths --json   # CONFIG = config_path
+```
+
+Pass `--config $CONFIG` to every command below. Without it the loader walks
+up from the working directory to `.guide-maker/config.yaml`, which is the
+same file when you run from inside the project. Customisation (your own
+format cards, the usage log) lives in `<project>/.guide-maker/`, never under
+`references/`; a skill update replaces those files.
+
 ## Pipeline
 
 ```
@@ -97,7 +109,7 @@ own product screenshot, a rights-cleared photo). Never let a model invent a UI.
 ### Step 0. Rotation
 
 ```bash
-python3 $SKILL_DIR/scripts/graphics_generate.py rotation
+python3 $SKILL_DIR/scripts/graphics_generate.py rotation --config $CONFIG
 ```
 
 If a format was used inside `graphics.format_rotation_days` and another format
@@ -114,7 +126,7 @@ the pick and the reason before generating. The shipped catalog has one card
 ### Step 2 to 4a. Pillow card
 
 ```bash
-python3 $SKILL_DIR/scripts/graphics_generate.py card \
+python3 $SKILL_DIR/scripts/graphics_generate.py card --config $CONFIG \
   --title "Automate your CRM follow-ups" --subtitle "5 workflows" \
   --stat "3|tools" --stat "20 min|setup" \
   --keyword FLOWS --bg dark \
@@ -127,17 +139,17 @@ character with the keyword configured in your DM tool.
 ### Step 2 to 4b. Two-pass
 
 ```bash
-python3 $SKILL_DIR/scripts/graphics_generate.py scene \
+python3 $SKILL_DIR/scripts/graphics_generate.py scene --config $CONFIG \
   --prompt "SCENE PROMPT, no literal text" \
   --ref-image /abs/refs/my-layout.png \
   --output-prefix /abs/work/flows --variants 2 --estimate     # cost only, no call
 
-python3 $SKILL_DIR/scripts/graphics_generate.py scene \
+python3 $SKILL_DIR/scripts/graphics_generate.py scene --config $CONFIG \
   --prompt "SCENE PROMPT, no literal text" \
   --ref-image /abs/refs/my-layout.png \
   --output-prefix /abs/work/flows --variants 2
 
-python3 $SKILL_DIR/scripts/graphics_generate.py text \
+python3 $SKILL_DIR/scripts/graphics_generate.py text --config $CONFIG \
   --scene /abs/work/flows-v1.png \
   --prompt "TEXT PASS PROMPT: what to write where, change nothing else" \
   --fallback-prompt "COMBINED SINGLE-SHOT PROMPT" \
@@ -159,7 +171,7 @@ calling anything.
 Standalone, for a graphic that did not come through this script:
 
 ```bash
-python3 $SKILL_DIR/scripts/graphics_generate.py finalize \
+python3 $SKILL_DIR/scripts/graphics_generate.py finalize --config $CONFIG \
   --image /abs/work/other.png --keyword FLOWS
 ```
 
@@ -170,7 +182,7 @@ survives).
 ### Step 6. Log
 
 ```bash
-python3 $SKILL_DIR/scripts/graphics_generate.py log \
+python3 $SKILL_DIR/scripts/graphics_generate.py log --config $CONFIG \
   --format title-card-pillow --keyword FLOWS --title "Automate your CRM follow-ups"
 ```
 
@@ -179,7 +191,7 @@ Log only the shipped graphic, not rejected attempts.
 ### Tweak loop
 
 ```bash
-python3 $SKILL_DIR/scripts/graphics_generate.py tweak \
+python3 $SKILL_DIR/scripts/graphics_generate.py tweak --config $CONFIG \
   --image /abs/work/flows-post.png --instruction "make the headline 20 percent larger" \
   --keyword FLOWS --output /abs/work/flows-post-v2.png
 ```

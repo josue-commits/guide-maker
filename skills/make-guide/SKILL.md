@@ -9,13 +9,18 @@ You are the orchestrator. The writer agent (`AGENT.md`) does the heavy lifting i
 
 ## 0. Before anything
 
-1. Resolve `SKILL_DIR`, the absolute path of this folder, and `SKILLS_ROOT`, its parent. Every command below uses absolute paths; the working directory is the project, not the skill.
+1. Resolve `SKILL_DIR`, the absolute path of this folder, and `SKILLS_ROOT`, its parent. Then resolve the config and the project from the doctor, never by guessing a path:
+   ```bash
+   python3 {SKILL_DIR}/scripts/doctor.py --print-paths --json
+   ```
+   `CONFIG` is `config_path`, `PROJECT_DIR` is `project_dir` (the folder that holds `.guide-maker/`). `config_source` says where the config came from: `project` (`<project>/.guide-maker/config.yaml`, the normal case), `home` (`~/.config/guide-maker/`), `env`, `arg`, `legacy` (a v2 config still inside a skill folder; it works, with a deprecation line, until the user runs `doctor.py --init --from <that file>`) or `none`. Every command below uses absolute paths and passes `--config {CONFIG}`; the working directory is the project, not the skill.
 2. Run the doctor. Never proceed on a red line.
    ```bash
-   python3 {SKILL_DIR}/scripts/doctor.py
+   python3 {SKILL_DIR}/scripts/doctor.py --config {CONFIG}
    ```
-   No config yet? It says so. Copy `config.example.yaml` to `config.yaml`, walk the user through `docs/setup.md` at the repo root, run the doctor again. `--offline` skips the network checks, `--print-paths` shows what it resolved, `--migrate-config` prints a v2 file from a v1 one.
-3. Load the config (`python3 {SKILL_DIR}/scripts/_config.py` prints the validation). `WORK_DIR` is `workflow.work_dir`. Guides are never written into the project directory.
+   `--offline` skips the network checks, `--list-databases` prints the Notion databases shared with the integration, `--migrate-config` prints a v2 file from a v1 one, `--init` writes a fresh `.guide-maker/` (that is `/setup-guide-maker`'s job; do not run it on your own).
+3. Load the config (`python3 {SKILL_DIR}/scripts/_config.py --config {CONFIG}` prints the validation). `WORK_DIR` is `workflow.work_dir`. Guides are never written into the project directory, and nothing is ever written into a skill folder.
+4. Customisation lives in `{PROJECT_DIR}/.guide-maker/`, never in `references/` (a skill update replaces those files). Optional overrides the writer picks up automatically: `voice.md`, `examples.md`, `top-performers.md`, `banned-words.md`; topic sources in `topic-finder/*.json`; format cards in `formats/`. The doctor's `resources` lines say which file is in use.
 
 ## 1. Pipeline
 
@@ -79,7 +84,7 @@ RETURN the Phase <N> block exactly as AGENT.md specifies."""
 ## 5. Phase 1: intake, research, outline
 
 1. Spawn Phase 1 with the URL, transcript or topic. The agent extracts the transcript (yt-dlp), fetches official docs, verifies every claim, checks already-covered, applies the depth gate, writes the gap analysis, classifies the guide type (four types), outlines 4-7 subpages and derives a one-word keyword from the guide name.
-2. Run `python3 {SKILL_DIR}/scripts/keyword_check.py KEYWORD --config {SKILL_DIR}/config.yaml`. Shape first (offline), then collisions against the Content Board, the Guide DB and the DM tool. A collision means a new keyword before G1.
+2. Run `python3 {SKILL_DIR}/scripts/keyword_check.py KEYWORD --config {CONFIG}`. Shape first (offline), then collisions against the Content Board, the Guide DB and the DM tool. A collision means a new keyword before G1.
 3. Present the Phase 1 block: type, title, keyword, outline with per-step descriptions, sources tagged `official | institutional | creator-research-only`, gap analysis, `[Verify: ...]` items.
 4. **G1.** The user approves or edits the outline, title or keyword.
 
@@ -88,19 +93,19 @@ RETURN the Phase <N> block exactly as AGENT.md specifies."""
 1. Spawn Phase 2 with the approved outline, keyword, config and the recent closer log.
 2. The agent writes `{WORK_DIR}/hub.md`, `{WORK_DIR}/NN-step.md` per subpage, three copy variations per account (`{WORK_DIR}/copy/<account>-<hook>.txt`), every DM version the config allows (`{WORK_DIR}/dm/<version>.txt`), a cover recommendation and a post-graphic brief. It runs the linters itself; you run them again:
    ```bash
-   python3 {SKILL_DIR}/scripts/lint_copy.py copy {WORK_DIR}/copy/*.txt --keyword KEYWORD --config {SKILL_DIR}/config.yaml
-   python3 {SKILL_DIR}/scripts/lint_copy.py dm {WORK_DIR}/dm/*.txt --config {SKILL_DIR}/config.yaml
+   python3 {SKILL_DIR}/scripts/lint_copy.py copy {WORK_DIR}/copy/*.txt --keyword KEYWORD --config {CONFIG}
+   python3 {SKILL_DIR}/scripts/lint_copy.py dm {WORK_DIR}/dm/*.txt --config {CONFIG}
    ```
    Exit 1 goes back to the agent with the findings. Exit 2 (warnings) you read and decide.
 3. **G2** if `workflow.gates: two`: hooks of each variation, subpage summaries, DM versions, cover and graphic briefs. Expand anything the user asks for. Small edits you make; structural changes go back to the agent.
 
 ## 7. Phase 3: publish and package
 
-Every command takes `--config {SKILL_DIR}/config.yaml` and `--dry-run` where it writes. Run the dry run first the first time you use a command in a session.
+Every command takes `--config {CONFIG}` (from step 0) and `--dry-run` where it writes. Run the dry run first the first time you use a command in a session.
 
 **3a. Hub + subpages**
 ```bash
-python3 {SKILL_DIR}/scripts/publish_guide_hub.py --config {SKILL_DIR}/config.yaml \
+python3 {SKILL_DIR}/scripts/publish_guide_hub.py --config {CONFIG} \
   --title "Guide Title" --description "One sentence." --keyword KEYWORD \
   --type "Technical Tutorial" --week YYYY-MM-DD --icon "🛠️" \
   --build-item "..." --audience-item "..." --nav-note "..." \
@@ -111,7 +116,7 @@ Creator-channel sources are refused by default. The output has `HUB_PAGE_ID`.
 
 **3b. Cover (required, never the keyword)**
 ```bash
-python3 {SKILL_DIR}/scripts/banner_generator.py --config {SKILL_DIR}/config.yaml simple \
+python3 {SKILL_DIR}/scripts/banner_generator.py --config {CONFIG} simple \
   --title "Short Title" --keyword KEYWORD --output {WORK_DIR}/cover.png --upload-to HUB_PAGE_ID
 ```
 `ai` and `upload` are the other subcommands (`references/banner-guide.md`). The guide is not "ready" until this exists.
@@ -119,16 +124,16 @@ python3 {SKILL_DIR}/scripts/banner_generator.py --config {SKILL_DIR}/config.yaml
 **3c. Post graphic with the CTA band** (sibling `graphics-maker`; skip only if it is not installed, and say so)
 ```bash
 G={SKILLS_ROOT}/graphics-maker/scripts
-python3 $G/graphics_generate.py card --title "Short Title" --keyword KEYWORD --out {WORK_DIR}/graphic.png        # Pillow, free, default
-python3 $G/graphics_generate.py scene --brief {WORK_DIR}/graphic-brief.md --out {WORK_DIR}/scene/ --estimate    # provider, two variants, no text
-python3 $G/graphics_generate.py finalize {WORK_DIR}/scene/pick.png --keyword KEYWORD --out {WORK_DIR}/graphic.png   # CTA band + C2PA strip
-python3 $G/cta_bar.py {WORK_DIR}/graphic.png --keyword KEYWORD --check
+python3 $G/graphics_generate.py card --config {CONFIG} --title "Short Title" --keyword KEYWORD --output {WORK_DIR}/graphic.png        # Pillow, free, default
+python3 $G/graphics_generate.py scene --config {CONFIG} --prompt "..." --output-prefix {WORK_DIR}/scene/v --estimate               # provider, two variants, no text
+python3 $G/graphics_generate.py finalize --config {CONFIG} --image {WORK_DIR}/scene/pick.png --keyword KEYWORD --output {WORK_DIR}/graphic.png   # CTA band + C2PA strip
+python3 $G/cta_bar.py --image {WORK_DIR}/graphic.png --keyword KEYWORD --output {WORK_DIR}/graphic.png
 ```
 `text`, `single` and `tweak` exist for provider-rendered text. Whatever path you took, open the final PNG and read the keyword character by character. Misspelled, missing or illegible means it does not ship.
 
 **3d. Content Board card** (skipped when `notion.content_board_database_id` is empty)
 ```bash
-python3 {SKILL_DIR}/scripts/md_to_notion.py create-content-entry --config {SKILL_DIR}/config.yaml \
+python3 {SKILL_DIR}/scripts/md_to_notion.py create-content-entry --config {CONFIG} \
   --title "KEYWORD | Mon 09/07" --keyword KEYWORD --post-date YYYY-MM-DD --day Monday \
   --guide-link "https://www.notion.so/..." --status Draft --type guide \
   --variation "Contrarian Hook|@{WORK_DIR}/copy/main-contrarian.txt" \
@@ -142,12 +147,12 @@ One card per guide (`workflow.one_card_per: guide`); `account` makes one per acc
 **3e. DM bundle** (sibling `dm-automation`; without it, the DM toggles on the card are the deliverable)
 ```bash
 D={SKILLS_ROOT}/dm-automation/scripts
-python3 $D/dm_cli.py render --guide-url "$(python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --page-id HUB_PAGE_ID)" --guide-title "Title" --out {WORK_DIR}/dm/
-python3 $D/dm_cli.py schedule --keyword KEYWORD --dm {WORK_DIR}/dm/combined.txt --image {WORK_DIR}/graphic.png --dry-run
+python3 $D/dm_cli.py render --config {CONFIG} --guide-url "$(python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --config {CONFIG} --page-id HUB_PAGE_ID)" --guide-title "Title" --out-dir {WORK_DIR}/dm/
+python3 $D/dm_cli.py schedule --config {CONFIG} --keyword KEYWORD --dm @{WORK_DIR}/dm/combined.txt --image {WORK_DIR}/graphic.png --content @{WORK_DIR}/copy/pick.txt --time "YYYY-MM-DDTHH:MM:SSZ" --out-dir {WORK_DIR} --dry-run
 ```
 `dm_tool.provider: manual` writes a checklist; `leadshark` creates the automation paused. Before any DM goes live:
 ```bash
-python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --page-id HUB_PAGE_ID --check
+python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --config {CONFIG} --page-id HUB_PAGE_ID --check
 ```
 Exit 1 means the user has not published the page to the web yet. Tell them; do not schedule.
 
@@ -174,13 +179,13 @@ Log the closers used: append `{"date": "YYYY-MM-DD", "closer": "..."}` per varia
 9. Every spawn prompt carries the no-nested-agents line and absolute paths.
 10. Guides are written under `WORK_DIR`, never into the project. They live in Notion.
 11. The user publishes to the web by hand and posts by hand. The skill stops at the bundle.
-12. Config over constants. If you are typing a name, URL, color or count, it belongs in `config.yaml`.
+12. Config over constants. If you are typing a name, URL, color or count, it belongs in `.guide-maker/config.yaml`. If you are about to edit a file under `references/`, the change belongs in a `.guide-maker/` override instead.
 
 ## 10. Tools
 
 | Tool | Purpose |
 |------|---------|
-| `{SKILL_DIR}/scripts/doctor.py` | 12-line health check; `--offline`, `--json`, `--print-paths`, `--migrate-config` |
+| `{SKILL_DIR}/scripts/doctor.py` | 13 checks; `--offline`, `--json`, `--print-paths`, `--list-databases`, `--init`, `--migrate-config` |
 | `{SKILL_DIR}/scripts/_config.py` | Config loader shared by every skill; prints validation when run |
 | `{SKILL_DIR}/scripts/publish_guide_hub.py` | Hub + subpages to the Guide DB |
 | `{SKILL_DIR}/scripts/md_to_notion.py` | `blocks`, `publish-subpage`, `create-content-entry`, `public-url` |

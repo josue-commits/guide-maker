@@ -34,7 +34,7 @@ Notion's copy-link button gives you `app.notion.com/...` or `notion.so/...`. Bot
 The public URL is `https://<notion.public_domain>/<slug>-<page-id>` and it resolves only after you publish the page to web from the Notion UI, by hand. The pipeline never does this for you. Before a DM goes live:
 
 ```bash
-python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --page-id HUB_PAGE_ID --check
+python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --config {CONFIG} --page-id HUB_PAGE_ID --check
 ```
 
 Exit 0 means the public page answers. Exit 1 means it is not published yet, and the DM would send a 404.
@@ -64,12 +64,12 @@ DMs that read as a sequence step get ignored or reported. Write each one like a 
 - `dm.max_lines` non-blank lines, default 7. People do not read long DMs from strangers.
 - Zero em dashes. Commas and periods.
 - Match the language of the post.
-- No AI vocabulary (the banned list in `references/writing/humanizer.md` applies).
+- No AI vocabulary (the banned list applies: `<project>/.guide-maker/banned-words.md` when it exists, else the shipped `references/writing/humanizer.md`).
 
 ## Linting
 
 ```bash
-python3 {SKILL_DIR}/scripts/lint_copy.py dm WORK_DIR/dm/*.txt --config config.yaml
+python3 {SKILL_DIR}/scripts/lint_copy.py dm {WORK_DIR}/dm/*.txt --config {CONFIG}
 ```
 
 Rules: `name-tag`, `hard-wrap`, `app-url`, `em-dash`, `max-lines` (warn), `formula-opener`, `collab-signoff`, `banned-word`, `missing-merge-tag` (warn). Exit 0 clean, 1 failures, 2 warnings only.

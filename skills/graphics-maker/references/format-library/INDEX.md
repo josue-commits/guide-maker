@@ -13,7 +13,7 @@ them. Read both catalogs before picking.
 ## Before picking: check rotation
 
 ```bash
-python3 $SKILL_DIR/scripts/graphics_generate.py rotation
+python3 $SKILL_DIR/scripts/graphics_generate.py rotation --config $CONFIG
 ```
 
 Do not repeat a format used inside `graphics.format_rotation_days` (default 7)
@@ -69,7 +69,7 @@ once your library has a second format.
 1. Pick an image you have the rights to: one of your own shipped graphics,
    or a layout you built. Not a screenshot of someone else's post; their
    name, avatar and wordmark ride into your output.
-2. `python3 $SKILL_DIR/scripts/ingest_reference.py /abs/path/image.png --slug my-format`
+2. `python3 $SKILL_DIR/scripts/ingest_reference.py /abs/path/image.png --slug my-format --config $CONFIG`
    (add `--upload` only when your provider needs public reference URLs).
 3. Open the stub card. Look at that one image and fill every section from
    what you see. One image, then its card, then the next. Cards written from

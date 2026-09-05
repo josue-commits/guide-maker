@@ -2,6 +2,8 @@
 
 This defines how you write. Not just what you avoid, but who you are on the page.
 
+To make it yours, copy this file to `<project>/.guide-maker/voice.md` and edit the copy; the writer reads that file instead of this one. Do not edit it here, a skill update replaces it.
+
 ---
 
 ## Core Truths
