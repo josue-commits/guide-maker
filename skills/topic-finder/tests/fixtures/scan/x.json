@@ -1,0 +1,19 @@
+{
+  "scan_date": "2026-09-01",
+  "lookback_days": 8,
+  "accounts": ["example_ai_lab", "example_devrel"],
+  "cost_usd": 0.004,
+  "raw_count": 4,
+  "after_dedupe": 4,
+  "duplicates_dropped": 0,
+  "long_form_count": 1,
+  "substance_count": 2,
+  "noise_count": 1,
+  "thresholds": {"long_form_seconds": 900, "substance_bookmark_rate": 0.8, "noise_bookmark_rate": 0.1},
+  "posts": [
+    {"id": "x001", "handle": "example_devrel", "account_focus": "Engineer talks", "text": "New talk: designing an MCP server that survives production. 40 minutes, slides linked.", "created": "2026-08-31T09:00:00Z", "url": "https://x.com/example_devrel/status/x001", "views": 81000, "bookmarks": 1080, "likes": 900, "replies": 40, "retweets": 120, "quotes": 10, "bm_rate": 1.333, "is_reply": false, "is_retweet": false, "is_quote": false, "conversation_id": "x001", "in_reply_to": null, "video_seconds": 2400, "video_url": null, "x_article_urls": [], "article_urls": [], "video_urls": [], "lang": "en"},
+    {"id": "x002", "handle": "example_ai_lab", "account_focus": "Research", "text": "Context engineering notes from our latest release: what we changed in the context window and why.", "created": "2026-08-30T09:00:00Z", "url": "https://x.com/example_ai_lab/status/x002", "views": 40000, "bookmarks": 420, "likes": 500, "replies": 30, "retweets": 80, "quotes": 5, "bm_rate": 1.05, "is_reply": false, "is_retweet": false, "is_quote": false, "conversation_id": "x002", "in_reply_to": null, "video_seconds": 0, "video_url": null, "x_article_urls": [], "article_urls": ["https://example.org/notes"], "video_urls": [], "lang": "en"},
+    {"id": "x003", "handle": "example_devrel", "account_focus": "Engineer talks", "text": "lol this meme about AI agents", "created": "2026-08-29T09:00:00Z", "url": "https://x.com/example_devrel/status/x003", "views": 1800000, "bookmarks": 1260, "likes": 90000, "replies": 3000, "retweets": 12000, "quotes": 900, "bm_rate": 0.07, "is_reply": false, "is_retweet": false, "is_quote": false, "conversation_id": "x003", "in_reply_to": null, "video_seconds": 0, "video_url": null, "x_article_urls": [], "article_urls": [], "video_urls": [], "lang": "en"},
+    {"id": "x004", "handle": "example_ai_lab", "account_focus": "Research", "text": "Voice agent latency benchmark across five providers, full method in the repo.", "created": "2026-08-28T09:00:00Z", "url": "https://x.com/example_ai_lab/status/x004", "views": 25000, "bookmarks": 300, "likes": 200, "replies": 12, "retweets": 40, "quotes": 3, "bm_rate": 1.2, "is_reply": false, "is_retweet": false, "is_quote": false, "conversation_id": "x004", "in_reply_to": null, "video_seconds": 0, "video_url": null, "x_article_urls": [], "article_urls": [], "video_urls": [], "lang": "en"}
+  ]
+}

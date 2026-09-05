@@ -1,0 +1,20 @@
+{
+  "_note": "Real-world preset for the AI coding / AI dev tools niche. Covers Claude Code, Cursor, AI agents, automation, and LLM builds. Use this as a starting point, then prune or extend based on what you actually find useful. 'category' is 'tool' for channels that teach the tooling and 'business' for channels that teach selling or building a business on it; add your own business-track channels, this preset ships tool channels only. Score the tracks separately.",
+  "channels": [
+    {"name": "Chase H AI", "url": "https://www.youtube.com/@Chase-H-AI", "focus": "Claude Code", "category": "tool"},
+    {"name": "Nate Herk", "url": "https://www.youtube.com/@nateherk", "focus": "AI coding tools", "category": "tool"},
+    {"name": "Mich Torti", "url": "https://www.youtube.com/@michtortiyt", "focus": "AI automation", "category": "tool"},
+    {"name": "Duncan Rogoff", "url": "https://www.youtube.com/@duncanrogoff", "focus": "Claude Code", "category": "tool"},
+    {"name": "0x5am5", "url": "https://www.youtube.com/@0x5am5", "focus": "AI dev tools", "category": "tool"},
+    {"name": "Mark Kashef", "url": "https://www.youtube.com/@Mark_Kashef", "focus": "AI tools", "category": "tool"},
+    {"name": "Cole Medin", "url": "https://www.youtube.com/@ColeMedin", "focus": "AI agents/automation", "category": "tool"},
+    {"name": "AI Automation Station", "url": "https://www.youtube.com/@ai-automation-station", "focus": "AI automation", "category": "tool"},
+    {"name": "Eric W Tech", "url": "https://www.youtube.com/@EricWTech", "focus": "AI tools", "category": "tool"},
+    {"name": "Dubibubi", "url": "https://www.youtube.com/@Dubibubii", "focus": "AI dev", "category": "tool"},
+    {"name": "Matthew Berman", "url": "https://www.youtube.com/@matthew_berman", "focus": "AI news/reviews", "category": "tool"}
+  ],
+  "scan_defaults": {
+    "days_back": 7,
+    "max_videos_per_channel": 10
+  }
+}

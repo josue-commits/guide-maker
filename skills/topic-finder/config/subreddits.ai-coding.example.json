@@ -1,0 +1,22 @@
+{
+  "_note": "Real-world preset for the AI coding / AI dev tools niche. Subreddits ranked by relevance to Claude Code, AI dev tools, AI agents, automation, and LLM builds. Weights: 3=core, 2=strong, 1=news-only.",
+  "subreddits": [
+    {"name": "ClaudeAI", "focus": "Claude + Claude Code (widest reach)", "weight": 3, "subs": 730000},
+    {"name": "ClaudeCode", "focus": "Pure Claude Code signal", "weight": 3, "subs": 212000},
+    {"name": "vibecoding", "focus": "AI coding culture (Cursor, CC, Bolt, V0)", "weight": 3, "subs": 217000},
+    {"name": "LocalLLaMA", "focus": "LLM builders, RAG, practical AI", "weight": 3, "subs": 682000},
+    {"name": "AI_Agents", "focus": "Agent frameworks (LangChain, CrewAI)", "weight": 3, "subs": 338000},
+    {"name": "cursor", "focus": "Cursor IDE (agentic coding)", "weight": 3, "subs": 131000},
+    {"name": "mcp", "focus": "Model Context Protocol (CC skills/plugins)", "weight": 3, "subs": 104000},
+    {"name": "Anthropic", "focus": "Anthropic news and releases", "weight": 2, "subs": 124000},
+    {"name": "LLMDevs", "focus": "Practical LLM development", "weight": 2, "subs": 141000},
+    {"name": "Rag", "focus": "RAG implementations", "weight": 2, "subs": 67000},
+    {"name": "LangChain", "focus": "Agent framework specific", "weight": 2, "subs": 94000},
+    {"name": "OpenAI", "focus": "News-only: GPT, ChatGPT releases", "weight": 1, "subs": 2700000},
+    {"name": "automation", "focus": "Broader automation trends", "weight": 1, "subs": 199000}
+  ],
+  "sort": "hot",
+  "time_window": "week",
+  "max_posts_per_sub": 10,
+  "min_upvotes": 50
+}

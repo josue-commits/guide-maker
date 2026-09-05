@@ -1,0 +1,12 @@
+{
+  "_note": "Replace with subreddits in YOUR niche. 8-15 subreddits is the sweet spot. Weights: 3=core (your bullseye audience), 2=strong (adjacent), 1=news-only (broad). Higher weights rank posts higher in cross-platform clustering.",
+  "subreddits": [
+    {"name": "ExampleSubA", "focus": "Core audience for your niche", "weight": 3, "subs": 250000},
+    {"name": "ExampleSubB", "focus": "Adjacent / supporting topic", "weight": 2, "subs": 100000},
+    {"name": "ExampleSubC", "focus": "News-only feed for broader signal", "weight": 1, "subs": 1500000}
+  ],
+  "sort": "hot",
+  "time_window": "week",
+  "max_posts_per_sub": 10,
+  "min_upvotes": 50
+}

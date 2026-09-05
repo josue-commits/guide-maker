@@ -1,0 +1,13 @@
+{
+  "_note": "Replace with channels in YOUR niche. 8-15 channels is the sweet spot, more dilutes the signal. 'focus' is metadata the agent uses when explaining why a topic clustered. 'category' splits the list into tracks: 'tool' for channels that teach how to use the thing, 'business' for channels that teach how to sell or make money with it. Score the two tracks separately and surface topics from both; see references/scoring-rubric.md.",
+  "_two_track_rule": "Never merge the tracks into one ranked list. A business video scored on the tool rubric either never surfaces or turns into a get-rich-quick piece. A tool video scored on the business rubric looks like it has no angle. Each track gets its own top list.",
+  "channels": [
+    {"name": "Example Creator 1", "url": "https://www.youtube.com/@example1", "focus": "Hands-on tutorials for the tools in your niche", "category": "tool"},
+    {"name": "Example Creator 2", "url": "https://www.youtube.com/@example2", "focus": "Product deep dives and release walkthroughs", "category": "tool"},
+    {"name": "Example Creator 3", "url": "https://www.youtube.com/@example3", "focus": "How practitioners sell and price this work", "category": "business"}
+  ],
+  "scan_defaults": {
+    "days_back": 7,
+    "max_videos_per_channel": 10
+  }
+}

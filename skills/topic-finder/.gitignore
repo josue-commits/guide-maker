@@ -1,0 +1,17 @@
+# Your real configs. Only the *.example.json files are tracked.
+config/youtube-channels.json
+config/subreddits.json
+config/x-accounts.json
+config/topics.json
+
+# Scan outputs, if you point --out-dir inside the repo
+out/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
