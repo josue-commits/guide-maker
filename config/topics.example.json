@@ -1,0 +1,21 @@
+{
+  "_note": "Named topic map for correlate.py. Copy to config/topics.json and replace with topics in YOUR niche. Each entry is a label plus a list of case-insensitive regexes; a resource matching any pattern lands in that topic, and a resource can land in several topics on purpose. Topic maps go stale, so prune monthly, or skip the file entirely and let correlate.py cluster on shared title n-grams with --auto.",
+  "topics": [
+    {"label": "Coding agents and CLI assistants",
+     "patterns": ["coding agent", "\\bcli\\b.{0,20}agent", "agentic (coding|ide)", "code assistant", "terminal agent"]},
+    {"label": "MCP servers and tool integrations",
+     "patterns": ["\\bmcp\\b", "model context protocol", "tool (calling|use)", "function calling"]},
+    {"label": "Prompt and context engineering",
+     "patterns": ["context engineering", "prompt engineering", "context window", "\\bcompaction\\b", "prompt cach", "system prompt"]},
+    {"label": "Local and open-weight models",
+     "patterns": ["open.?weight", "open.?source (model|llm)", "\\blocal (model|llm|inference)", "\\bollama\\b", "\\bquantiz", "run(ning)? .{0,20}locally"]},
+    {"label": "RAG and knowledge bases",
+     "patterns": ["\\brag\\b", "retrieval.?augmented", "vector (db|database|store)", "embedding", "knowledge base"]},
+    {"label": "Agent evals and observability",
+     "patterns": ["\\bevals?\\b", "evaluation", "observability", "\\btracing\\b", "benchmark", "regression test"]},
+    {"label": "Workflow automation with AI",
+     "patterns": ["automat(e|ion|ed)", "\\bworkflow", "\\bzapier\\b", "\\bmake\\.com\\b", "\\bn8n\\b", "no.?code"]},
+    {"label": "Voice and phone agents",
+     "patterns": ["voice agent", "phone agent", "\\bvoice ai\\b", "speech.?to.?text", "text.?to.?speech", "call center"]}
+  ]
+}

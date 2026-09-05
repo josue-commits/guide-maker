@@ -1,0 +1,13 @@
+{
+  "scan_date": "2026-09-01",
+  "lookback_days": 7,
+  "mode": "flat",
+  "channels_scanned": 2,
+  "videos_found": 4,
+  "videos": [
+    {"id": "yt001", "title": "Build an MCP server in 20 minutes", "upload_date": "20260831", "view_count": 48000, "duration": 1260, "description": "", "channel_name": "Example Creator 1", "channel_focus": "AI dev tools", "channel_category": "tool", "url": "https://www.youtube.com/watch?v=yt001"},
+    {"id": "yt002", "title": "Context engineering beats prompt engineering", "upload_date": "20260830", "view_count": 22000, "duration": 980, "description": "", "channel_name": "Example Creator 1", "channel_focus": "AI dev tools", "channel_category": "tool", "url": "https://www.youtube.com/watch?v=yt002"},
+    {"id": "yt003", "title": "How I sell AI automation to local businesses", "upload_date": "20260829", "view_count": 9000, "duration": 1500, "description": "", "channel_name": "Example Creator 2", "channel_focus": "AI agency", "channel_category": "business", "url": "https://www.youtube.com/watch?v=yt003"},
+    {"id": "yt004", "title": "Scheduled premiere: live Q and A", "upload_date": "20260901", "view_count": 0, "duration": 0, "description": "", "channel_name": "Example Creator 2", "channel_focus": "AI agency", "channel_category": "business", "url": "https://www.youtube.com/watch?v=yt004"}
+  ]
+}

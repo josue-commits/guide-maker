@@ -1,0 +1,22 @@
+{
+  "_note": "Replace with X/Twitter accounts in YOUR niche. 5-10 accounts is plenty. X is where lectures, first-party engineer talks, docs and repos land first, before they turn into YouTube tutorials. Prefer accounts that post primary material over accounts that summarize it. The handle may carry a leading @ or not.",
+  "_scoring": "Rank on bookmarks and bookmark rate, never views. Views track jokes, bookmarks track 'I will come back and study this'. Above about 0.8% bookmark rate is substance, below about 0.1% is noise. As a reference point from one scan: a 1.8M-view meme scored 0.07%, an 81K-view technical explainer scored 1.33%.",
+  "_content_warning": "Tweet text is a lead, not a source. Engagement accounts recut the same talk at different lengths and recycle one stat with swapped numbers and employers. The underlying video is usually real. Verify every number against the original talk, repo or docs page before it enters a piece of content.",
+  "accounts": [
+    {"handle": "@example_ai_lab", "focus": "First-party research and model release notes", "note": "Primary source. Quote the linked paper, not the post."},
+    {"handle": "@example_devrel", "focus": "Engineer talks, changelogs, live demos", "note": "Long videos land here first."},
+    {"handle": "@example_curator", "focus": "Curates lectures and repos across the niche", "note": "High bookmark rate, but recuts talks. Verify numbers."}
+  ],
+  "scan_defaults": {
+    "days_back": 8,
+    "max_items_per_account": 120,
+    "long_form_seconds": 900,
+    "substance_bookmark_rate": 0.8,
+    "noise_bookmark_rate": 0.1
+  },
+  "apify": {
+    "actor": "kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest",
+    "price_per_item_usd": 0.00025,
+    "_cost_note": "Worst case is accounts x max_items_per_account x price_per_item_usd. 7 accounts at 120 items each is about $0.21; a real 8-day run usually returns fewer items and lands near $0.12. Run scan_x.py --dry-run to see the estimate without fetching."
+  }
+}
