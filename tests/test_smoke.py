@@ -84,6 +84,110 @@ class TestConfigAndDoctor(TmpDirMixin, unittest.TestCase):
         proc = run(GM / "doctor.py", "--migrate-config", "--config", CFG)
         self.assertIn("schema_version: 2", proc.stdout)
 
+    def test_init_project_writes_skeleton_and_refuses_overwrite(self):
+        proj = self.tmp / "proj"
+        proc = run(GM / "doctor.py", "--init", "--project", proj, env=env_without_config())
+        gm = proj / ".guide-maker"
+        self.assertTrue((gm / "config.yaml").is_file(), proc.stdout)
+        for name in ("youtube-channels", "subreddits", "x-accounts", "topics"):
+            self.assertTrue((gm / "topic-finder" / f"{name}.json").is_file(), name)
+        self.assertFalse(list((gm / "topic-finder").glob("*.example.json")))
+        self.assertTrue((gm / "formats").is_dir())
+        self.assertTrue((gm / "state").is_dir())
+        gi = (gm / ".gitignore").read_text()
+        self.assertIn("state/", gi)
+        self.assertNotIn("config.yaml", gi, "no secret inlined, config.yaml must stay committable")
+        # the example is a valid config: the doctor finds it from a nested cwd
+        sub = proj / "sub"; sub.mkdir()
+        proc = run(GM / "doctor.py", "--print-paths", "--json", cwd=sub, env=env_without_config())
+        paths = json.loads(proc.stdout)
+        self.assertEqual(paths["config_source"], "project")
+        self.assertEqual(pathlib.Path(paths["config_path"]).resolve(), (gm / "config.yaml").resolve())
+        self.assertEqual(pathlib.Path(paths["project_dir"]).resolve(), proj.resolve())
+        for name in ("make-guide", "topic-finder", "graphics-maker", "dm-automation"):
+            self.assertIn(name, paths["siblings"])
+            self.assertTrue(paths["siblings"][name], name)
+        # second run refuses
+        proc = run(GM / "doctor.py", "--init", "--project", proj, env=env_without_config(), ok=False)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("--force", proc.stdout + proc.stderr)
+        run(GM / "doctor.py", "--init", "--project", proj, "--force", env=env_without_config())
+
+    def test_init_from_old_copies_config_state_sources_and_edited_references(self):
+        old = self.tmp / "old" / "skills"
+        (old / "guide-maker" / "references" / "writing").mkdir(parents=True)
+        (old / "graphics-maker").mkdir()
+        (old / "topic-finder" / "config").mkdir(parents=True)
+        old_cfg = old / "guide-maker" / "config.yaml"
+        old_cfg.write_text(CFG.read_text().replace('api_key: ""', 'api_key: "ntn_FAKEKEY12345"', 1))
+        (old / "guide-maker" / "references" / "writing" / "voice.md").write_text("# edited voice\n")
+        (old / "graphics-maker" / "format-usage-log.jsonl").write_text('{"date": "2026-01-01", "format_slug": "x"}\n')
+        (old / "topic-finder" / "config" / "youtube-channels.json").write_text('{"channels": [{"name": "mine"}]}\n')
+        (old / "topic-finder" / "config" / "subreddits.example.json").write_text("{}\n")
+        proj = self.tmp / "proj"
+        proc = run(GM / "doctor.py", "--init", "--project", proj, "--from", old_cfg, env=env_without_config())
+        gm = proj / ".guide-maker"
+        self.assertIn("ntn_FAKEKEY12345", (gm / "config.yaml").read_text())
+        self.assertIn("config.yaml", (gm / ".gitignore").read_text(), "inlined key: config.yaml must be ignored")
+        self.assertEqual((gm / "voice.md").read_text(), "# edited voice\n")
+        self.assertFalse((gm / "examples.md").exists(), "unedited references are not copied")
+        self.assertIn('"x"', (gm / "state" / "format-usage-log.jsonl").read_text())
+        self.assertFalse((old / "graphics-maker" / "format-usage-log.jsonl").exists(), "usage log is moved, not copied")
+        self.assertIn("mine", (gm / "topic-finder" / "youtube-channels.json").read_text())
+        self.assertTrue((gm / "topic-finder" / "subreddits.json").is_file(), "example seeded when no real file")
+        self.assertIn(str(old_cfg.resolve()), proc.stdout)
+
+    def test_init_from_v1_migrates(self):
+        v1 = self.tmp / "config.yaml"
+        v1.write_text('notion_api_key: ""\nguide_database_id: "0123456789abcdef0123456789abcdef"\nauthor_name: "Sam"\n')
+        proj = self.tmp / "proj"
+        run(GM / "doctor.py", "--init", "--project", proj, "--from", v1, env=env_without_config())
+        text = (proj / ".guide-maker" / "config.yaml").read_text()
+        self.assertIn("schema_version: 2", text)
+        self.assertIn("Sam", text)
+        proc = run(GM / "doctor.py", "--offline", "--json", cwd=proj, env=env_without_config())
+        report = json.loads(proc.stdout)
+        self.assertEqual(report["config"]["author"]["name"], "Sam")
+        self.assertFalse(report["config"].get("_v1"))
+
+    def test_print_paths_without_config_reports_none(self):
+        proc = run(GM / "doctor.py", "--print-paths", "--json", cwd=self.tmp, env=env_without_config())
+        paths = json.loads(proc.stdout)
+        self.assertEqual(paths["config_source"], "none")
+        self.assertEqual(paths["config_path"], "")
+
+    def test_print_paths_reports_env_and_arg_sources(self):
+        proc = run(GM / "doctor.py", "--print-paths", "--json")
+        self.assertEqual(json.loads(proc.stdout)["config_source"], "env")
+        proc = run(GM / "doctor.py", "--print-paths", "--json", "--config", CFG)
+        self.assertEqual(json.loads(proc.stdout)["config_source"], "arg")
+
+    def test_list_databases_offline_skips(self):
+        proc = run(GM / "doctor.py", "--list-databases", "--offline", "--config", CFG)
+        self.assertIn("SKIP", proc.stdout)
+        proc = run(GM / "doctor.py", "--list-databases", "--offline", "--json", "--config", CFG)
+        self.assertEqual(json.loads(proc.stdout)["databases"], [])
+
+    def test_gitignore_check_is_about_inline_secrets(self):
+        proj = self.tmp / "proj"
+        gm = proj / ".guide-maker"; gm.mkdir(parents=True)
+        shutil.copy(CFG, gm / "config.yaml")
+        proc = run(GM / "doctor.py", "--offline", "--json", cwd=proj, env=env_without_config())
+        rows = [r for r in json.loads(proc.stdout)["checks"] if r["name"] == "gitignore"]
+        self.assertEqual(rows[0]["level"], "OK", rows)
+        self.assertIn("no inline API key", rows[0]["message"])
+        # an inlined key inside a git repo that does not ignore the file: WARN
+        if shutil.which("git"):
+            (gm / "config.yaml").write_text(CFG.read_text().replace('api_key: ""', 'api_key: "ntn_FAKEKEY12345"', 1))
+            subprocess.run(["git", "init", "-q", str(proj)], check=True, capture_output=True)
+            proc = run(GM / "doctor.py", "--offline", "--json", cwd=proj, env=env_without_config())
+            rows = [r for r in json.loads(proc.stdout)["checks"] if r["name"] == "gitignore"]
+            self.assertEqual(rows[0]["level"], "WARN", rows)
+            (gm / ".gitignore").write_text("config.yaml\n")
+            proc = run(GM / "doctor.py", "--offline", "--json", cwd=proj, env=env_without_config())
+            rows = [r for r in json.loads(proc.stdout)["checks"] if r["name"] == "gitignore"]
+            self.assertEqual(rows[0]["level"], "OK", rows)
+
 
 def env_without_config():
     """ENV minus GUIDE_MAKER_CONFIG, so the loader's own search order runs."""
