@@ -5,9 +5,17 @@ description: Turn a finished guide into the DM side of a keyword-comment lead ma
 
 # dm-automation
 
+**Precondition.** This skill reads `.guide-maker/config.yaml` (author, community,
+`dm.*`, `dm_tool.*`); it should have been created by `/setup-guide-maker`. If
+make-guide's `doctor.py --print-paths` reports `config_source: none`, tell the
+user to run `/setup-guide-maker` and stop. Without the config there is no
+sign-off, no merge tag and no DM tool to render for.
+
 Optional sibling of make-guide. make-guide produces the guide, the copy, the
 graphic and the DM text. This skill takes it from there: the keyword, the DM the
 tool sends when someone comments it, and the post going out with both attached.
+Model-invoked: the user describes the job ("schedule Monday's post", "is FLOWS
+taken") and you pick this skill.
 
 Set `SKILL_DIR` to the absolute path of this folder first and use it in every
 command. Never call the scripts through a relative path. Resolve `CONFIG`

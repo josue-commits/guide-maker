@@ -14,6 +14,13 @@ loader (`.guide-maker/config.yaml` in your project, or `GUIDE_MAKER_CONFIG`).
 Runs standalone if make-guide is absent; the config loader then walks up from
 the working directory for the same file.
 
+**Soft dependency on the config.** `card` runs with defaults when
+`doctor.py --print-paths` reports `config_source: none` (brand colors, bundled
+font, Pillow bar); say so and carry on. The providers (`scene`, `text`,
+`single`, `tweak`), the brand fonts and logo, and the usage log need the
+config, so for those point the user at `/setup-guide-maker` first.
+Model-invoked: the user asks for the graphic, you pick this skill.
+
 ## What you get
 
 | Path | Cost | Needs | Output |

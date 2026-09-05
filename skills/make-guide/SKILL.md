@@ -1,11 +1,13 @@
 ---
 name: make-guide
-description: "Turn a YouTube video, a transcript or a researched topic into a multi-page Notion guide plus the LinkedIn lead-magnet bundle around it: three copy variations, a cover, a post graphic that carries the keyword, DM templates and a Content Board card. Use when the user provides a YouTube URL or transcript, says 'make a guide from this', 'turn this into a lead magnet', 'create a Notion guide', 'write the copy for the guide', 'publish the guide', or asks 'find me a topic' / 'what's trending' / 'what should I write about'. Also use for partial steps: only the copy, only the DMs, only the publish."
+description: "Turn a YouTube video, a transcript or a researched topic into a multi-page Notion guide plus the LinkedIn lead-magnet bundle around it: three copy variations, a cover, a post graphic that carries the keyword, DM templates and a Content Board card. Use when the user provides a YouTube URL or transcript, says 'make a guide from this', 'turn this into a lead magnet', 'create a Notion guide', 'write the copy for the guide', 'publish the guide', or picks a topic from a topic-finder scan. Also use for partial steps: only the copy, only the DMs, only the publish. Topic hunting itself ('find me a topic', 'what's trending') belongs to topic-finder."
 ---
 
 # make-guide
 
-You are the orchestrator. The writer agent (`AGENT.md`) does the heavy lifting in the background; you run the scripts, hold the gates, and talk to the user. Talk to the user in their language; everything the skill ships (guide, copy, DMs) is written in `workflow.language`.
+**Precondition.** This skill reads `.guide-maker/config.yaml`; it should have been created by `/setup-guide-maker`. If `doctor.py --print-paths` reports `config_source: none`, tell the user to run `/setup-guide-maker` and stop. A `legacy` source (a v2 config still inside a skill folder) works for now; mention the move once and carry on.
+
+You are the orchestrator. The writer agent (`AGENT.md`) does the heavy lifting in the background; you run the scripts, hold the gates, and talk to the user. Talk to the user in their language; everything the skill ships (guide, copy, DMs) is written in `workflow.language`. Model-invoked: the user does not type `/make-guide`, they describe the job and you pick this skill. Unsure which skill fits the situation, or where in the pipeline the user is: `/ask-guide-maker` is the map.
 
 ## 0. Before anything
 
