@@ -33,6 +33,10 @@ import site
 _USER_SITE = site.getusersitepackages() if hasattr(site, "getusersitepackages") else ""
 ENV["HOME"] = tempfile.mkdtemp(prefix="gm-home-")
 ENV["PYTHONPATH"] = os.pathsep.join(p for p in (_USER_SITE, ENV.get("PYTHONPATH", "")) if p)
+# Every subprocess runs from a scratch cwd outside the repo, so a script that
+# resolves .guide-maker/ from the working directory never writes into the
+# checkout. The last test class asserts nothing under skills/ changed.
+CWD = pathlib.Path(tempfile.mkdtemp(prefix="gm-cwd-"))
 
 
 def future_iso(days=2):
@@ -40,8 +44,8 @@ def future_iso(days=2):
     return (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def run(*args, ok=True, cwd=None):
-    proc = subprocess.run([PY, *map(str, args)], capture_output=True, text=True, env=ENV, cwd=cwd or ROOT)
+def run(*args, ok=True, cwd=None, env=None):
+    proc = subprocess.run([PY, *map(str, args)], capture_output=True, text=True, env=env or ENV, cwd=cwd or CWD)
     if ok and proc.returncode != 0:
         raise AssertionError(f"exit {proc.returncode}\n$ {' '.join(map(str, args))}\n{proc.stdout}\n{proc.stderr}")
     return proc
@@ -79,6 +83,106 @@ class TestConfigAndDoctor(TmpDirMixin, unittest.TestCase):
     def test_migrate_config_prints_v2(self):
         proc = run(GM / "doctor.py", "--migrate-config", "--config", CFG)
         self.assertIn("schema_version: 2", proc.stdout)
+
+
+def env_without_config():
+    """ENV minus GUIDE_MAKER_CONFIG, so the loader's own search order runs."""
+    env = dict(ENV)
+    env.pop("GUIDE_MAKER_CONFIG", None)
+    return env
+
+
+LOADER_PROBE = (
+    "import sys, json; sys.path.insert(0, sys.argv[1]); "
+    "from _config import load_config, project_dir, resource, state_path; "
+    "c = load_config(); "
+    "print(json.dumps({'path': c['_path'], 'source': c['_source'], 'project': str(project_dir(c)), "
+    "'voice': str(resource(c, 'voice')), 'examples': str(resource(c, 'examples')), "
+    "'state': str(state_path(c, 'closer-log.jsonl'))}))"
+)
+
+
+class TestProjectConfig(TmpDirMixin, unittest.TestCase):
+    """The v3 search order: .guide-maker/ found by walking up from cwd, overrides, state."""
+
+    def _project(self):
+        proj = self.tmp / "proj"
+        (proj / ".guide-maker").mkdir(parents=True)
+        shutil.copy(CFG, proj / ".guide-maker" / "config.yaml")
+        nested = proj / "a" / "b"
+        nested.mkdir(parents=True)
+        return proj, nested
+
+    def test_config_found_from_nested_cwd(self):
+        proj, nested = self._project()
+        proc = run("-c", LOADER_PROBE, GM, cwd=nested, env=env_without_config())
+        info = json.loads(proc.stdout.strip().splitlines()[-1])
+        self.assertEqual(pathlib.Path(info["path"]).resolve(), (proj / ".guide-maker" / "config.yaml").resolve())
+        self.assertEqual(info["source"], "project")
+        self.assertEqual(pathlib.Path(info["project"]).resolve(), proj.resolve())
+        self.assertNotIn("deprecat", proc.stderr.lower())
+
+    def test_resource_prefers_project_override(self):
+        proj, nested = self._project()
+        (proj / ".guide-maker" / "voice.md").write_text("# my voice\n")
+        proc = run("-c", LOADER_PROBE, GM, cwd=nested, env=env_without_config())
+        info = json.loads(proc.stdout.strip().splitlines()[-1])
+        self.assertEqual(pathlib.Path(info["voice"]).resolve(), (proj / ".guide-maker" / "voice.md").resolve())
+        # no examples.md override: the shipped file
+        self.assertEqual(pathlib.Path(info["examples"]).resolve(),
+                         (ROOT / "skills" / "make-guide" / "references" / "linkedin" / "examples.md").resolve())
+
+    def test_state_path_lives_under_project_state(self):
+        proj, nested = self._project()
+        proc = run("-c", LOADER_PROBE, GM, cwd=nested, env=env_without_config())
+        info = json.loads(proc.stdout.strip().splitlines()[-1])
+        state = pathlib.Path(info["state"])
+        self.assertEqual(state.resolve(), (proj / ".guide-maker" / "state" / "closer-log.jsonl").resolve())
+        self.assertTrue(state.parent.is_dir(), "state/ parent was not created")
+
+    def test_explicit_config_outside_project_still_resolves_project_from_cwd(self):
+        proj, nested = self._project()
+        # --config points at the fixture, cwd is inside the project: project_dir comes from cwd
+        probe = LOADER_PROBE.replace("c = load_config(); ", "c = load_config(sys.argv[2]); ")
+        proc = run("-c", probe, GM, CFG, cwd=nested, env=env_without_config())
+        info = json.loads(proc.stdout.strip().splitlines()[-1])
+        self.assertEqual(info["source"], "arg")
+        self.assertEqual(pathlib.Path(info["project"]).resolve(), proj.resolve())
+
+    def test_legacy_skill_folder_config_loads_with_deprecation_line(self):
+        # a copy of the scripts folder acts as an old-style skill with config.yaml inside it
+        fake = self.tmp / "fake-skill"
+        shutil.copytree(GM, fake / "scripts")
+        shutil.copy(CFG, fake / "config.yaml")
+        proc = run("-c", LOADER_PROBE, fake / "scripts", cwd=self.tmp, env=env_without_config())
+        info = json.loads(proc.stdout.strip().splitlines()[-1])
+        self.assertEqual(info["source"], "legacy")
+        self.assertIn("config inside the skill folder is deprecated", proc.stderr)
+        self.assertIn("doctor.py --init", proc.stderr)
+
+    def test_no_config_anywhere_fails_with_init_hint(self):
+        proc = run("-c", LOADER_PROBE, GM, cwd=self.tmp, env=env_without_config(), ok=False)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("doctor.py --init", proc.stderr)
+
+    def test_sibling_shims_walk_up_standalone(self):
+        # graphics-maker and dm-automation without make-guide next to them: their own
+        # fallback loaders must still find <project>/.guide-maker/config.yaml
+        proj, nested = self._project()
+        for skill, module in (("graphics-maker", "_cfg"), ("dm-automation", "_config_shim")):
+            alone = self.tmp / "alone" / "skills" / skill
+            shutil.copytree(ROOT / "skills" / skill / "scripts", alone / "scripts")
+            probe = (f"import sys, json; sys.path.insert(0, sys.argv[1]); import {module} as m; "
+                     "c = m.load_config(); print(json.dumps({'shared': bool(getattr(m, 'USING_SHARED_LOADER', "
+                     "getattr(m, 'SHARED_LOADER', None))), 'project': str(m.project_dir(c)), "
+                     "'state': str(m.state_path(c, 'format-usage-log.jsonl'))}))")
+            proc = run("-c", probe, alone / "scripts", cwd=nested, env=env_without_config())
+            info = json.loads(proc.stdout.strip().splitlines()[-1])
+            self.assertFalse(info["shared"], skill)
+            self.assertEqual(pathlib.Path(info["project"]).resolve(), proj.resolve(), skill)
+            self.assertEqual(pathlib.Path(info["state"]).resolve(),
+                             (proj / ".guide-maker" / "state" / "format-usage-log.jsonl").resolve(), skill)
+            shutil.rmtree(self.tmp / "alone")
 
 
 class TestNotionConversion(TmpDirMixin, unittest.TestCase):
@@ -238,7 +342,7 @@ class TestDM(TmpDirMixin, unittest.TestCase):
         proc = subprocess.run([PY, str(DM / "dm_cli.py"), "schedule", "--content", f"@{post}", "--image", str(img),
                                "--time", future_iso(), "--keyword", "SAMPLEKW", "--dm", f"@{dm}",
                                "--out-dir", str(out), "--dry-run", "--config", str(CFG)],
-                              capture_output=True, text=True, env=env, cwd=ROOT)
+                              capture_output=True, text=True, env=env, cwd=CWD)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertTrue(any(out.rglob("checklist.md")), "checklist.md not written")
 

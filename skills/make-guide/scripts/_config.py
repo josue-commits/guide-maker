@@ -10,17 +10,32 @@ Keep the public surface stable:
                                    "guide-maker" is accepted as an alias of "make-guide"
                                    for one release (the v2 folder name)
     load_config(path=None) -> dict v2 nested dict; v1 flat keys are mapped in with ONE
-                                   printed deprecation line
+                                   printed deprecation line. cfg["_path"] is the file,
+                                   cfg["_source"] is which search step found it
+    project_dir(cfg=None) -> Path  the folder that holds .guide-maker/: the config's own
+                                   project when it was loaded from one, else the first
+                                   ancestor of cwd holding .guide-maker/, else cwd
+    project_file(name, cfg=None)   project_dir(cfg)/.guide-maker/<name>
+    resource(cfg, key) -> Path     key in {voice, examples, top_performers, banned_words};
+                                   the project override when it exists, else the shipped file
+    state_path(cfg, name) -> Path  cfg paths.state, else project_file("state")/<name>;
+                                   the parent folder is created on demand
     cfg_get(cfg, "a.b.c", default) dotted accessor with schema defaults as the last fallback
     secret(cfg, name) -> str       name in {notion, kieai, openai, apify, leadshark};
                                    env var > key file > config; "" if none
     validate(cfg) -> [(level, message)]   level in OK | WARN | FAIL, used by doctor.py
 
-Config search order for load_config(None):
-    1. env GUIDE_MAKER_CONFIG
-    2. skill_dir()/config.yaml
-    3. skill_dir()/config.json      (same keys, for machines without PyYAML)
-    4. ~/.config/guide-maker/config.yaml
+Config search order for load_config(None), first hit wins (cfg["_source"]):
+    1. explicit path argument                                   "arg"
+    2. env GUIDE_MAKER_CONFIG                                   "env"
+    3. <dir>/.guide-maker/config.yaml|json, for dir in cwd,
+       cwd.parent, ... up to the filesystem root                "project"
+    4. ~/.config/guide-maker/config.yaml|json                   "home"
+    5. skill_dir()/config.yaml|json  (the v2 location; loads with one stderr
+       deprecation line, removed in 4.0)                        "legacy"
+
+Nothing under skill_dir() is written at run time. State (closer log, format
+usage log), user format cards and reference overrides live in .guide-maker/.
 
 Python 3.9+, stdlib + PyYAML (optional: JSON works without it).
 """
@@ -189,7 +204,20 @@ DEFAULTS = {
         "leadshark": {"api_key": ""},
     },
     "tools": {"ytdlp_path": ""},
+    "paths": {"state": ""},                # empty = <project>/.guide-maker/state
 }
+
+# .guide-maker/ file name -> path of the shipped default, relative to skill_dir()
+RESOURCES = {
+    "voice": ("voice.md", "references/writing/voice.md"),
+    "examples": ("examples.md", "references/linkedin/examples.md"),
+    "top_performers": ("top-performers.md", "references/linkedin/top-performers.md"),
+    "banned_words": ("banned-words.md", "references/writing/humanizer.md"),
+}
+PROJECT_DIRNAME = ".guide-maker"
+CONFIG_NAMES = ("config.yaml", "config.json")
+LEGACY_DEPRECATION = ("config inside the skill folder is deprecated; run doctor.py --init "
+                      "or /setup-guide-maker")
 
 # v1 flat key -> v2 dotted path
 V1_KEYS = {
@@ -209,6 +237,7 @@ V1_KEYS = {
 
 _cache = {}
 _deprecation_printed = False
+_legacy_printed = False
 
 
 # --- Paths --------------------------------------------------------------------
@@ -257,15 +286,99 @@ def sibling(name):
     raise FileNotFoundError(f"sibling skill '{name}' not found at {path}. Install it: {hint}")
 
 
+# --- Project paths ------------------------------------------------------------
+
+def _walk_up(start):
+    """start and every ancestor, nearest first."""
+    cur = Path(start).expanduser().resolve()
+    yield cur
+    for parent in cur.parents:
+        yield parent
+
+
+def project_dir(cfg=None):
+    """The folder that holds .guide-maker/.
+
+    When cfg was loaded from <dir>/.guide-maker/config.*, that <dir> wins, so
+    a script run with --config from anywhere still finds the right overrides
+    and state. Otherwise the first ancestor of cwd holding .guide-maker/, else
+    cwd itself (the folder .guide-maker/ would be created in).
+    """
+    if cfg:
+        found = cfg.get("_path", "")
+        if found:
+            parent = Path(found).expanduser().resolve().parent
+            if parent.name == PROJECT_DIRNAME:
+                return parent.parent
+    for d in _walk_up(Path.cwd()):
+        if (d / PROJECT_DIRNAME).is_dir():
+            return d
+    return Path.cwd().resolve()
+
+
+def project_file(name, cfg=None):
+    """project_dir(cfg)/.guide-maker/<name>. Not created."""
+    return project_dir(cfg) / PROJECT_DIRNAME / name
+
+
+def resource(cfg, key):
+    """Path of a reference the writer reads: the project override when the
+    user wrote one into .guide-maker/, else the file shipped with the skill.
+
+    banned_words honours copy.banned_words_file: absolute paths are used as
+    is; a relative path is resolved against skill_dir() unless the project
+    override exists.
+    """
+    if key not in RESOURCES:
+        raise KeyError(f"unknown resource {key!r}; one of {sorted(RESOURCES)}")
+    override_name, shipped_rel = RESOURCES[key]
+    if key == "banned_words":
+        configured = cfg_get(cfg, "copy.banned_words_file") or ""
+        if configured and os.path.isabs(os.path.expanduser(configured)):
+            return Path(configured).expanduser()
+        if configured:
+            shipped_rel = configured
+    override = project_file(override_name, cfg)
+    if override.is_file():
+        return override
+    return skill_dir() / shipped_rel
+
+
+def resource_source(cfg, key):
+    """"override" when resource() returns a project file, else "shipped". For doctor."""
+    path = resource(cfg, key)
+    try:
+        path.resolve().relative_to(skill_dir().resolve())
+        return "shipped"
+    except ValueError:
+        return "override"
+
+
+def state_path(cfg, name):
+    """Where run-time state goes: paths.state from the config, else
+    <project>/.guide-maker/state/. The folder is created on demand. Never
+    under skill_dir()."""
+    base = cfg_get(cfg, "paths.state") or ""
+    folder = Path(base).expanduser() if base else project_file("state", cfg)
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder / name
+
+
 # --- Loading ------------------------------------------------------------------
 
 def _candidate_paths():
+    """(path, source) in search order; see the module docstring."""
     env = os.environ.get("GUIDE_MAKER_CONFIG", "").strip()
     if env:
-        yield Path(env).expanduser()
-    yield skill_dir() / "config.yaml"
-    yield skill_dir() / "config.json"
-    yield Path("~/.config/guide-maker/config.yaml").expanduser()
+        yield Path(env).expanduser(), "env"
+    for d in _walk_up(Path.cwd()):
+        for name in CONFIG_NAMES:
+            yield d / PROJECT_DIRNAME / name, "project"
+    home = Path("~/.config/guide-maker").expanduser()
+    for name in CONFIG_NAMES:
+        yield home / name, "home"
+    for name in CONFIG_NAMES:
+        yield skill_dir() / name, "legacy"
 
 
 def _read_file(path):
@@ -347,29 +460,33 @@ def load_config(path=None):
     Raises FileNotFoundError when no config exists. v1 files load through a
     shim that prints one deprecation line to stderr.
     """
-    global _deprecation_printed
-    key = str(path) if path else ""
+    global _deprecation_printed, _legacy_printed
+    key = str(path) if path else f"cwd:{Path.cwd()}"
     if key in _cache:
         return _cache[key]
 
-    found = None
+    found, source = None, None
     if path:
         found = Path(path).expanduser()
+        source = "arg"
         if not found.exists():
             raise FileNotFoundError(f"Config not found: {found}")
     else:
-        for cand in _candidate_paths():
-            if cand.exists():
-                found = cand
+        for cand, cand_source in _candidate_paths():
+            if cand.is_file():
+                found, source = cand, cand_source
                 break
     if found is None:
         raise FileNotFoundError(
-            f"Config not found. Looked for {skill_dir() / 'config.yaml'}, "
-            f"{skill_dir() / 'config.json'}, ~/.config/guide-maker/config.yaml "
-            "and $GUIDE_MAKER_CONFIG.\n"
-            f"Copy {skill_dir() / 'config.example.yaml'} to config.yaml and fill it in "
-            "(or write the same keys as config.json if you do not have PyYAML). "
-            "Then run scripts/doctor.py.")
+            "Config not found. Looked for $GUIDE_MAKER_CONFIG, "
+            f"{PROJECT_DIRNAME}/config.yaml in {Path.cwd()} and every parent folder, "
+            f"~/.config/guide-maker/config.yaml and (deprecated) {skill_dir() / 'config.yaml'}.\n"
+            "Create it with: python3 scripts/doctor.py --init --project /path/to/your/project "
+            "(or run /setup-guide-maker in Claude Code). config.json with the same keys works "
+            "without PyYAML.")
+    if source == "legacy" and not _legacy_printed:
+        print(f"[guide-maker] {found}: {LEGACY_DEPRECATION}", file=sys.stderr)
+        _legacy_printed = True
 
     raw = _read_file(found)
     if is_v1(raw):
@@ -382,6 +499,7 @@ def load_config(path=None):
 
     cfg = _deep_merge(DEFAULTS, raw)
     cfg["_path"] = str(found)
+    cfg["_source"] = source
     cfg["_v1"] = is_v1(_read_file(found))
     _cache[key] = cfg
     return cfg
@@ -551,8 +669,8 @@ def add_config_arg(parser, subparsers=None):
     Read it with getattr(args, "config", None).
     """
     import argparse
-    help_text = ("Config file (default: $GUIDE_MAKER_CONFIG, then the skill's "
-                 "config.yaml / config.json)")
+    help_text = ("Config file (default: $GUIDE_MAKER_CONFIG, then .guide-maker/config.yaml "
+                 "walking up from the working directory, then ~/.config/guide-maker/)")
     parser.add_argument("--config", default=None, help=help_text)
     for sub in (subparsers or []):
         sub.add_argument("--config", default=argparse.SUPPRESS, help=help_text)
@@ -567,6 +685,7 @@ if __name__ == "__main__":
     add_config_arg(_parser)
     _args = _parser.parse_args()
     cfg = load_config(_args.path or _args.config)
-    print(f"config: {cfg.get('_path')}")
+    print(f"config: {cfg.get('_path')} (source: {cfg.get('_source')})")
+    print(f"project: {project_dir(cfg)}")
     for level, message in validate(cfg):
         print(f"{level:<4} {message}")

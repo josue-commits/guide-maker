@@ -1,12 +1,19 @@
 # guide-maker configuration (schema_version 2)
 # ============================================
-# Copy this file to config.yaml in the same folder and fill in the blanks.
+# This file lives at <your project>/.guide-maker/config.yaml. Create the folder
+# with /setup-guide-maker in Claude Code, or `python3 scripts/doctor.py --init
+# --project /path/to/your/project`; both copy this file there for you.
 # Every key has a default; you can delete anything you do not want to change.
 # Secrets can live here, in an env var, or in a key file (env wins, then file,
-# then this file). Never commit config.yaml; .gitignore already covers it.
+# then this file). If you inline a key, add config.yaml to .guide-maker/.gitignore
+# (doctor.py --init does this when it copies a config that carries one).
 #
 # The six keys most people change: copy.cta_mode, copy.words, workflow.gates,
 # community.*, secondary_channel.*, excluded_topics.
+#
+# Next to this file, all optional: voice.md, examples.md, top-performers.md,
+# banned-words.md (overrides of the shipped references), topic-finder/*.json
+# (your source lists), formats/ (your graphic format cards), state/ (logs).
 #
 # Check the result with:  python3 scripts/doctor.py
 
@@ -220,7 +227,7 @@ graphics:
   strip_c2pa: true              # remove Content Credentials so LinkedIn does not badge the image
   format_rotation_days: 7       # do not reuse a format card within this window
   negative_prompt_extra: ""     # third-party branding to name in every negative prompt
-  usage_log: ""                 # format usage log; empty = <graphics-maker>/format-usage-log.jsonl
+  usage_log: ""                 # format usage log; empty = <paths.state>/format-usage-log.jsonl
   upload_endpoint: ""           # public host for reference images when a provider needs URLs;
                                 # empty = anonymous catbox API
   logo_corner: top-left         # where brand.logo.path goes when on_post_graphic is true
@@ -242,3 +249,10 @@ providers:
 
 tools:
   ytdlp_path: ""                # empty = the yt-dlp on PATH
+
+# Where run-time state goes (closer-log.jsonl, format-usage-log.jsonl).
+# Empty = <project>/.guide-maker/state/, which .guide-maker/.gitignore ignores.
+# Set an absolute path when the config lives in ~/.config/guide-maker/ and you
+# work from many folders. Nothing is ever written inside a skill folder.
+paths:
+  state: ""
