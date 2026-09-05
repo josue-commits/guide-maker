@@ -369,6 +369,66 @@ class TestDM(TmpDirMixin, unittest.TestCase):
         self.assertLessEqual(out.stat().st_size, 4194304)
 
 
+class TestRuntimeStateLocations(TmpDirMixin, unittest.TestCase):
+    """Run-time writers land in <project>/.guide-maker/, never in a skill folder."""
+
+    def _project(self):
+        proj = self.tmp / "proj"
+        (proj / ".guide-maker").mkdir(parents=True)
+        shutil.copy(CFG, proj / ".guide-maker" / "config.yaml")
+        nested = proj / "a"
+        nested.mkdir()
+        return proj, nested
+
+    def test_usage_log_goes_to_project_state(self):
+        proj, nested = self._project()
+        proc = run(GX / "graphics_generate.py", "log", "--format", "title-card-pillow", "--keyword", "SAMPLEKW",
+                   "--title", "Sample", cwd=nested, env=env_without_config())
+        log = proj / ".guide-maker" / "state" / "format-usage-log.jsonl"
+        self.assertTrue(log.is_file(), proc.stdout)
+        self.assertIn("title-card-pillow", log.read_text())
+        proc = run(GX / "graphics_generate.py", "rotation", cwd=nested, env=env_without_config())
+        self.assertIn("title-card-pillow", proc.stdout)
+
+    def test_ingest_reference_writes_cards_to_project_formats(self):
+        proj, nested = self._project()
+        from PIL import Image
+        src = self.tmp / "my-layout.png"
+        Image.new("RGB", (64, 64), "#333333").save(src)
+        proc = run(GX / "ingest_reference.py", src, "--dry-run", cwd=nested, env=env_without_config())
+        self.assertIn("would", proc.stdout)
+        self.assertFalse((proj / ".guide-maker" / "formats").exists(), "dry run wrote something")
+        run(GX / "ingest_reference.py", src, cwd=nested, env=env_without_config())
+        lib = proj / ".guide-maker" / "formats"
+        self.assertTrue((lib / "my-layout.png").is_file())
+        self.assertTrue((lib / "my-layout.md").is_file())
+        index = (lib / "INDEX.md").read_text()
+        self.assertIn("[my-layout](my-layout.md)", index)
+        self.assertIn("<!-- ingest: new rows go above this line -->", index)
+        shipped_index = (ROOT / "skills" / "graphics-maker" / "references" / "format-library" / "INDEX.md").read_text()
+        self.assertNotIn("my-layout", shipped_index)
+
+    def test_rotation_reads_project_closer_log_by_default(self):
+        proj, nested = self._project()
+        state = proj / ".guide-maker" / "state"
+        state.mkdir()
+        (state / "closer-log.jsonl").write_text('{"date": "2026-01-05", "closer": "Free Access"}\n')
+        run(GM / "lint_copy.py", "rotation", cwd=nested, env=env_without_config())
+        (state / "closer-log.jsonl").write_text('{"date": "2026-01-05", "closer": "Free Access"}\n'
+                                                '{"date": "2026-01-07", "closer": "Free Access"}\n')
+        proc = run(GM / "lint_copy.py", "rotation", cwd=nested, env=env_without_config(), ok=False)
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn("closer-repeat-week", proc.stdout + proc.stderr)
+
+    def test_doctor_reports_which_reference_is_in_use(self):
+        proj, nested = self._project()
+        (proj / ".guide-maker" / "voice.md").write_text("# mine\n")
+        proc = run(GM / "doctor.py", "--offline", "--json", cwd=nested, env=env_without_config())
+        rows = [r for r in json.loads(proc.stdout)["checks"] if r["name"] == "resources"]
+        self.assertTrue(any("voice: project override" in r["message"] for r in rows), rows)
+        self.assertTrue(any("examples: shipped" in r["message"] for r in rows), rows)
+
+
 class TestTopicFinder(TmpDirMixin, unittest.TestCase):
     def test_scan_all_none_writes_health_and_fails(self):
         # topic-finder is a git subtree under skills/, so it is always present
@@ -379,6 +439,32 @@ class TestTopicFinder(TmpDirMixin, unittest.TestCase):
         health = json.loads((self.tmp / "health.json").read_text())
         self.assertFalse(any(health["config_present"].values()))
         self.assertFalse(health["web_search_used"])
+
+
+class TestZNothingWrittenUnderSkills(unittest.TestCase):
+    """Runs last (unittest loads classes in name order): after every test above,
+    the checkout under skills/ must be exactly what git tracks. A script that
+    writes into a skill folder at run time is a bug (skills are replaced on
+    update). __pycache__ is gitignored and does not count."""
+
+    def test_git_status_under_skills_is_empty(self):
+        if not (ROOT / ".git").exists():
+            self.skipTest("not a git checkout")
+        proc = subprocess.run(["git", "status", "--porcelain", "--", "skills/"],
+                              capture_output=True, text=True, cwd=ROOT)
+        if proc.returncode != 0:
+            self.skipTest(f"git unavailable: {proc.stderr.strip()}")
+        # Only run-time artefacts count. An uncommitted source edit (a developer
+        # running the suite mid-change) is a modified tracked file, which is
+        # allowed; anything untracked or any *.jsonl / format card is not.
+        offenders = []
+        for line in proc.stdout.splitlines():
+            status, path = line[:2], line[3:]
+            if status.strip() in ("??", "A") or path.endswith((".jsonl", ".png")) or "/formats/" in path:
+                offenders.append(line)
+            elif path.endswith(("config.yaml", "config.json")):
+                offenders.append(line)
+        self.assertEqual(offenders, [], "run-time writes under skills/:\n" + proc.stdout)
 
 
 if __name__ == "__main__":

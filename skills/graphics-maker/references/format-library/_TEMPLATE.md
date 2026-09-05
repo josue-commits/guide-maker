@@ -1,6 +1,6 @@
 ---
 name: {slug}
-local_path: references/format-library/{slug}.png
+local_path: {local_path}
 public_url: {public_url}
 tags: [keyword-cta]
 density: unknown
@@ -11,7 +11,7 @@ created: {today}
 
 # {title}
 
-<!-- Fill this card from THIS image only. Open references/format-library/{slug}.png,
+<!-- Fill this card from THIS image only. Open {local_path},
      describe what is actually there, then write the sections. Do not write from
      memory of a batch of images. -->
 

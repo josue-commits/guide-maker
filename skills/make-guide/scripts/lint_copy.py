@@ -4,7 +4,7 @@
 Usage:
     lint_copy.py copy FILE... [--cta-mode graphic|copy] [--keyword KW] [--json] [--strict]
     lint_copy.py dm FILE... [--merge-tag TAG] [--json] [--strict]
-    lint_copy.py rotation --log FILE [--weeks N] [--json]
+    lint_copy.py rotation [--log FILE] [--weeks N] [--json]
 
 A FILE ending in .md is split on fenced code blocks and each block is linted
 on its own (so references/linkedin/examples.md and templates/dm-*.md lint
@@ -42,9 +42,13 @@ DM rules:
     collab-signoff     FAIL  "let me know if you have any questions", "hope this helps", "happy to chat"
     banned-word        FAIL
 
-Rotation (--log FILE, JSONL rows {"date": "YYYY-MM-DD", "closer": "..."}):
+Rotation (JSONL rows {"date": "YYYY-MM-DD", "closer": "..."}; --log defaults to
+<project>/.guide-maker/state/closer-log.jsonl, or paths.state from the config):
     closer-repeat-week  FAIL  same closer twice in one ISO week
     closer-repeat-run   FAIL  same closer in N consecutive weeks (copy.closer_rotation_weeks)
+
+The banned-word list comes from .guide-maker/banned-words.md when the project
+has one, else copy.banned_words_file (default references/writing/humanizer.md).
 """
 
 import argparse
@@ -56,7 +60,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _config import load_config, cfg_get, skill_dir, DEFAULTS, add_config_arg  # noqa: E402
+from _config import load_config, cfg_get, DEFAULTS, add_config_arg, resource, state_path  # noqa: E402
 
 POINT_DOWN = "\U0001F447"   # the only emoji allowed in copy, final character
 THUMBS_UP = "\U0001F44D"
@@ -118,9 +122,12 @@ def _read_marked_list(text, name):
 
 
 def load_banned(cfg):
-    """(words, phrases) from the humanizer file plus copy.extra_banned_words."""
-    rel = cfg_get(cfg, "copy.banned_words_file") or "references/writing/humanizer.md"
-    path = os.path.join(str(skill_dir()), rel) if not os.path.isabs(rel) else rel
+    """(words, phrases) from the banned-words file plus copy.extra_banned_words.
+
+    The file is resource(cfg, "banned_words"): the project's
+    .guide-maker/banned-words.md when present, else copy.banned_words_file
+    (default references/writing/humanizer.md in the skill)."""
+    path = str(resource(cfg, "banned_words"))
     words, phrases = [], []
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as fh:
@@ -447,7 +454,9 @@ def main():
     pd.add_argument("--strict", action="store_true")
 
     pr = sub.add_parser("rotation", help="Check closer rotation in a JSONL log")
-    pr.add_argument("--log", required=True, help='JSONL rows {"date": "YYYY-MM-DD", "closer": "..."}')
+    pr.add_argument("--log", default=None,
+                    help='JSONL rows {"date": "YYYY-MM-DD", "closer": "..."} '
+                         '(default: <project>/.guide-maker/state/closer-log.jsonl)')
     pr.add_argument("--weeks", type=int, default=None, help="Override copy.closer_rotation_weeks")
     pr.add_argument("--json", action="store_true")
     pr.add_argument("--strict", action="store_true")
@@ -487,11 +496,12 @@ def main():
         sys.exit(_print_reports(reports, args.json, args.strict))
 
     if args.command == "rotation":
-        if not os.path.exists(args.log):
-            print(f"Error: log not found: {args.log}", file=sys.stderr)
+        log_path = args.log or str(state_path(cfg, "closer-log.jsonl"))
+        if not os.path.exists(log_path):
+            print(f"Error: log not found: {log_path}", file=sys.stderr)
             sys.exit(1)
         weeks = args.weeks or int(cfg_get(cfg, "copy.closer_rotation_weeks") or 3)
-        sys.exit(_print_reports([lint_rotation(args.log, weeks)], args.json, args.strict))
+        sys.exit(_print_reports([lint_rotation(log_path, weeks)], args.json, args.strict))
 
 
 if __name__ == "__main__":

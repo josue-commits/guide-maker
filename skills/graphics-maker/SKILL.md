@@ -53,7 +53,7 @@ graphics:
   strip_c2pa: true
   format_rotation_days: 7
   negative_prompt_extra: ""
-  usage_log: ""                           # empty = <skill>/format-usage-log.jsonl
+  usage_log: ""                           # empty = <project>/.guide-maker/state/format-usage-log.jsonl
   upload_endpoint: ""                     # empty = catbox.moe (kieai references only)
   logo_corner: top-left
   logo_width_pct: 0.12
@@ -105,9 +105,11 @@ fits, pick the other one.
 
 ### Step 1. Format
 
-Walk `references/format-library/INDEX.md` by guide type. State the pick and
-the reason before generating. The shipped catalog has one card
-(`title-card-pillow`); add your own with `ingest_reference.py`.
+Walk `references/format-library/INDEX.md` by guide type, then your own
+catalog at `<project>/.guide-maker/formats/INDEX.md` when it exists. State
+the pick and the reason before generating. The shipped catalog has one card
+(`title-card-pillow`); add your own with `ingest_reference.py` (they land in
+`.guide-maker/formats/`, never in the skill folder).
 
 ### Step 2 to 4a. Pillow card
 
@@ -254,7 +256,13 @@ scripts/ingest_reference.py            add a reference image to the library
 scripts/_upload.py                     public URL upload (kieai references only)
 scripts/_cfg.py                        config shim with standalone fallback
 scripts/providers/{base,kieai,openai}.py
-format-usage-log.jsonl                 created at runtime, gitignored
+```
+
+Written at run time, outside the skill folder:
+
+```
+<project>/.guide-maker/formats/<slug>.png, <slug>.md, INDEX.md   your format cards (ingest_reference.py)
+<project>/.guide-maker/state/format-usage-log.jsonl              rotation log (graphics_generate.py log)
 ```
 
 ## Integration

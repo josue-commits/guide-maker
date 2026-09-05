@@ -18,7 +18,9 @@ Subcommands
   tweak     Delta-only edit of an existing local PNG through the provider.
   finalize  CTA bar, optional logo, C2PA strip. Runs automatically at the
             end of text / single / tweak unless --no-finalize.
-  log       Append one line to format-usage-log.jsonl (rotation tracking).
+  log       Append one line to the format usage log (rotation tracking). The
+            log lives in <project>/.guide-maker/state/format-usage-log.jsonl
+            unless graphics.usage_log says otherwise; never in the skill folder.
   rotation  Print the formats used in the last N days.
 
 --dry-run prints what would be sent (provider, prompt, references, cost)
@@ -52,7 +54,7 @@ from PIL import Image, ImageDraw
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, SCRIPT_DIR)
 
-from _cfg import load_config, cfg_get, skill_dir  # noqa: E402
+from _cfg import load_config, cfg_get, state_path  # noqa: E402
 from cta_bar import (add_cta_bar, render_string, validate_keyword, KeywordError,  # noqa: E402
                      find_font_path, load_font, hex_to_rgb, STRINGS, DEFAULT_HEIGHT_PCT,
                      DEFAULT_COLORS)
@@ -83,8 +85,10 @@ def _band_pct(cfg):
 
 
 def _usage_log_path(cfg):
+    """graphics.usage_log when set, else <project>/.guide-maker/state/format-usage-log.jsonl
+    (or paths.state). Never inside the skill folder."""
     p = cfg_get(cfg, "graphics.usage_log", "")
-    return os.path.expanduser(str(p)) if p else str(skill_dir() / USAGE_LOG_NAME)
+    return os.path.expanduser(str(p)) if p else str(state_path(cfg, USAGE_LOG_NAME))
 
 
 def band_instruction(cfg):

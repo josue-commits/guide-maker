@@ -4,7 +4,7 @@
 Usage:
     doctor.py [--config PATH] [--offline] [--json] [--print-paths] [--migrate-config]
 
-Twelve checks, each OK | WARN | FAIL | SKIP:
+Thirteen checks, each OK | WARN | FAIL | SKIP:
      1. config file found, schema version, static validation
      2. Python >= 3.9, PyYAML, Pillow
      3. Notion token (env NOTION_API_KEY, ~/.config/notion/api_key, config)
@@ -17,6 +17,8 @@ Twelve checks, each OK | WARN | FAIL | SKIP:
     10. copy.cta_mode (warns with the impression numbers when it is copy)
     11. workflow.work_dir writable
     12. .gitignore at the repo root covers config.yaml
+    13. which voice / examples / top-performers / banned-words file is in use
+        (project override in .guide-maker/, or the shipped one)
 
 --offline skips 4 and the network part of 3 (SKIP, never FAIL).
 --json prints {"checks": [...], "config": {...}, "paths": {...}}.
@@ -37,6 +39,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _config import (load_config, cfg_get, secret, secret_source, validate,  # noqa: E402
                      skill_dir, skills_root, sibling, migrate_v1, add_config_arg,
+                     resource, resource_source, RESOURCES,
                      SCHEMA_VERSION, DEFAULTS, _read_file)
 
 MIN_YTDLP = (2026, 7, 4)
@@ -302,6 +305,21 @@ def run_checks(cfg, offline):
         c.ok("work-dir", f"{work_dir} writable")
     except OSError as exc:
         c.fail("work-dir", f"{work_dir} not writable: {exc}")
+
+    # 13. reference overrides in use
+    for key in RESOURCES:
+        try:
+            path = resource(cfg, key)
+            src = resource_source(cfg, key)
+        except Exception as exc:  # a bad copy.banned_words_file, for instance
+            c.warn("resources", f"{key}: could not resolve ({exc})")
+            continue
+        if not path.exists():
+            c.warn("resources", f"{key}: {path} does not exist")
+        elif src == "override":
+            c.ok("resources", f"{key}: project override {path}")
+        else:
+            c.ok("resources", f"{key}: shipped {path.name} (override with .guide-maker/{RESOURCES[key][0]})")
 
     # 12. gitignore
     repo_root = skills_root().parent

@@ -55,7 +55,8 @@ Task(
   prompt="""Read {SKILL_DIR}/AGENT.md in full before doing anything.
 PHASE: <0 | 1 | 2>
 SKILL_DIR: {SKILL_DIR}
-CONFIG: {SKILL_DIR}/config.yaml   (already validated by doctor.py)
+CONFIG: {CONFIG}   (already validated by doctor.py)
+PROJECT_DIR: {PROJECT_DIR}   (holds .guide-maker/: overrides, topic sources, state)
 WORK_DIR: {WORK_DIR}
 TOPIC_FINDER_DIR: {SKILLS_ROOT}/topic-finder   (Phase 0 only)
 INPUTS: <URL | transcript path | approved outline + keyword | topic pick>
@@ -150,7 +151,7 @@ python3 {SKILL_DIR}/scripts/md_to_notion.py public-url --page-id HUB_PAGE_ID --c
 ```
 Exit 1 means the user has not published the page to the web yet. Tell them; do not schedule.
 
-Log the closers used: append `{"date": "YYYY-MM-DD", "closer": "..."}` per variation to `{WORK_DIR}/../closer-log.jsonl` and run `lint_copy.py rotation --log` before the next week's copy.
+Log the closers used: append `{"date": "YYYY-MM-DD", "closer": "..."}` per variation to `{PROJECT_DIR}/.guide-maker/state/closer-log.jsonl` (the path `lint_copy.py rotation` reads by default; `paths.state` in the config moves it) and run `lint_copy.py rotation` before the next week's copy. Nothing is ever written inside a skill folder.
 
 ## 8. Quality gates (before "done")
 

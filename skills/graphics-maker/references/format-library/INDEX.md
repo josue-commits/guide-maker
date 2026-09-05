@@ -6,7 +6,9 @@ which format fits the guide, and which one to skip this week.
 The library ships with one format, the Pillow title card. It needs no image
 API and it cannot misspell the keyword. Add your own formats from your own
 past graphics with `scripts/ingest_reference.py`; the schema is in
-`_TEMPLATE.md`.
+`_TEMPLATE.md`. Your cards land in `<project>/.guide-maker/formats/` with
+their own `INDEX.md`, never in this folder, so a skill update cannot delete
+them. Read both catalogs before picking.
 
 ## Before picking: check rotation
 
@@ -79,8 +81,9 @@ once your library has a second format.
 
 ## Rotation log schema
 
-`format-usage-log.jsonl` in the skill folder (or `graphics.usage_log`), one
-JSON object per line, written by `graphics_generate.py log`:
+`<project>/.guide-maker/state/format-usage-log.jsonl` (or `paths.state`, or
+`graphics.usage_log`), one JSON object per line, written by
+`graphics_generate.py log`:
 
 ```json
 {"date": "2026-07-14", "guide_title": "The Agent Upgrade Kit", "keyword": "AGENTS", "format_slug": "title-card-pillow"}
