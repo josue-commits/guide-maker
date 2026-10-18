@@ -215,7 +215,12 @@ def lint_copy_text(text, cfg, keyword=None, cta_mode=None):
     # keyword in copy
     kw_hits = []
     if keyword:
-        for m in re.finditer(r"\b" + re.escape(keyword) + r"\b", norm, re.I):
+        # Only the CTA mechanic is banned: the keyword in quotes, or right after a comment/type/reply verb.
+        # The keyword as the subject of the post (the tool or model the guide is about) is fine.
+        kw = re.escape(keyword)
+        cta_re = (r"[\"“'‘]" + kw + r"[\"”'’]"
+                  r"|\b(?:comment|type|reply|drop|write|dm)\b[^\n]{0,25}?\b" + kw + r"\b")
+        for m in re.finditer(cta_re, norm, re.I):
             kw_hits.append((m.group(0), _line_of(norm, m.start())))
     for m in QUOTED_KEYWORD_RE.finditer(norm):
         token = m.group(1)
@@ -443,7 +448,7 @@ def main():
     pc.add_argument("files", nargs="+")
     pc.add_argument("--cta-mode", choices=["graphic", "copy"], default=None,
                     help="Override copy.cta_mode from the config")
-    pc.add_argument("--keyword", default=None, help="The guide keyword; must not appear in the copy")
+    pc.add_argument("--keyword", default=None, help="The guide keyword; must not appear as a comment CTA in the copy")
     pc.add_argument("--json", action="store_true")
     pc.add_argument("--strict", action="store_true", help="Treat warnings as failures")
 

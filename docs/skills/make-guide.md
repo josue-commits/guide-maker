@@ -4,7 +4,7 @@
 
 `make-guide` turns a YouTube URL, a pasted transcript or a researched topic into a published Notion guide and the LinkedIn lead-magnet bundle around it: three copy variations, a cover on the hub page, a post graphic that carries the keyword, DM templates and a Content Board card. It is the orchestrator. A writer agent does the research and the writing in the background; the skill runs the scripts, holds the gates and talks to you.
 
-The keyword never appears in the copy, and the skill never posts to LinkedIn or publishes a page to the web. The copy ends on a value line and the pointing-down emoji, the keyword lives in the graphic's CTA bar, and the linter fails any text that breaks that split. Publishing the Notion page to the web, picking a variation and posting stay with you.
+The copy never asks readers to comment the keyword (naming the tool is fine), and the skill never posts to LinkedIn or publishes a page to the web. The copy ends on a value line and the pointing-down emoji, the keyword lives in the graphic's CTA bar, and the linter fails any text that breaks that split. Publishing the Notion page to the web, picking a variation and posting stay with you.
 
 ## When to reach for it
 

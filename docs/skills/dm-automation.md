@@ -43,7 +43,7 @@ Before anything lands in it, four lint rules run on every outgoing text:
 | No hard wrap | The DM pane wraps again; a pre-wrapped paragraph reads like a broken paste. One paragraph is one line |
 | No em dashes | Anywhere in a payload: DM, variants, replies, automation name |
 
-Also enforced: `dm.max_lines` (seven non-blank lines by default), no unfilled `{slot}`, the adapter's character limit, and the keyword must not appear in the post copy unless `copy.cta_mode: copy`.
+Also enforced: `dm.max_lines` (seven non-blank lines by default), no unfilled `{slot}`, the adapter's character limit, and the post copy must not ask readers to comment the keyword (quoted, or after comment, type or reply) unless `copy.cta_mode: copy`.
 
 ## Common questions
 

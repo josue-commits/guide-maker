@@ -432,9 +432,14 @@ def _keyword_in_copy(cfg: dict, content: str, keywords: list[str]) -> None:
     if str(cfg_get(cfg, "copy.cta_mode", "graphic")).lower() == "copy":
         return
     for kw in keywords:
-        if re.search(r"(?<![A-Za-z0-9])" + re.escape(kw) + r"(?![A-Za-z0-9])", content, flags=re.I):
+        # Only the CTA mechanic is banned (keyword in quotes, or after comment/type/reply...); the keyword
+        # as the subject of the post (the tool or model the guide is about) is fine.
+        k = re.escape(kw)
+        cta = (r"[\"“'‘]" + k + r"[\"”'’]"
+               r"|\b(?:comment|type|reply|drop|write|dm)\b[^\n]{0,25}?(?<![A-Za-z0-9])" + k + r"(?![A-Za-z0-9])")
+        if re.search(cta, content, flags=re.I):
             fail(
-                f'The keyword "{kw}" appears in the post copy. It lives in the graphic only; LinkedIn '
+                f'The copy asks readers to comment the keyword "{kw}". The CTA lives in the graphic only; LinkedIn '
                 "suppresses posts whose copy carries an engagement instruction. Remove it from the copy, "
                 "or set copy.cta_mode: copy if you accept the reach hit."
             )

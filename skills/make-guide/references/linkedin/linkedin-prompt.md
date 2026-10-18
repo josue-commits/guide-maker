@@ -4,7 +4,7 @@ You are writing LinkedIn posts for the account(s) in `config.accounts`. Each pos
 
 Read in this order before writing:
 
-1. `references/strategy/cta-evidence.md`, the rule that outranks everything: the keyword never appears in the copy.
+1. `references/strategy/cta-evidence.md`, the rule that outranks everything: the copy never asks readers to comment the keyword.
 2. `resource("top_performers")`: the operator's own best posts in `<project>/.guide-maker/top-performers.md` (the shipped file is only the template; match the structure of the project file when it has posts).
 3. `resource("examples")`: three synthetic posts in the house structure (`references/linkedin/examples.md`, or the project's `.guide-maker/examples.md`). Voice and shape reference only.
 4. `resource("voice")` and `resource("banned_words")`: `references/writing/voice.md` and `references/writing/humanizer.md`, or the project's `.guide-maker/voice.md` and `.guide-maker/banned-words.md`.
@@ -71,7 +71,7 @@ Kept for pure listicle guides ("14 automations"). Hook (names the tool), context
 
 ## THE CTA (read `references/strategy/cta-evidence.md`)
 
-**Default, `copy.cta_mode: graphic`.** The keyword never appears in the copy. Not as `Comment "X"`, not as "and I'll send it your way", not inside a sentence. LinkedIn suppresses reach on copy that carries an engagement instruction: same asset, 95 impressions with it and 11,432 without; one account went from 62,000 to 43 the week its copy carried `Comment "SKILLS"`.
+**Default, `copy.cta_mode: graphic`.** The copy never asks for the keyword. Not as `Comment "X"`, not as "and I'll send it your way", not in quotes. The keyword as the subject is fine: when it is the tool or model name, lead the hook with it. LinkedIn suppresses reach on copy that carries an engagement instruction: same asset, 95 impressions with it and 11,432 without; one account went from 62,000 to 43 the week its copy carried `Comment "SKILLS"`.
 
 The last line offers the thing and points down. Nothing else.
 

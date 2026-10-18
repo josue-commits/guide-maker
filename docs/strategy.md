@@ -2,7 +2,7 @@
 
 Everything below is a rule the skill enforces by default. Each one has a reason and, where we have numbers, the numbers. If your data says otherwise, most of it is a config change. The few that are not are marked.
 
-## 1. The keyword lives in the graphic, never in the copy
+## 1. The comment CTA lives in the graphic, never in the copy
 
 LinkedIn suppresses the reach of posts whose text carries an engagement instruction: "comment X", "like this post", "repost this to get it". The classic lead-magnet closer (`Like this post 👍 / Comment "KEYWORD"`) is exactly that instruction, so the post that asks the most gets shown the least.
 
