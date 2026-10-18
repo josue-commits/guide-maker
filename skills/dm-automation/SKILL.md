@@ -70,8 +70,8 @@ To add a tool, subclass `scripts/adapters/base.py:DMTool` and register it in
 
 Also enforced: `dm.max_lines` (default 7 non-blank lines), no unfilled `{slot}`
 left in a rendered DM, the 2000-character LeadShark limit when that adapter is
-selected, and the keyword must not appear in the post copy unless
-`copy.cta_mode: copy`.
+selected, and the post copy must not ask readers to comment the keyword (quoted, or
+after comment/type/reply) unless `copy.cta_mode: copy`.
 
 ## Commands
 
@@ -223,6 +223,6 @@ providers:
 - Never create an automation as `Running` on a post you have not read the DM for.
 - Never delete an automation from a script; pause it. The stats go with it.
 - One keyword per guide, unique across the account, derived from the guide name.
-- The keyword goes in the graphic. Never in the copy.
+- The comment CTA goes in the graphic, never in the copy. The keyword as the subject is fine.
 - The DM link is the public one, and it resolves before the post goes out.
 - No em dashes anywhere in an outgoing payload.

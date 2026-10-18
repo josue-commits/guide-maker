@@ -386,6 +386,11 @@ class TestLint(unittest.TestCase):
         run(GM / "lint_copy.py", "copy", FIX / "copy" / "good-prose-1.txt", FIX / "copy" / "good-prose-2.txt",
             "--keyword", "SAMPLEKW", "--config", CFG)
 
+    def test_keyword_as_subject_passes(self):
+        # Naming the tool is fine; only the comment CTA is banned.
+        run(GM / "lint_copy.py", "copy", FIX / "copy" / "good-keyword-as-subject.txt",
+            "--keyword", "SAMPLEKW", "--config", CFG)
+
     def test_bad_copy_fails_with_rule_ids(self):
         for name, rule in (("bad-keyword-in-copy.txt", "keyword-in-copy"), ("bad-emdash.txt", "em-dash"),
                            ("bad-too-long.txt", "word-count"), ("bad-old-cta.txt", "banned-cta")):

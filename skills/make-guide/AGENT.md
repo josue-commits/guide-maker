@@ -62,7 +62,7 @@ Guide angle, guide type, suggested keyword (one word, ALL CAPS, from the guide n
 
 ## PHASE 0.5: Calibration read (before Phase 0 and Phase 2)
 
-Read, in this order: `references/strategy/cta-evidence.md` (the keyword never appears in the copy), `resource("top_performers")` (the operator's own posts; when empty, `resource("examples")` for shape only), `resource("voice")`, and `config.copy`. Each `resource(...)` is the path the loader printed in the Overrides step: the project's `.guide-maker/<file>` when it exists, else the shipped file under `references/`. Nothing you read here is authoritative over the config.
+Read, in this order: `references/strategy/cta-evidence.md` (the copy never asks readers to comment the keyword), `resource("top_performers")` (the operator's own posts; when empty, `resource("examples")` for shape only), `resource("voice")`, and `config.copy`. Each `resource(...)` is the path the loader printed in the Overrides step: the project's `.guide-maker/<file>` when it exists, else the shipped file under `references/`. Nothing you read here is authoritative over the config.
 
 ---
 

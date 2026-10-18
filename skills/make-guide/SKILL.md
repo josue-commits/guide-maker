@@ -170,7 +170,7 @@ Log the closers used: append `{"date": "YYYY-MM-DD", "closer": "..."}` per varia
 
 ## 9. Key rules
 
-1. The keyword lives only in the post graphic. Never in the copy. `references/strategy/cta-evidence.md` has the numbers.
+1. The comment CTA lives only in the post graphic, never in the copy. The keyword as the subject (the tool or model name) is fine in the copy. `references/strategy/cta-evidence.md` has the numbers.
 2. Two image assets per guide, not interchangeable: cover (no keyword) and post graphic (always the keyword).
 3. Humanizer always on. `lint_copy.py` is the floor, not the ceiling.
 4. Never an unverified URL. Never a claim without a primary source.

@@ -1,4 +1,4 @@
-# The keyword lives in the graphic, never in the copy
+# The comment CTA lives in the graphic, never in the copy
 
 This is the one rule in the repo that outranks everything else about LinkedIn copy. Read it before writing a post, and read it again if you are tempted to put `Comment "X"` back into the text.
 
@@ -49,10 +49,14 @@ Give me a shout if you want the full setup 👇
 Any of these gets the post suppressed and fails `lint_copy.py` in graphic mode:
 
 - `Comment "KEYWORD"` in any form, including "and I'll send it your way" and "DM me"
-- The keyword itself, anywhere in the text, even inside a sentence
+- The keyword in quotes, or right after "comment", "type", "reply", "drop", "write" or "DM", anywhere in the text
 - "Like this post", "Connect with me", "Repost this to get early access"
 - Any numbered instruction block ("1. Connect + like 2. Comment")
 - The thumbs-up emoji. The only emoji allowed is the pointing-down one, and only as the final character
+
+## The keyword as the subject is fine
+
+The ban is on the instruction, not the word. When the keyword is the name of the tool or model the guide is about, it can and usually should lead the hook: "Opus 5.5 can run your whole LinkedIn routine" names the subject, it asks nothing. What the copy never does is tell the reader to comment, type or send the keyword.
 
 ## Where the keyword goes instead
 
@@ -66,7 +70,7 @@ COMMENT "[KEYWORD]" TO GET IT FOR FREE
 Comment "[KEYWORD]" for the guide
 ```
 
-Do not invent a third phrasing. The band is the only capture mechanism the post has, so it is a release gate: read the rendered keyword character by character before the post ships. `ENGNE` instead of `ENGINE` silently breaks the auto-DM trigger, and the copy can no longer save it because the copy does not mention the keyword at all.
+Do not invent a third phrasing. The band is the only capture mechanism the post has, so it is a release gate: read the rendered keyword character by character before the post ships. `ENGNE` instead of `ENGINE` silently breaks the auto-DM trigger, and the copy can no longer save it because the copy never carries the instruction.
 
 The band goes on the **post graphic** only. The Notion cover never carries the keyword; it is a different asset with a different job (see `references/banner-guide.md`).
 
